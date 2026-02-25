@@ -1,0 +1,8 @@
+{
+  "name": "IFA OLWO completo ultimo",
+  "description": "An interactive digital Opele for Ifá divination. Cast the oracle, mark the fall, and receive AI-guided interpretations, Itans, and wisdom for love, health, and prosperity.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ]
+}
