@@ -187,22 +187,20 @@ const SettingsModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     </div>
                 </div>
 
-                {/* --- SEÇÃO CHAVE API (NEW) --- */}
-                {isAdmin && (
-                    <div className="mb-8 border-b border-ifa-border pb-6 bg-red-900/10 p-4 rounded-lg border border-red-500/20">
-                        <h3 className="text-red-400 font-bold text-sm uppercase mb-4 flex items-center gap-2"><KeyIcon size={18} /> Inteligência Artificial (Groq)</h3>
-                        <div>
-                            <label className="text-ifa-neutral text-xs block mb-2 uppercase font-bold">Chave de API (Necessária para leitura)</label>
-                            <input
-                                value={apiKey}
-                                onChange={(e) => setApiKey(e.target.value)}
-                                className="w-full bg-black border border-ifa-border text-white rounded p-3 focus:border-ifa-gold outline-none font-mono text-sm"
-                                placeholder="gsk_..."
-                            />
-                            <p className="text-[10px] text-ifa-neutral mt-2 italic">Acesse console.groq.com para obter sua chave gratuita.</p>
-                        </div>
+                {/* --- SEÇÃO CHAVE API (Sempre visível) --- */}
+                <div className="mb-8 border-b border-ifa-border pb-6 bg-amber-900/10 p-4 rounded-lg border border-amber-500/20">
+                    <h3 className="text-amber-400 font-bold text-sm uppercase mb-4 flex items-center gap-2"><KeyIcon size={18} /> Chave de Acesso (Groq API)</h3>
+                    <div>
+                        <label className="text-ifa-neutral text-xs block mb-2 uppercase font-bold">Chave de API — necessária para leituras</label>
+                        <input
+                            value={apiKey}
+                            onChange={(e) => setApiKey(e.target.value)}
+                            className="w-full bg-black border border-ifa-border text-white rounded p-3 focus:border-ifa-gold outline-none font-mono text-sm"
+                            placeholder="gsk_..."
+                        />
+                        <p className="text-[10px] text-ifa-neutral mt-2 italic">Acesse <strong>console.groq.com</strong> → API Keys → Create Key. Chave gratuita. Começa com <strong>gsk_</strong>.</p>
                     </div>
-                )}
+                </div>
 
                 {/* --- SEÇÃO APARÊNCIA --- */}
                 <div className="mb-8 border-b border-ifa-border pb-6">
