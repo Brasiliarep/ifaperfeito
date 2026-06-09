@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader2, Check } from 'lucide-react';
+import { Loader2, Check, X } from 'lucide-react';
 import { IreOsogboType } from '../types';
 
 interface Props {

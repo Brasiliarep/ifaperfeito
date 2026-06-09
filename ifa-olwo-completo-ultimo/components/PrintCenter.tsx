@@ -22,6 +22,7 @@ interface PrintSettings {
     summary: boolean;
     notes: boolean;
     checklist: boolean;
+    interactive: boolean;
   };
   consulente: {
     date: boolean;
@@ -32,6 +33,7 @@ interface PrintSettings {
     ebo: boolean;
     baths: boolean;
     summary: boolean;
+    interactive: boolean;
   };
 }
 
@@ -42,19 +44,20 @@ interface Props {
   notes: string;
   onClose: () => void;
   clientName?: string;
+  interactiveQA?: { question: string, answer: string };
 }
 
-const PrintCenter: React.FC<Props> = ({ data, oduInfo, selections, notes, onClose, clientName }) => {
+const PrintCenter: React.FC<Props> = ({ data, oduInfo, selections, notes, onClose, clientName, interactiveQA }) => {
   const [activeTab, setActiveTab] = useState<'babalawo' | 'consulente'>('babalawo');
   const [settings, setSettings] = useState<PrintSettings>({
     babalawo: {
       id: true, question: true, ibo: true, odu: true, itan: true, ewo: true,
       advice: true, orisha: true, ofo: true, ebo: true, areas: true,
-      baths: true, obstacles: true, diet: true, summary: true, notes: true, checklist: true
+      baths: true, obstacles: true, diet: true, summary: true, notes: true, checklist: true, interactive: true
     },
     consulente: {
       date: true, question: false, ibo: true, odu: true, ewo: true,
-      ebo: true, baths: true, summary: true
+      ebo: true, baths: true, summary: true, interactive: true
     }
   });
 
@@ -320,6 +323,18 @@ const PrintCenter: React.FC<Props> = ({ data, oduInfo, selections, notes, onClos
       `;
     }
 
+    if ((cfg as any).interactive && interactiveQA) {
+      content += `
+        <div class="section">
+          <div class="label">Pergunta Específica (Oráculo Interativo)</div>
+          <div class="value">
+            <p><strong>P:</strong> ${interactiveQA.question}</p>
+            <p><strong>R:</strong> ${interactiveQA.answer}</p>
+          </div>
+        </div>
+      `;
+    }
+
     if ((cfg as any).notes && isBabalawo && notes) {
       content += `
         <div class="section">
@@ -503,6 +518,7 @@ const PrintCenter: React.FC<Props> = ({ data, oduInfo, selections, notes, onClos
                 {renderCheckbox('babalawo', 'diet', 'Dieta e Roupas')}
                 {renderCheckbox('babalawo', 'summary', 'Resumo Final')}
                 {renderCheckbox('babalawo', 'notes', 'Notas Internas (Privado)')}
+                {renderCheckbox('babalawo', 'interactive', 'Pergunta Específica (Oráculo)')}
                 {renderCheckbox('babalawo', 'checklist', 'Checklist de Execução')}
               </>
             ) : (
@@ -514,6 +530,7 @@ const PrintCenter: React.FC<Props> = ({ data, oduInfo, selections, notes, onClos
                 {renderCheckbox('consulente', 'ewo', 'Ewo + Recomendações')}
                 {renderCheckbox('consulente', 'ebo', 'Ebó/Solução (Instruções)')}
                 {renderCheckbox('consulente', 'baths', 'Banhos')}
+                {renderCheckbox('consulente', 'interactive', 'Pergunta Específica (Oráculo)')}
                 {renderCheckbox('consulente', 'summary', 'Resumo e Próximos Passos')}
               </>
             )}

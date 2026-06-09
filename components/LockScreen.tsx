@@ -20,7 +20,7 @@ const LockScreen = ({ onUnlock }: { onUnlock: () => void }) => {
         // Previne zoom ou seleção de texto
         e.preventDefault();
         e.stopPropagation();
-        
+
         const newCount = clickCount + 1;
         setClickCount(newCount);
 
@@ -39,11 +39,11 @@ const LockScreen = ({ onUnlock }: { onUnlock: () => void }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[9999] bg-[#1a1510] text-[#F5F5DC] flex flex-col items-center justify-center font-serif p-6 text-center overflow-y-auto select-none touch-manipulation">
-            <div className="max-w-3xl w-full flex flex-col items-center">
-                
+        <div className="fixed inset-0 z-[9999] bg-[#1a1510] text-[#F5F5DC] flex flex-col items-center justify-start md:justify-center font-serif p-6 text-center overflow-y-auto select-none touch-manipulation">
+            <div className="max-w-3xl w-full flex flex-col items-center pt-8 md:pt-0">
+
                 {/* ÁREA DE DESBLOQUEIO (BOTÃO EXPLÍCITO) */}
-                <button 
+                <button
                     onClick={handleUnlockAttempt}
                     onTouchStart={handleUnlockAttempt}
                     className="mb-6 p-4 rounded-full bg-black/40 border border-[#D4AF37]/30 hover:bg-[#D4AF37]/20 active:scale-95 transition-all"
@@ -55,24 +55,24 @@ const LockScreen = ({ onUnlock }: { onUnlock: () => void }) => {
                         <Lock size={48} className="text-[#a8a29e]" />
                     )}
                 </button>
-                
+
                 <h1 className="text-4xl md:text-5xl text-[#D4AF37] font-bold mb-4 uppercase tracking-widest">
                     Acesso Restrito
                 </h1>
-                
+
                 <p className="text-[#a8a29e] font-sans text-lg mb-8 max-w-xl mx-auto leading-relaxed">
-                    Este sistema é protegido. Para utilizar o <strong>Ifá Guia Profissional</strong>, adquira uma licença oficial.
+                    Este sistema é protegido. Para utilizar o <strong>Ifá Oluwo</strong>, adquira uma licença oficial.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 w-full">
-                    {/* PLANO SEMESTRAL */}
+                    {/* PLANO MENSAL */}
                     <div className="bg-white/5 border border-[#5D4037] rounded-2xl p-8 flex flex-col items-center hover:bg-white/10 transition-colors">
-                        <h3 className="text-[#a8a29e] font-sans text-sm font-bold uppercase tracking-widest mb-4">Licença Semestral</h3>
+                        <h3 className="text-[#a8a29e] font-sans text-sm font-bold uppercase tracking-widest mb-4">Licença Mensal</h3>
                         <div className="text-5xl font-bold text-white mb-2">{currency.symbol} {currency.p1}</div>
-                        <p className="font-sans text-sm text-[#a8a29e] mb-6">Acesso completo por 6 meses</p>
-                        <a 
-                            href={`https://wa.me/?text=Ola,%20quero%20adquirir%20a%20licenca%20SEMESTRAL%20do%20Ifa%20Guia%20(${currency.name})`} 
-                            target="_blank" 
+                        <p className="font-sans text-sm text-[#a8a29e] mb-6">Acesso completo por 30 dias</p>
+                        <a
+                            href={`https://wa.me/?text=Ola,%20quero%20adquirir%20a%20licenca%20MENSAL%20do%20Ifa%20Oluwo%20(${currency.name})`}
+                            target="_blank"
                             className="bg-transparent border-2 border-[#D4AF37] text-[#D4AF37] py-3 px-8 rounded-full font-sans font-bold uppercase hover:bg-[#D4AF37] hover:text-black transition-all"
                         >
                             Adquirir Agora
@@ -85,9 +85,9 @@ const LockScreen = ({ onUnlock }: { onUnlock: () => void }) => {
                         <h3 className="text-[#D4AF37] font-sans text-sm font-bold uppercase tracking-widest mb-4">Licença Anual</h3>
                         <div className="text-5xl font-bold text-white mb-2">{currency.symbol} {currency.p2}</div>
                         <p className="font-sans text-sm text-[#F5F5DC] mb-6">Acesso por 12 meses (Economize)</p>
-                        <a 
-                            href={`https://wa.me/?text=Ola,%20quero%20adquirir%20a%20licenca%20ANUAL%20do%20Ifa%20Guia%20(${currency.name})`} 
-                            target="_blank" 
+                        <a
+                            href={`https://wa.me/?text=Ola,%20quero%20adquirir%20a%20licenca%20ANUAL%20do%20Ifa%20Oluwo%20(${currency.name})`}
+                            target="_blank"
                             className="bg-[#D4AF37] text-black py-3 px-8 rounded-full font-sans font-bold uppercase hover:bg-white hover:scale-105 transition-all shadow-lg"
                         >
                             Adquirir Agora

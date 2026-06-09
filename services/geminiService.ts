@@ -553,8 +553,8 @@ JSON: {
 };
 export const searchYorubaDictionary = async (term: string) => ({ word: term, meaning: "Dicionário offline." });
 export const analyzeOpeleImage = async () => ({ rightLeg: ["open", "open", "open", "open"], leftLeg: ["open", "open", "open", "open"] });
-export const analyzeFace = async () => ({ emotionalState: "...", oriDiagnosis: "...", recommendation: "..." });
-export const compareAncestry = async () => ({ similarityScore: 0, facialAnalysis: "...", spiritualConnection: "...", ancestralAdvice: "..." });
+export const analyzeFace = async (imageBase64: string, lang: string = 'pt-BR') => ({ emotionalState: "...", oriDiagnosis: "...", recommendation: "..." });
+export const compareAncestry = async (image1: string, image2: string, lang: string = 'pt-BR') => ({ similarityScore: 0, facialAnalysis: "...", spiritualConnection: "...", ancestralAdvice: "..." });
 export const searchAjogunRemedy = async (symptom: string, lang: string = 'pt-BR') => {
   const defaultResult = {
     ajogunName: 'Àrùn', yorubaName: 'Àrùn', hierarchy: 2,
@@ -633,8 +633,8 @@ JSON: { "yorubaName": "nome em Yorùbá", "scientificName": "nome científico", 
     return { ...fallback, ...parsed, imageUrl };
   } catch (e) { return fallback; }
 };
-export const analyzeAnimalSymbolism = async () => ({ animalName: "...", spiritualMeaning: "...", omenType: "Neutral", relatedOrisha: "...", actionRequired: "..." });
-export const fetchOriki = async (q: string) => ({ title: q, yoruba: "...", translation: "..." });
+export const analyzeAnimalSymbolism = async (imageBase64: string, lang: string = 'pt-BR') => ({ animalName: "...", spiritualMeaning: "...", omenType: "Neutral", relatedOrisha: "...", actionRequired: "..." });
+export const fetchOriki = async (q: string, lang: string = 'pt-BR') => ({ title: q, yoruba: "...", translation: "..." });
 export const fetchLibraryAkose = async () => ({ results: [] });
 
 // ─── EBÓ COMPLETO (Ajogun + Universal) ────────────────────────────────────────

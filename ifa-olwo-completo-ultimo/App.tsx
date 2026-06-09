@@ -201,13 +201,17 @@ function App() {
       });
   };
 
+  const autoCastCowries = () => {
+      setCowries(Array.from({ length: 16 }, () => Math.random() > 0.5 ? 'open' : 'closed'));
+  };
+
   const handleMethodSelection = (method: DivinationMethod) => {
       setDivinationMethod(method);
   };
 
   const renderBoard = () => {
       if (divinationMethod === 'merindilogun') {
-          return (<div className="w-full flex justify-center py-4"><MerindilogunBoard cowries={cowries} onToggle={toggleCowrie} /></div>);
+          return (<div className="w-full flex justify-center py-4"><MerindilogunBoard cowries={cowries} onToggle={toggleCowrie} onAutoCast={autoCastCowries} /></div>);
       }
       if (divinationMethod === 'opon') {
           return (<div className="w-full flex justify-center py-4"><OponIfaBoard opele={opele} onToggle={toggleSeed} /></div>);

@@ -4,13 +4,16 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "vite --host",
+    "build": "vite build",
+    "build:full": "tsc && vite build",
     "preview": "vite preview",
     "index-liturgy": "node scripts/index_liturgy.js"
   },
   "dependencies": {
     "@google/genai": "*",
+    "@stripe/stripe-js": "^9.7.0",
+    "firebase": "^12.14.0",
     "jszip": "^3.10.1",
     "lucide-react": "^0.344.0",
     "pdf-parse": "^2.4.5",

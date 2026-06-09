@@ -6,9 +6,10 @@ import { Shell, Camera, Loader2, Shuffle, Compass, Wind, CheckCircle2 } from 'lu
 interface Props {
     cowries: SeedState[];
     onToggle: (index: number) => void;
+    onAutoCast?: () => void;
 }
 
-const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
+const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle, onAutoCast }) => {
     const [ritualComplete, setRitualComplete] = useState(false);
     const [directionsInvoked, setDirectionsInvoked] = useState<string[]>([]);
     
@@ -170,7 +171,7 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
                     <button 
                         className="p-2 text-ifa-neutral hover:text-white border border-white/10 rounded-lg transition-colors"
                         title="Embaralhar / Relançar"
-                        onClick={() => window.location.reload()}
+                        onClick={onAutoCast || (() => window.location.reload())}
                     >
                         <Shuffle size={18} />
                     </button>

@@ -16,3 +16,9 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+build_log.txt
+*.zip
+*.xlsx
+*.csv
+__BACKUP__/
+precificador-sfimports/

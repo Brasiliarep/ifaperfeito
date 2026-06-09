@@ -104,6 +104,18 @@ const InterpretationView: React.FC<Props> = ({ data, oduInfo, initialSelections,
   }
   const planet = getPlanetaryInfluence();
 
+  const renderTextField = (value: any, fallback: string) => {
+      if (!value) return fallback;
+      if (typeof value === 'string') return value;
+      if (typeof value === 'object') {
+          if (value.yoruba || value.translation) {
+              return `${value.yoruba || ''}\n${value.translation || ''}`.trim();
+          }
+          return JSON.stringify(value);
+      }
+      return String(value);
+  };
+
   const updateSelection = (category: keyof SelectionMap, type: EboSelectionType) => {
       setSelections(prev => ({ ...prev, [category]: type }));
   };
@@ -364,40 +376,40 @@ const InterpretationView: React.FC<Props> = ({ data, oduInfo, initialSelections,
                           </div>
                       )}
 
-                      {activeTab === 'spirituality' && <p>{data.spirituality || "Conecte-se com sua essência."}</p>}
+                      {activeTab === 'spirituality' && <p className="whitespace-pre-line">{renderTextField(data.spirituality, "Conecte-se com sua essência.")}</p>}
                       {/* ... other tabs ... */}
                       {activeTab === 'oriki' && (
                           <div className="space-y-6">
                               <div className="bg-black/20 p-4 rounded border-l-4 border-ifa-gold">
                                   <h4 className="text-ifa-gold text-sm font-bold uppercase mb-2">Reza do Odu (Chant)</h4>
-                                  <p className="italic mb-2">{data.chant.yoruba || "Ifá wa gbo temi."}</p>
-                                  <TextReader text={data.chant.yoruba} forceLang="yo-NG" />
-                                  <p className="text-sm text-ifa-neutral mt-2 border-t border-ifa-border pt-2">{data.chant.translation}</p>
+                                  <p className="italic mb-2">{data.chant?.yoruba || "Ifá wa gbo temi."}</p>
+                                  {data.chant?.yoruba && <TextReader text={data.chant.yoruba} forceLang="yo-NG" />}
+                                  <p className="text-sm text-ifa-neutral mt-2 border-t border-ifa-border pt-2">{data.chant?.translation}</p>
                               </div>
                               <div className="bg-blue-900/10 p-4 rounded border-l-4 border-blue-500">
                                   <h4 className="text-blue-400 text-sm font-bold uppercase mb-2">Oriki Pessoal (Para o Consulente)</h4>
-                                  <p className="italic mb-2">{data.oduOriki.yoruba}</p>
-                                  <TextReader text={data.oduOriki.yoruba} forceLang="yo-NG" />
-                                  <p className="text-sm text-ifa-neutral mt-2">{data.oduOriki.translation}</p>
-                                  <p className="text-xs text-ifa-gold mt-2 font-bold uppercase">Modo de Rezar: {data.oduOriki.instructions}</p>
+                                  <p className="italic mb-2">{data.oduOriki?.yoruba}</p>
+                                  {data.oduOriki?.yoruba && <TextReader text={data.oduOriki.yoruba} forceLang="yo-NG" />}
+                                  <p className="text-sm text-ifa-neutral mt-2">{data.oduOriki?.translation}</p>
+                                  <p className="text-xs text-ifa-gold mt-2 font-bold uppercase">Modo de Rezar: {data.oduOriki?.instructions}</p>
                               </div>
                           </div>
                       )}
                       
                       {/* ... rest of the tabs ... */}
-                      {activeTab === 'orishas' && <p>{data.rulingOrishas}</p>}
-                      {activeTab === 'ori' && <p>{data.destinyAndOri}</p>}
-                      {activeTab === 'dangers' && <p>{data.dangers}</p>}
-                      {activeTab === 'diet' && <div><p className="text-green-400 mb-2">👍 {data.diet.positive}</p><p className="text-red-400">🚫 {data.diet.negative}</p></div>}
-                      {activeTab === 'clothing' && <div><p className="text-green-400 mb-2">👍 {data.clothing.positive}</p><p className="text-red-400">🚫 {data.clothing.negative}</p></div>}
-                      {activeTab === 'obstacles' && <p>{data.obstaclesAndEnemies}</p>}
-                      {activeTab === 'ancestry' && <p>{data.ancestry}</p>}
-                      {activeTab === 'personality' && <p>{data.personality}</p>}
-                      {activeTab === 'decisions' && <p>{data.decisionMaking}</p>}
+                      {activeTab === 'orishas' && <p className="whitespace-pre-line">{renderTextField(data.rulingOrishas, "Informação não disponível.")}</p>}
+                      {activeTab === 'ori' && <p className="whitespace-pre-line">{renderTextField(data.destinyAndOri, "Informação não disponível.")}</p>}
+                      {activeTab === 'dangers' && <p className="whitespace-pre-line">{renderTextField(data.dangers, "Informação não disponível.")}</p>}
+                      {activeTab === 'diet' && <div><p className="text-green-400 mb-2">👍 {renderTextField(data.diet?.positive, "")}</p><p className="text-red-400">🚫 {renderTextField(data.diet?.negative, "")}</p></div>}
+                      {activeTab === 'clothing' && <div><p className="text-green-400 mb-2">👍 {renderTextField(data.clothing?.positive, "")}</p><p className="text-red-400">🚫 {renderTextField(data.clothing?.negative, "")}</p></div>}
+                      {activeTab === 'obstacles' && <p className="whitespace-pre-line">{renderTextField(data.obstaclesAndEnemies, "Informação não disponível.")}</p>}
+                      {activeTab === 'ancestry' && <p className="whitespace-pre-line">{renderTextField(data.ancestry, "Informação não disponível.")}</p>}
+                      {activeTab === 'personality' && <p className="whitespace-pre-line">{renderTextField(data.personality, "Informação não disponível.")}</p>}
+                      {activeTab === 'decisions' && <p className="whitespace-pre-line">{renderTextField(data.decisionMaking, "Informação não disponível.")}</p>}
                       
                       {activeTab === 'baths' && (
                           <div className="bg-green-900/10 p-6 rounded border border-green-700">
-                              <h4 className="text-green-400 font-bold text-xl mb-2">{data.herbalBaths.name || "Banho de Ervas"}</h4>
+                              <h4 className="text-green-400 font-bold text-xl mb-2">{data.herbalBaths?.name || "Banho de Ervas"}</h4>
                               <p className="text-sm text-ifa-neutral mb-4 italic">{data.herbalBaths.purpose}</p>
                               <ShoppingList ingredients={data.herbalBaths.ingredients || []} />
                               <div className="mt-4">
@@ -472,7 +484,7 @@ const InterpretationView: React.FC<Props> = ({ data, oduInfo, initialSelections,
       </div>
 
       {showShare && <ShareCard odu={oduInfo} data={data} onClose={() => setShowShare(false)} />}
-      {showPrintCenter && <PrintCenter data={data} oduInfo={oduInfo} selections={selections} notes={notes} onClose={() => setShowPrintCenter(false)} />}
+      {showPrintCenter && <PrintCenter data={data} oduInfo={oduInfo} selections={selections} notes={notes} interactiveQA={chatResponse ? { question, answer: chatResponse.fullAnswer } : undefined} onClose={() => setShowPrintCenter(false)} />}
       
       {showChat && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">

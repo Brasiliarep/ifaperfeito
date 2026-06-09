@@ -58,10 +58,12 @@ import KeyInputModal from './components/KeyInputModal';
 import OduLibraryTable from './components/OduLibraryTable';
 import IboRitual from './components/IboRitual';
 import OraclePreparation from './components/OraclePreparation';
+import VirtualRoom from './components/VirtualRoom';
 
 import { getTranslation } from './utils/i18n';
 import { checkDomainLock } from './utils/security';
-import { Feather, Loader2, Users, History, GraduationCap, X, Check, Settings, Globe, Camera, Book, Shuffle, FileText, FlaskConical, BarChart3, Package, Music, Hammer, Leaf, CircleDot, Move, GripHorizontal, Baby, UserCheck, ArrowLeft, Database, Sparkles, Mic, Scale, BookOpen, PenTool, Gamepad2, Stars, ShoppingBag, Crown, Moon, MapPin, Truck, GitBranch, LayoutGrid, Search, Sun, Sunset, CloudMoon, Quote, CalendarDays, Lock, Stethoscope, Zap } from 'lucide-react';
+import { canUseFeature, incrementAnonUsage, getAnonRemaining } from './utils/anonymousTracker';
+import { Feather, Loader2, Users, History, GraduationCap, X, Check, Settings, Globe, Camera, Book, Shuffle, FileText, FlaskConical, BarChart3, Package, Music, Hammer, Leaf, CircleDot, Move, GripHorizontal, Baby, UserCheck, ArrowLeft, Database, Sparkles, Mic, Scale, BookOpen, PenTool, Gamepad2, Stars, ShoppingBag, Crown, Moon, MapPin, Truck, GitBranch, LayoutGrid, Search, Sun, Sunset, CloudMoon, Quote, CalendarDays, Lock, Stethoscope, Zap, Video, Shield } from 'lucide-react';
 
 const INITIAL_OPELE: OpeleState = {
     rightLeg: ['open', 'open', 'open', 'open'],
@@ -78,9 +80,14 @@ const PROVERBS = [
     { yo: "Aje ke lana, omo ku loni.", pt: "A bruxa gritou ontem, a criança morreu hoje (Cuidado com coincidências)." }
 ];
 
-type AppView = 'home' | 'history' | 'register' | 'input' | 'result' | 'print' | 'prayers' | 'manual' | 'oogun' | 'analytics' | 'inventory_hub' | 'sound_hub' | 'study' | 'dream_journal' | 'face_reading' | 'geo_herbs' | 'lineage_tree' | 'igbadu' | 'oracle_hub' | 'ajogun' | 'assentamentos' | 'herb_id' | 'ebo_sim' | 'mandala' | 'amutorunwa' | 'ebori' | 'dictionary' | 'sango_wheel' | 'reverse_odu' | 'esoteric_hub' | 'door_guardian' | 'voice_commander' | 'treatise' | 'story_mode' | 'mojuba' | 'constellation' | 'delivery' | 'agenda' | 'verse_builder' | 'odu_library';
+import AdminPanel from './components/AdminPanel';
+import { useAuth } from './services/AuthContext';
+
+type AppView = 'home' | 'history' | 'register' | 'input' | 'result' | 'print' | 'prayers' | 'manual' | 'oogun' | 'analytics' | 'inventory_hub' | 'sound_hub' | 'study' | 'dream_journal' | 'face_reading' | 'geo_herbs' | 'lineage_tree' | 'igbadu' | 'oracle_hub' | 'ajogun' | 'assentamentos' | 'herb_id' | 'ebo_sim' | 'mandala' | 'amutorunwa' | 'ebori' | 'dictionary' | 'sango_wheel' | 'reverse_odu' | 'esoteric_hub' | 'door_guardian' | 'voice_commander' | 'treatise' | 'story_mode' | 'mojuba' | 'constellation' | 'delivery' | 'agenda' | 'verse_builder' | 'odu_library' | 'virtual_room' | 'admin_panel';
+import LoginScreen from './components/LoginScreen';
 
 function App() {
+    const { user, userProfile, loading: authLoading, updateUsageCounters } = useAuth();
     const [isLocked, setIsLocked] = useState(false);
     const [isKeyMissing, setIsKeyMissing] = useState(false);
     const [view, setView] = useState<AppView>('home');
@@ -108,24 +115,42 @@ function App() {
     const [homeSearch, setHomeSearch] = useState('');
     const [dailyWisdom, setDailyWisdom] = useState(PROVERBS[0]);
     const [legalModalType, setLegalModalType] = useState<'terms' | 'privacy' | null>(null);
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [virtualRoomData, setVirtualRoomData] = useState<{ mode: 'babalawo' | 'consulente', room: string }>({ mode: 'babalawo', room: 'SalaIfaOluwo' });
 
-    const [user, setUser] = useState<UserProfile>({
-        uid: 'guest',
-        email: '',
-        plan: 'pro_annual',
-        name: 'Visitante'
-    });
     const [showPaywall, setShowPaywall] = useState(false);
     const [blockedFeature, setBlockedFeature] = useState('');
-    const [usageCount, setUsageCount] = useState(0);
 
     const viewRef = useRef<AppView>('home');
 
+    // HISTORY API - For Android Back Button/Gesture
     useEffect(() => {
+        const handlePopState = (e: PopStateEvent) => {
+            if (e.state && e.state.view) {
+                setView(e.state.view);
+            } else {
+                setView('home');
+            }
+        };
+        window.addEventListener('popstate', handlePopState);
+
+        // Initial state
+        if (!window.history.state) {
+            window.history.replaceState({ view: 'home' }, '', '');
+        }
+
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    // Push to history when view changes
+    useEffect(() => {
+        if (window.history.state?.view !== view) {
+            window.history.pushState({ view }, '', '');
+        }
         viewRef.current = view;
     }, [view]);
 
-    // SWIPE LOGIC
+    // SWIPE LOGIC - Refined for Android system gestures
     useEffect(() => {
         let touchStartX = 0;
         let touchStartY = 0;
@@ -142,8 +167,12 @@ function App() {
             const deltaX = touchEndX - touchStartX;
             const deltaY = touchEndY - touchStartY;
 
-            if (Math.abs(deltaX) > 60 && Math.abs(deltaY) < 40) {
+            // Only trigger if vertical movement is minimal and horizontal is significant
+            if (Math.abs(deltaX) > 80 && Math.abs(deltaY) < 50) {
+                // Swipe Left-to-Right (Back)
                 if (deltaX > 0 && viewRef.current !== 'home') {
+                    // Se o sistema já cuidou do popstate pelo gesto lateral do Android, 
+                    // não precisamos forçar aqui, mas para garantir compatibilidade:
                     if (viewRef.current === 'result') {
                         if (confirm("Deseja sair da leitura e voltar ao início?")) setView('home');
                     } else {
@@ -166,17 +195,36 @@ function App() {
         const allowed = checkDomainLock();
         if (!allowed) { setIsLocked(true); return; }
         if (!hasValidKey()) { setIsKeyMissing(true); }
-        setUser(prev => ({ ...prev, plan: 'pro_annual' }));
         setDailyWisdom(PROVERBS[0]);
+
+        // Handle URL Parameters for Virtual Room
+        const params = new URLSearchParams(window.location.search);
+        const viewParam = params.get('view');
+        const modeParam = params.get('mode') as 'babalawo' | 'consulente';
+        const roomParam = params.get('room');
+
+        if (viewParam === 'virtual_room' && modeParam && roomParam) {
+            setVirtualRoomData({ mode: modeParam, room: roomParam });
+            setView('virtual_room');
+        }
     }, []);
 
-    const incrementUsage = () => {
-        const newCount = usageCount + 1;
-        setUsageCount(newCount);
-        localStorage.setItem('ifa_usage_count', newCount.toString());
-    }
+    const requireAuth = (action: () => void) => {
+        if (!user) { setShowLoginModal(true); return; }
+        action();
+    };
 
-    const handleProFeature = (featureName: string, action: () => void) => { action(); };
+    const isPro = (plan?: string) => plan === 'pro_monthly' || plan === 'pro_annual';
+
+    const handleProFeature = (featureName: string, action: () => void) => {
+        if (!user) { setShowLoginModal(true); return; }
+        if (!isPro(userProfile?.plan)) {
+            setBlockedFeature(featureName);
+            setShowPaywall(true);
+        } else {
+            action();
+        }
+    };
     const handleSubscribe = () => { setShowPaywall(false); };
 
     // --- NAVEGAÇÃO PARA CHAT VIA BUSCA ---
@@ -248,6 +296,23 @@ function App() {
     const onOpeningRitualComplete = () => { setShowOpeningRitual(false); setDivinationMethod(null); setShowIboRitual(true); };
     const handleIboComplete = (result: IreOsogboType) => { setIboResult(result); setShowIboRitual(false); setView('input'); };
     const handleStudyStart = () => {
+        if (!user) {
+            if (!canUseFeature('study')) {
+                setBlockedFeature('Modo Estudo Ilimitado');
+                setShowPaywall(true);
+                return;
+            }
+            setClient({ id: 'study', fullName: 'Estudo Individual', dateOfBirth: 'N/A',
+                mothersName: 'N/A', address: 'N/A', consultationTime: new Date().toLocaleString(),
+                profession: 'Estudante', maritalStatus: 'N/A', phone: 'N/A', email: 'N/A' });
+            setDivinationMethod(null); setShowQuickStudyModal(false); setView('input');
+            return;
+        }
+        if (userProfile?.plan === 'free' && (userProfile.studyCount || 0) >= 3) {
+            setBlockedFeature('Modo Estudo Ilimitado');
+            setShowPaywall(true);
+            return;
+        }
         setClient({ id: 'study', fullName: 'Estudo Individual', dateOfBirth: 'N/A', mothersName: 'N/A', address: 'N/A', consultationTime: new Date().toLocaleString(), profession: 'Estudante', maritalStatus: 'N/A', phone: 'N/A', email: 'N/A' });
         setDivinationMethod(null); setShowQuickStudyModal(false); setView('input');
     };
@@ -257,7 +322,14 @@ function App() {
         try {
             const result = await fetchInterpretation(oduToInterpret, language, iboResult ?? undefined);
             setInterpretation(result);
-            incrementUsage();
+            if (!user) {
+                if (client?.id === 'study') incrementAnonUsage('study');
+                else incrementAnonUsage('consultation');
+            } else if (client?.id === 'study') {
+                updateUsageCounters('study');
+            } else {
+                updateUsageCounters('consultation');
+            }
             setView('result');
         } catch (e: any) {
             alert(`Erro na leitura. Verifique sua conexão. Detalhe: ${e.message}`);
@@ -267,6 +339,30 @@ function App() {
     };
 
     const startNewSession = () => {
+        if (!user) {
+            if (!canUseFeature('consultation')) {
+                setBlockedFeature('Consultas Grátis');
+                setShowPaywall(true);
+                return;
+            }
+            setClient({
+                id: 'anon', fullName: 'Visitante', dateOfBirth: '',
+                mothersName: '', address: '', consultationTime: new Date().toLocaleString(),
+                profession: '', maritalStatus: '', phone: '', email: ''
+            });
+            setDivinationMethod(null); setView('input');
+            return;
+        }
+        if (userProfile?.plan === 'student_monthly') {
+            setBlockedFeature('Atendimento ao Consulente');
+            setShowPaywall(true);
+            return;
+        }
+        if (userProfile?.plan === 'free' && (userProfile.consultationCount || 0) >= 3) {
+            setBlockedFeature('Atendimento Ilimitado');
+            setShowPaywall(true);
+            return;
+        }
         setClient(null); setInterpretation(null); setOpele(INITIAL_OPELE); setCowries(INITIAL_COWRIES);
         setDivinationMethod(null); setShowQuickStudyModal(false); setActiveRecord(null); setView('register');
     }
@@ -287,102 +383,160 @@ function App() {
         return (
             <button
                 onClick={() => { setHomeSearch(''); feature ? handleProFeature(feature, onClick) : onClick(); }}
-                className={`w-full ${fullWidth ? 'col-span-2' : ''} ${colorClass} border border-white/10 text-white font-bold text-sm uppercase rounded-lg shadow-lg flex items-center justify-center gap-3 py-4 px-4 hover:brightness-110 relative overflow-hidden group min-h-[60px] transition-all`}
+                className={`w-full ${fullWidth ? 'col-span-2' : ''} backdrop-blur-xl border-t border-l border-white/30 border-b border-r border-black/30 text-white font-bold text-sm uppercase rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex items-center justify-center gap-3 py-4 px-4 hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)] hover:border-white/50 relative overflow-hidden group min-h-[60px] transition-all duration-300 ${colorClass}`}
             >
-                <Icon size={20} className="shrink-0" /> <span className="text-center text-xs md:text-sm font-sans">{label}</span>
+                <Icon size={24} className="shrink-0 drop-shadow-md z-10" /> <span className="text-center font-sans drop-shadow-md z-10">{label}</span>
+                {/* Efeito de brilho de reflexo do vidro */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
             </button>
         );
     };
 
     const renderHome = () => (
-        <div className="flex flex-col items-center min-h-screen p-4 pb-24 relative bg-gradient-to-br from-black to-[#0f0c08]">
-            {/* HEADER */}
-            <div className="w-full flex justify-between items-center mb-6 pt-12 md:pt-4">
-                <div className="flex items-center gap-2">
-                    <div className="bg-ifa-gold p-2 rounded-full text-black"><Crown size={20} /></div>
-                    <div className="flex flex-col">
-                        <h1 className="text-xl font-serif font-black text-ifa-gold tracking-widest uppercase leading-none">IFÁ OLUWO</h1>
-                        <span className="text-[8px] text-ifa-neutral uppercase tracking-wider hidden md:block">Codex Sacerdotal</span>
+        <div className="min-h-screen bg-gradient-to-br from-black to-[#0f0c08] flex flex-col md:flex-row relative">
+            {/* SIDEBAR (Desktop) / TOPO (Mobile) */}
+            <div className="w-full md:w-[320px] lg:w-[360px] p-4 flex flex-col items-center md:items-stretch md:border-r md:border-ifa-border/20 md:h-screen md:sticky md:top-0 md:overflow-y-auto md:bg-black/40 md:backdrop-blur-sm z-10 scrollbar-hide">
+                
+                {/* HEADER */}
+                <div className="w-full flex justify-between items-center mb-6 pt-12 md:pt-4">
+                    <div className="flex items-center gap-2">
+                        <div className="bg-ifa-gold p-2 rounded-full text-black"><Crown size={20} /></div>
+                        <div className="flex flex-col">
+                            <h1 className="text-xl font-serif font-black text-ifa-gold tracking-widest uppercase leading-none">IFÁ OLUWO</h1>
+                            <span className="text-[8px] text-ifa-neutral uppercase tracking-wider hidden md:block">Codex Sacerdotal</span>
+                        </div>
+                    </div>
+                    {/* Estes controles vão para o topo da área direita no desktop */}
+                    <div className="flex gap-3 md:hidden">
+                        {!user && (
+                            <button onClick={() => setShowLoginModal(true)} className="text-ifa-gold hover:text-yellow-300 p-2 border border-ifa-gold/50 rounded text-xs font-bold uppercase tracking-wider">Entrar</button>
+                        )}
+                        {userProfile?.role === 'admin' && (
+                            <button onClick={() => setView('admin_panel')} className="text-red-400 hover:text-red-300 p-2 border border-red-500/30 rounded bg-red-500/10" title="Painel Admin">
+                                <Shield size={20} />
+                            </button>
+                        )}
+                        <button onClick={() => setShowSettings(true)} className="text-ifa-neutral hover:text-ifa-gold p-2 border border-white/10 rounded"><Settings size={20} /></button>
+                        <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="text-ifa-neutral hover:text-ifa-gold p-2 border border-white/10 rounded text-xs font-bold">{language}</button>
                     </div>
                 </div>
-                <div className="flex gap-3">
-                    <button onClick={() => setShowSettings(true)} className="text-ifa-neutral hover:text-ifa-gold p-2 border border-white/10 rounded"><Settings size={20} /></button>
-                    <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="text-ifa-neutral hover:text-ifa-gold p-2 border border-white/10 rounded text-xs font-bold">{language}</button>
-                </div>
-            </div>
 
-            {/* Calendar Widget */}
-            {!homeSearch && <YorubaCalendarWidget onOpenIgbadu={() => handleProFeature('Igbadu Virtual', () => setView('igbadu'))} />}
+                {/* Calendar Widget */}
+                {!homeSearch && <YorubaCalendarWidget onOpenIgbadu={() => handleProFeature('Igbadu Virtual', () => setView('igbadu'))} />}
+                
+                {!homeSearch && <IleIfeCompass />}
 
-            {!homeSearch && <IleIfeCompass />}
-
-            <div className="w-full max-w-md space-y-4 pb-20">
                 {/* Search Bar */}
-                <div className="relative mb-4">
-                    <input value={homeSearch} onChange={(e) => setHomeSearch(e.target.value)} placeholder="Buscar função..." className="w-full bg-ifa-base-dark border border-ifa-border rounded-xl py-3 pl-10 pr-4 text-ifa-text focus:border-ifa-gold outline-none shadow-inner" />
+                <div className="relative mt-4 mb-4 w-full max-w-md">
+                    <input value={homeSearch} onChange={(e) => setHomeSearch(e.target.value)} placeholder="Buscar função..." className="w-full bg-ifa-base-dark/50 backdrop-blur-md border border-white/10 rounded-xl py-3 pl-10 pr-4 text-ifa-text focus:border-ifa-gold outline-none shadow-inner" />
                     <Search className="absolute left-3 top-3.5 text-ifa-neutral" size={18} />
                     {homeSearch && <button onClick={() => setHomeSearch('')} className="absolute right-3 top-3.5 text-ifa-neutral hover:text-white"><X size={16} /></button>}
                 </div>
 
-                {/* --- SEÇÃO 1: PRINCIPAL (CORE) --- */}
-                <MenuBtn onClick={startNewSession} label="Atendimento ao Consulente" icon={Users} colorClass="bg-ifa-gold text-black" fullWidth />
-                <div className="grid grid-cols-2 gap-3">
-                    <MenuBtn onClick={handleStudyStart} label="Modo Estudo Individual" icon={GraduationCap} colorClass="bg-ifa-wood" />
-                    <MenuBtn onClick={() => setView('oracle_hub')} label="Oráculos Sagrados" icon={CircleDot} colorClass="bg-yellow-800/90" />
+                {!user && !homeSearch && (
+                    <div className="w-full mt-2 p-3 bg-ifa-gold/10 border border-ifa-gold/30 rounded-lg text-xs text-ifa-neutral">
+                        <span className="text-ifa-gold font-bold">Visitante</span> — Você tem <strong className="text-ifa-gold">{getAnonRemaining('consultation')} consulta</strong> e <strong className="text-ifa-gold">{getAnonRemaining('study')} estudos</strong> grátis.
+                        <button onClick={() => setShowLoginModal(true)} className="ml-1 underline text-ifa-gold hover:text-yellow-300">Cadastre-se</button> para continuar usando ou <button onClick={() => { setBlockedFeature(''); setShowPaywall(true); }} className="underline text-ifa-gold hover:text-yellow-300">assine</button> e tenha acesso ilimitado.
+                    </div>
+                )}
+            </div>
+
+            {/* ÁREA PRINCIPAL (Workspace) */}
+            <div className="flex-1 p-4 pb-24 md:p-8 flex flex-col items-center md:items-start overflow-y-auto">
+                
+                {/* Header Desktop Controls */}
+                <div className="hidden md:flex w-full justify-end items-center mb-8">
+                    <div className="flex gap-3 bg-ifa-base-dark/30 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-lg">
+                        {!user && (
+                            <button onClick={() => setShowLoginModal(true)} className="text-ifa-gold hover:text-yellow-300 p-2 rounded text-xs font-bold uppercase tracking-wider border border-ifa-gold/30">
+                                Entrar / Registar
+                            </button>
+                        )}
+                        {userProfile?.role === 'admin' && (
+                            <button onClick={() => setView('admin_panel')} className="text-red-400 hover:text-red-300 p-2 rounded border border-red-500/30 bg-red-500/10 flex items-center gap-2">
+                                <Shield size={16} /> <span className="text-xs font-bold uppercase">Admin</span>
+                            </button>
+                        )}
+                        <button onClick={() => setShowSettings(true)} className="text-ifa-neutral hover:text-ifa-gold p-2 rounded"><Settings size={20} /></button>
+                        <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="text-ifa-neutral hover:text-ifa-gold p-2 rounded text-xs font-bold uppercase tracking-widest">{language}</button>
+                    </div>
                 </div>
 
-                {/* --- SEÇÃO 2: CONHECIMENTO & ESTUDO --- */}
-                <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-6 mb-2 pl-1 border-l-4 border-ifa-gold">Conhecimento (Imo)</h3>
-                <div className="grid grid-cols-2 gap-3">
-                    <MenuBtn onClick={() => setView('odu_library')} label="Biblioteca 256 Odu" icon={Book} colorClass="bg-amber-900/80" />
-                    <MenuBtn onClick={() => setView('treatise')} label="Tratado Ifá Completo" icon={BookOpen} colorClass="bg-stone-800/90" />
-                    <MenuBtn onClick={() => setView('prayers')} label="Bibl. Sagrada (Rezas)" icon={Book} colorClass="bg-indigo-900/80" />
-                    <MenuBtn onClick={() => setView('amutorunwa')} label="Nomes Yorubá" icon={Baby} colorClass="bg-pink-900/80" />
-                    <MenuBtn onClick={() => setView('dictionary')} label="Dicionário Yorubá" icon={Book} colorClass="bg-gray-700/80" />
-                    <MenuBtn onClick={() => setView('story_mode')} label="Jogos de Ifá (RPG)" icon={Gamepad2} colorClass="bg-yellow-700/80" />
-                </div>
+                <div className="w-full max-w-md md:max-w-6xl space-y-6 md:space-y-8">
+                    {/* --- SEÇÃO 1: PRINCIPAL (CORE) --- */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4">
+                        {/* Botões Dourados e Brilhantes para as funções principais */}
+                        <MenuBtn onClick={startNewSession} label="Atendimento ao Consulente" icon={Users} colorClass="bg-gradient-to-b from-[#FFDF00]/80 via-[#D4AF37]/90 to-[#996515]/90 backdrop-blur-2xl border-t-[2px] border-l-[2px] border-[#FFF8DC]/80 border-b-[3px] border-r-[3px] border-[#664200]/80 shadow-[0_0_40px_rgba(255,215,0,0.6)] hover:shadow-[0_0_80px_rgba(255,223,0,1)] hover:from-[#FFF066]/90 hover:via-[#FFD700]/95 hover:to-[#B8860B]/95 hover:scale-[1.03] text-white drop-shadow-[0_3px_5px_rgba(0,0,0,1)] !py-8 md:!py-12 !text-base md:!text-xl !font-black ring-1 ring-[#FFDF00]/50" fullWidth={false} />
+                        <MenuBtn onClick={handleStudyStart} label="Modo Estudo Individual" icon={GraduationCap} colorClass="bg-gradient-to-b from-[#FFDF00]/80 via-[#D4AF37]/90 to-[#996515]/90 backdrop-blur-2xl border-t-[2px] border-l-[2px] border-[#FFF8DC]/80 border-b-[3px] border-r-[3px] border-[#664200]/80 shadow-[0_0_40px_rgba(255,215,0,0.6)] hover:shadow-[0_0_80px_rgba(255,223,0,1)] hover:from-[#FFF066]/90 hover:via-[#FFD700]/95 hover:to-[#B8860B]/95 hover:scale-[1.03] text-white drop-shadow-[0_3px_5px_rgba(0,0,0,1)] !py-8 md:!py-12 !text-base md:!text-xl !font-black ring-1 ring-[#FFDF00]/50" fullWidth={false} />
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                        <MenuBtn onClick={() => setView('virtual_room')} label="Sala de Atendimento (Vídeo)" icon={Video} colorClass="bg-blue-600/30 hover:bg-blue-600/50 md:col-span-2" fullWidth={true} feature="Sala de Atendimento (Vídeo)" />
+                        <MenuBtn onClick={() => setView('oracle_hub')} label="Oráculos Sagrados" icon={CircleDot} colorClass="bg-yellow-500/30 hover:bg-yellow-500/50 md:col-span-2" fullWidth={true} feature="Oráculos Avançados" />
+                    </div>
 
-                {/* --- SEÇÃO 3: FERRAMENTAS ESOTÉRICAS & VOZ --- */}
-                <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-6 mb-2 pl-1 border-l-4 border-purple-500">Esotérico (Awo)</h3>
-                <MenuBtn onClick={() => setView('voice_commander')} label="Voz do Trovão (Comando)" icon={Mic} colorClass="bg-red-800/80" fullWidth />
-                <div className="grid grid-cols-2 gap-3">
-                    <MenuBtn onClick={() => setView('esoteric_hub')} label="Ferramentas Esotéricas" icon={Sparkles} colorClass="bg-purple-900/90" />
-                    <MenuBtn onClick={() => setView('ebori')} label="Ori & Ara (Interativo)" icon={UserCheck} colorClass="bg-blue-900/80" />
-                    <MenuBtn onClick={() => setView('reverse_odu')} label="Mat. Reversa" icon={Database} colorClass="bg-teal-900/80" />
-                    <MenuBtn onClick={() => setView('ebo_sim')} label="Simulador Ebó" icon={Move} colorClass="bg-orange-800/80" />
-                    <MenuBtn onClick={() => setView('sound_hub')} label="Sons Sagrados" icon={Music} colorClass="bg-violet-900/80" />
-                    <MenuBtn onClick={() => setView('dream_journal')} label="Diário de Sonhos" icon={Moon} colorClass="bg-indigo-900/70" />
-                </div>
+                    {/* --- SEÇÃO 2: CONHECIMENTO & ESTUDO --- */}
+                    <div>
+                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-ifa-gold">Conhecimento (Imo)</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                            <MenuBtn onClick={() => setView('odu_library')} label="Biblioteca 256 Odu" icon={Book} colorClass="bg-amber-500/20 hover:bg-amber-500/40" />
+                            <MenuBtn onClick={() => setView('treatise')} label="Tratado Ifá Completo" icon={BookOpen} colorClass="bg-stone-500/20 hover:bg-stone-500/40" feature="Tratado de Ifá" />
+                            <MenuBtn onClick={() => setView('prayers')} label="Bibl. Sagrada (Rezas)" icon={Book} colorClass="bg-indigo-500/20 hover:bg-indigo-500/40" feature="Orações Sagradas" />
+                            <MenuBtn onClick={() => setView('amutorunwa')} label="Nomes Yorubá" icon={Baby} colorClass="bg-pink-500/20 hover:bg-pink-500/40" />
+                            <MenuBtn onClick={() => setView('dictionary')} label="Dicionário Yorubá" icon={Book} colorClass="bg-gray-500/20 hover:bg-gray-500/40" />
+                            <MenuBtn onClick={() => setView('story_mode')} label="Jogos de Ifá (RPG)" icon={Gamepad2} colorClass="bg-yellow-500/20 hover:bg-yellow-500/40" feature="Jogos Interativos" />
+                        </div>
+                    </div>
 
-                {/* --- SEÇÃO 4: MAGIA PRÁTICA --- */}
-                <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-6 mb-2 pl-1 border-l-4 border-red-500">Magia (Oogun)</h3>
-                <div className="grid grid-cols-2 gap-3">
-                    <MenuBtn onClick={() => setView('sango_wheel')} label="Roda de Xangô" icon={Scale} colorClass="bg-red-900/80" />
-                    {/* ATUALIZADO: Akose para Oogun Hub com onConsultOracle */}
-                    <MenuBtn onClick={() => setView('oogun')} label="ỌỌGÙN (MAGIAS)" icon={FlaskConical} colorClass="bg-emerald-900/80" />
-                    <MenuBtn onClick={() => setView('herb_id')} label="ID Ewé (Ervas)" icon={Leaf} colorClass="bg-green-900/80" />
-                    <MenuBtn onClick={() => setView('assentamentos')} label="Assentamentos" icon={Hammer} colorClass="bg-stone-700/80" />
-                    <MenuBtn onClick={() => setView('geo_herbs')} label="Mapa de Ervas" icon={MapPin} colorClass="bg-green-800/80" />
-                    <MenuBtn onClick={() => setView('ajogun')} label="Diagnóstico (Ajogun)" icon={Stethoscope} colorClass="bg-rose-900/80" />
-                </div>
+                    {/* --- SEÇÃO 3: FERRAMENTAS ESOTÉRICAS & VOZ --- */}
+                    <div>
+                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-purple-500">Esotérico (Awo)</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                            <div className="col-span-2 md:col-span-3 lg:col-span-4">
+                                <MenuBtn onClick={() => setView('voice_commander')} label="Voz do Trovão (Comando)" icon={Mic} colorClass="bg-red-600/30 hover:bg-red-600/50" fullWidth={false} feature="Comando de Voz" />
+                            </div>
+                            <MenuBtn onClick={() => setView('esoteric_hub')} label="Ferramentas Esotéricas" icon={Sparkles} colorClass="bg-purple-500/20 hover:bg-purple-500/40" feature="Ferramentas Esotéricas" />
+                            <MenuBtn onClick={() => setView('ebori')} label="Ori & Ara (Interativo)" icon={UserCheck} colorClass="bg-blue-500/20 hover:bg-blue-500/40" feature="Bori Interativo" />
+                            <MenuBtn onClick={() => setView('reverse_odu')} label="Mat. Reversa" icon={Database} colorClass="bg-teal-500/20 hover:bg-teal-500/40" feature="Matemática Reversa" />
+                            <MenuBtn onClick={() => setView('ebo_sim')} label="Simulador Ebó" icon={Move} colorClass="bg-orange-500/20 hover:bg-orange-500/40" feature="Simulador de Ebó" />
+                            <MenuBtn onClick={() => setView('sound_hub')} label="Sons Sagrados" icon={Music} colorClass="bg-violet-500/20 hover:bg-violet-500/40" feature="Biblioteca de Áudios" />
+                            <MenuBtn onClick={() => setView('dream_journal')} label="Diário de Sonhos" icon={Moon} colorClass="bg-indigo-500/20 hover:bg-indigo-500/40" />
+                        </div>
+                    </div>
 
-                {/* --- SEÇÃO 5: GESTÃO E SOCIAL --- */}
-                <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-6 mb-2 pl-1 border-l-4 border-blue-500">Gestão do Templo</h3>
-                <div className="grid grid-cols-2 gap-3">
-                    <MenuBtn onClick={() => setView('inventory_hub')} label="Gestão Templo" icon={Package} colorClass="bg-orange-900/80" />
-                    <MenuBtn onClick={() => setView('agenda')} label="Agenda Litúrgica" icon={CalendarDays} colorClass="bg-blue-800/80" />
-                    <MenuBtn onClick={() => setView('lineage_tree')} label="Linhagem (Axé)" icon={GitBranch} colorClass="bg-cyan-900/80" />
-                    <MenuBtn onClick={() => setView('analytics')} label="Painel Egrégora" icon={BarChart3} colorClass="bg-gray-800/90" />
-                </div>
+                    {/* --- SEÇÃO 4: MAGIA PRÁTICA --- */}
+                    <div>
+                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-red-500">Magia (Oogun)</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                            <MenuBtn onClick={() => setView('sango_wheel')} label="Roda de Xangô" icon={Scale} colorClass="bg-red-500/20 hover:bg-red-500/40" feature="Oráculo de Xangô" />
+                            <MenuBtn onClick={() => setView('oogun')} label="ỌỌGÙN (MAGIAS)" icon={FlaskConical} colorClass="bg-emerald-500/20 hover:bg-emerald-500/40" feature="Catálogo de Magias" />
+                            <MenuBtn onClick={() => setView('herb_id')} label="ID Ewé (Ervas)" icon={Leaf} colorClass="bg-green-500/20 hover:bg-green-500/40" feature="Identificador de Ervas" />
+                            <MenuBtn onClick={() => setView('assentamentos')} label="Assentamentos" icon={Hammer} colorClass="bg-stone-500/20 hover:bg-stone-500/40" feature="Guia de Assentamentos" />
+                            <MenuBtn onClick={() => setView('geo_herbs')} label="Mapa de Ervas" icon={MapPin} colorClass="bg-green-500/20 hover:bg-green-500/40" feature="Mapa Geográfico" />
+                            <MenuBtn onClick={() => setView('ajogun')} label="Diagnóstico (Ajogun)" icon={Stethoscope} colorClass="bg-rose-500/20 hover:bg-rose-500/40" feature="Diagnóstico de Ajogun" />
+                        </div>
+                    </div>
 
-                {/* FOOTER BUTTON */}
-                <div className="mt-6">
-                    <MenuBtn onClick={() => setView('manual')} label="Manual do Sacerdote" icon={BookOpen} colorClass="bg-stone-600" fullWidth />
+                    {/* --- SEÇÃO 5: GESTÃO E SOCIAL --- */}
+                    <div>
+                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-blue-500">Gestão do Templo</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                            <MenuBtn onClick={() => setView('inventory_hub')} label="Gestão Templo" icon={Package} colorClass="bg-orange-500/20 hover:bg-orange-500/40" feature="Gestão de Templo" />
+                            <MenuBtn onClick={() => setView('agenda')} label="Agenda Litúrgica" icon={CalendarDays} colorClass="bg-blue-500/20 hover:bg-blue-500/40" />
+                            <MenuBtn onClick={() => setView('lineage_tree')} label="Linhagem (Axé)" icon={GitBranch} colorClass="bg-cyan-500/20 hover:bg-cyan-500/40" feature="Árvore de Linhagem" />
+                            <MenuBtn onClick={() => setView('analytics')} label="Painel Egrégora" icon={BarChart3} colorClass="bg-gray-500/20 hover:bg-gray-500/40" feature="Análise Financeira" />
+                        </div>
+                    </div>
+
+                    {/* FOOTER BUTTON */}
+                    <div className="pt-6 mt-6 border-t border-ifa-border/30">
+                        <MenuBtn onClick={() => setView('manual')} label="Manual do Sacerdote" icon={BookOpen} colorClass="bg-stone-500/20 hover:bg-stone-500/40" />
+                    </div>
                 </div>
             </div>
         </div>
     );
 
+    if (authLoading) return <div className="min-h-screen bg-black flex items-center justify-center text-ifa-gold"><Loader2 className="animate-spin" size={48} /></div>;
     if (isLocked) return <LockScreen onUnlock={() => setIsLocked(false)} />;
     if (isKeyMissing) return <KeyInputModal onSave={setManualKey} />;
 
@@ -434,13 +588,23 @@ function App() {
                 {view === 'delivery' && <EboDelivery onBack={() => setView('home')} />}
                 {view === 'verse_builder' && <StoryMode onBack={() => setView('home')} />}
 
+                {view === 'virtual_room' && <VirtualRoom mode={virtualRoomData.mode} roomName={virtualRoomData.room} onBack={() => setView('home')} />}
+
                 {view === 'mandala' && <OduMandala odu={currentOdu} onBack={() => setView('result')} />}
                 {view === 'history' && <ConsultationHistory onBack={() => setView('home')} onView={(r) => { setActiveRecord(r); setView('print'); }} />}
                 {view === 'register' && <div className="min-h-screen flex items-center justify-center p-4"><ClientRegistration onRegister={handleRegister} onCancel={() => setView('home')} /></div>}
                 {view === 'study' && <StudyMode onBack={() => setView('home')} />}
                 {view === 'odu_library' && <OduLibraryTable onBack={() => setView('home')} />}
+                {view === 'admin_panel' && <AdminPanel onBack={() => setView('home')} />}
             </div>
 
+            {showLoginModal && (
+                <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[100] flex items-center justify-center" onClick={() => setShowLoginModal(false)}>
+                    <div className="relative" onClick={e => e.stopPropagation()}>
+                        <LoginScreen onSuccess={() => setShowLoginModal(false)} />
+                    </div>
+                </div>
+            )}
             <SubscriptionModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} onSubscribe={handleSubscribe} featureName={blockedFeature} />
             <LegalModal type={legalModalType} onClose={() => setLegalModalType(null)} />
             <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />

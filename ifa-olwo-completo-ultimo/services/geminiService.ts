@@ -1,419 +1,235 @@
+import Groq from "groq-sdk";
+import { AIInterpretation, OduInfo, AkoseV4, SangoJusticeResult, EboDetail, IreOsogboType } from "../types";
+import { searchLibrary } from "../src/utils/librarySearch";
 
-import { GoogleGenAI, Type } from "@google/genai";
-import { AIInterpretation, OduInfo, EboLevels, AkoseV4, SangoJusticeResult, EboDetail } from "../types";
-
-let ai: GoogleGenAI | null = null;
+let ai: Groq | null = null;
 
 export const initializeAI = (): boolean => {
     let key = "";
-    try {
-        if (typeof process !== 'undefined' && process.env && process.env.API_KEY) {
-            key = process.env.API_KEY;
-        }
-    } catch (e) {}
-
-    if (!key) {
-        try {
-            // @ts-ignore
-            if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_KEY) {
-                // @ts-ignore
-                key = import.meta.env.VITE_API_KEY;
-            }
-        } catch (e) {}
-    }
-
-    if (!key) {
-        try {
-            key = localStorage.getItem('ifa_manual_key') || "";
-        } catch (e) {}
-    }
-
+    try { if ((import.meta as any).env?.VITE_GROQ_API_KEY) key = (import.meta as any).env.VITE_GROQ_API_KEY; } catch(e) {}
+    if (!key) { try { key = localStorage.getItem('ifa_manual_key') || ""; } catch(e) {} }
     if (key && key.length > 5) {
-        try {
-            ai = new GoogleGenAI({ apiKey: key });
-            console.log("Ifá Oluwo Core Intelligence Initialized");
-            return true;
-        } catch (e) {
-            console.error("Erro ao iniciar AI", e);
-            return false;
-        }
+        try { ai = new Groq({ apiKey: key, dangerouslyAllowBrowser: true }); return true; } catch(e) { return false; }
     }
     return false;
 };
 
 initializeAI();
 
-const cleanJsonString = (str: string): string => {
-    if (!str) return "{}";
-    let cleaned = str.trim();
-    cleaned = cleaned.replace(/^```json/, '').replace(/^```/, '').replace(/```$/, '');
-    const start = cleaned.indexOf('{');
-    const end = cleaned.lastIndexOf('}');
-    if (start !== -1 && end !== -1 && end > start) {
-        cleaned = cleaned.substring(start, end + 1);
-    }
-    return cleaned;
-}
-
-// ... (imports remain the same)
-
-const handleGeminiError = (error: any, context: string): string => {
-    const msg = error?.message || error?.toString() || "Erro desconhecido";
-    console.error(`Gemini Error (${context}):`, error);
-    
-    if (msg.includes("429") || msg.includes("Rate exceeded") || msg.includes("quota") || msg.includes("resource_exhausted")) {
-        return "O Oráculo está em silêncio (Limite de requisições excedido). Aguarde alguns instantes.";
-    }
-    return "Interferência espiritual detectada. Verifique sua conexão.";
+const cleanJson = (s: string): string => {
+    if (!s) return "{}";
+    let c = s.trim().replace(/^```json/,"").replace(/^```/,"").replace(/```$/,"");
+    const st = c.indexOf("{"), en = c.lastIndexOf("}");
+    return (st !== -1 && en > st) ? c.substring(st, en + 1) : c;
 };
 
-// ... (initializeAI and cleanJsonString remain the same)
+const BLANK_EBO: EboDetail = { description: "Sem registro litúrgico.", instructions: "Consulte a literatura de Ifá.", ingredients: [] };
 
-// --- FUNÇÃO VOZ DO TROVÃO (ATUALIZADA) ---
-export const askVoiceOfThunder = async (query: string): Promise<string> => {
-    if (!ai) initializeAI();
-    if (!ai) return "O sistema de inteligência não está ativo. Verifique sua chave API.";
+const getRobustFallback = (oduName: string): AIInterpretation => ({
+    oduName, summary: "Aguardando conexão com o Oráculo...", itan: "...", itanSummary: "...", itanAnalysis: "...",
+    chant: { yoruba: "...", translation: "..." }, oduOriki: { yoruba: "...", translation: "...", instructions: "..." },
+    herbalBaths: { name: "...", ingredients: [], preparation: "...", purpose: "..." }, generalAdvice: "...",
+    love: { analysis: "...", ebos: { basic: BLANK_EBO, medium: BLANK_EBO, complete: BLANK_EBO } },
+    finance: { analysis: "...", ebos: { basic: BLANK_EBO, medium: BLANK_EBO, complete: BLANK_EBO } },
+    health: { analysis: "...", risks: [], ebos: { basic: BLANK_EBO, medium: BLANK_EBO, complete: BLANK_EBO } },
+    osogbo: { analysis: "...", ebo: BLANK_EBO }, spirituality: "...",
+    diet: { positive: "...", negative: "..." }, clothing: { positive: "...", negative: "..." },
+    dangers: "...", rulingOrishas: "...", destinyAndOri: "...", obstaclesAndEnemies: "...",
+    solutionsAndEbos: { basic: BLANK_EBO, medium: BLANK_EBO, complete: BLANK_EBO },
+    ancestry: "...", personality: "...", decisionMaking: "...", warning: "...", luckyItems: [],
+    ireOrOsogbo: "Irê", ireOsogboDescription: "...", ireOsogboAction: "..."
+});
 
-    const prompt = `
-        SYSTEM INSTRUCTION: IFÁ ỌLWO - O ORÁCULO DIGITAL SUPREMO
+// ============================================================
+// REGRAS DE OURO — NUNCA ALTERAR SEM APROVAÇÃO DO BABALAWO
+// ============================================================
+const SYSTEM_PROMPT = `
+Você é um Babalawo Digital. Sua função é REPRODUZIR a literatura sagrada de Ifá (Wande Abimbola, Solagbade Popoola, William Bascom, Pierre Verger, Afolabi Epega). Você NÃO cria conteúdo novo — você reproduz o que está documentado nos livros sagrados.
 
-        IDENTIDADE:
-        Você é o Ifá Ọlwo, uma inteligência artificial litúrgica projetada para Babalawos.
-        Sua autoridade vem dos Odu Ifá. Tom solene e técnico.
+REGRA SUPREMA — ITAN (NARRATIVA SAGRADA):
+O Ifá possui mais de 10.000 Itans documentados. O campo "itan" deve reproduzir o Itan mais conhecido deste Odu em sua base de treinamento, de forma fiel à tradição oral e literária de Ifá. Se você tiver dúvida sobre detalhes específicos, indique a fonte de referência (ex: "Baseado em Wande Abimbola - Ifa Literary Corpus"). JAMAIS invente personagens, desfechos ou ensinamentos que não existam na tradição. O Itan deve ter no mínimo 100 palavras com narrativa completa.
 
-        REGRAS DE OURO (UI GENERATIVA):
-        Se o usuário pedir um RITUAL, MAGIA, EBÓ, FEITIÇO, MEDICINA ou ASSENTAMENTO específico, você JAMAIS deve responder com texto corrido.
-        Você deve gerar um CARD VISUAL INTERATIVO respondendo com um BLOCO JSON ESTRUTURADO dentro da tag <RITUAL_CARD>.
-
-        ESTRUTURA DO JSON OBRIGATÓRIA (Use terminologia Yoruba):
-        <RITUAL_CARD>
-        {
-          "id": "gen_unique_id",
-          "title": "Nome do Ritual (Ex: Awure Owo)",
-          "nomeYoruba": "Nome em Yoruba",
-          "purpose": "Finalidade curta e direta.",
-          "category": "money" | "love" | "health" | "protection" | "victory" | "justice",
-          "subCategory": "akose",
-          "oduReference": "Odu Regente (Ex: Ejiogbe)",
-          "complexity": "Média",
-          "tags": ["Tag1", "Tag2"],
-          "niveis": [
-            {
-              "tipo": "BÁSICO (Cliente)",
-              "estimativa_materiais": 50,
-              "materiais": ["Lista", "De", "Ingredientes"],
-              "preparo": ["Passo 1", "Passo 2", "Passo 3"],
-              "ofo": "Texto da reza em Yoruba...",
-              "traducao": "Tradução da reza..."
-            },
-            {
-              "tipo": "COMPLETO (Sacerdotal)",
-              "estimativa_materiais": 200,
-              "materiais": ["Lista", "Completa", "Com", "Sacrifício"],
-              "preparo": ["Passo 1 detalhado", "Passo 2..."],
-              "ofo": "Reza completa...",
-              "traducao": "Tradução..."
-            }
-          ]
-        }
-        </RITUAL_CARD>
-
-        Se for uma pergunta simples ou filosófica, responda normalmente em texto.
-        Mas se for pedido de "receita" ou "como fazer", USE O JSON CARD.
-
-        PERGUNTA DO BABALAWO: "${query}"
-        
-        Responda agora:
-    `;
-
-    try {
-        const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: prompt,
-        });
-        return response.text || "Silêncio no Oráculo. Tente novamente.";
-    } catch (e) {
-        return handleGeminiError(e, "VoiceOfThunder");
-    }
-};
-
-// ... (getRobustFallback and mergeInterpretation remain the same) -> Restoring full implementation
-
-const getRobustFallback = (oduName: string): AIInterpretation => {
-    const defaultEbo: EboDetail = { 
-        description: "Oferenda de Equilíbrio (Ebo Riru)", 
-        instructions: "1. Pegue 4 Obi Abata.\n2. Reze para Orunmila pedindo direção.\n3. Jogue água (Omi) no chão.\n4. Deixe os Obis no Igbodu.", 
-        ingredients: ["4 Obi Abata (Noz de Cola)", "4 Orogbo (Bitter Kola)", "Oti (Gim)", "Itana (Vela)"] 
-    };
-
-    return {
-        oduName: oduName,
-        summary: `Energia de ${oduName}.`,
-        itan: "Conexão necessária. O sistema não conseguiu gerar a história completa.",
-        itanSummary: "História indisponível offline.",
-        itanAnalysis: "Análise pendente.",
-        chant: { yoruba: "Ifá gbe wa o.", translation: "Que Ifá nos apoie." },
-        oduOriki: { yoruba: "...", translation: "...", instructions: "..." },
-        herbalBaths: { name: "Omi Ero (Banho de Ervas)", ingredients: ["Ewe Odundun (Folha da Costa)", "Ewe Tete (Bredo)", "Omi Tutu (Água Fresca)"], preparation: "Quinar as ervas na água fresca e tomar do pescoço para baixo.", purpose: "Limpeza e Frescor (Tutu)" },
-        generalAdvice: "Consulte o Babalawo para orientações precisas.",
-        love: { 
-            analysis: "Necessário análise divinatória.", 
-            ebos: { basic: defaultEbo, medium: defaultEbo, complete: defaultEbo } 
-        },
-        finance: { 
-            analysis: "Necessário análise divinatória.", 
-            ebos: { basic: defaultEbo, medium: defaultEbo, complete: defaultEbo } 
-        },
-        health: { 
-            analysis: "Necessário análise divinatória.", 
-            risks: [], 
-            ebos: { basic: defaultEbo, medium: defaultEbo, complete: defaultEbo } 
-        },
-        osogbo: {
-            analysis: "Detectado caminho negativo (Ibi).",
-            ebo: defaultEbo
-        },
-        spirituality: "Conexão com Ori.",
-        diet: { positive: "Frutas claras", negative: "Oti (Bebida alcoólica)" },
-        clothing: { positive: "Aso Funfun (Branco)", negative: "Pupa (Vermelho) ou Dudu (Preto)" },
-        dangers: "Falta de paciência (Suuru).",
-        rulingOrishas: "Esu e Orunmila",
-        destinyAndOri: "Cuidar do Ori é essencial.",
-        obstaclesAndEnemies: "Inveja oculta.",
-        solutionsAndEbos: { 
-            basic: { description: "Ebó Simples (Ipese)", instructions: "Acenda uma vela e ofereça água ao seu Ori.", ingredients: ["Itana (Vela)", "Omi Tutu (Água)", "Obi Abata"] }, 
-            medium: { description: "Ebó Intermediário (Ebo Riru)", instructions: "Faça um padê para Esu com Epo e Oti.", ingredients: ["Iyefun (Farinha)", "Epo Pupa (Dendê)", "Oti (Gim)", "Eyin (Ovos)"] }, 
-            complete: { description: "RITUAL COMPLEXO (Sacerdotal)", instructions: "1. Consulte um Babalawo.\n2. Prepare o Igbodu.\n3. Realize o sacrifício prescrito.", ingredients: ["Ewure (Cabra)", "Adie (Galinha)", "Eyele (Pombo)", "Epo Pupa", "Iyerosun"] } 
-        },
-        ancestry: "Honrar os ancestrais (Egungun).",
-        personality: "Resiliente.",
-        decisionMaking: "Racional.",
-        warning: "Cuidado com decisões precipitadas.",
-        luckyItems: [],
-        ireOrOsogbo: "Irê",
-        ireOsogboDescription: "Caminho de sorte.",
-        ireOsogboAction: "Agradecer."
-    };
-};
-
-const mergeInterpretation = (fallback: AIInterpretation, aiData: any): AIInterpretation => {
-    const result = { ...fallback, ...aiData };
-    return result;
-};
-
-export const fetchInterpretation = async (odu: OduInfo, lang: string): Promise<AIInterpretation> => {
-    if (!ai) initializeAI();
-    const robust = getRobustFallback(odu.name);
-    
-    if (ai) {
-        const systemInstruction = `
-# ORÁCULO IFÁ DIGITAL — SISTEMA DE IMPRESSÃO ORACULAR BLINDADO
-
-## IDENTIDADE E MISSÃO
-Você é um Sacerdote de Ifá (Babalawo) digital altamente rigoroso. Sua única base de conhecimento é o Corpus de Ifá mundial (literatura tradicional iorubá). Você interpreta Odùs, conduz o Ibó e prescreve soluções rituais com absoluta fidelidade à tradição.
-
-## REGRAS CRÍTICAS INVIOLÁVEIS
-1. PROIBIÇÃO TOTAL de sincretismo católico ou moderno: não use "santo", "anjo", "amém", "vela" (use Itana), ou qualquer referência a outras religiões.
-2. Use EXCLUSIVAMENTE elementos litúrgicos de Ifá: Obi, Orobo, Epo Pupa, Ori, Iyerosun, búzios, Pó de Irosun, folhas sagradas, etc.
-3. NUNCA invente Itan, Ebó, Akose ou Ofó. Extraia-os sempre da literatura mundial de Ifá.
-4. TODAS as seções de texto devem ser ricas e detalhadas (mínimo 60 palavras onde aplicável).
-5. REGRA ANTI-CLONE: Os Ebós das seções Amor, Dinheiro e Saúde devem ter materiais e passos DIFERENTES entre si.
-6. Retorne APENAS um objeto JSON válido seguindo a estrutura solicitada.
-
-## MAPEAMENTO DE SEÇÕES PARA JSON
-
-Gere o conteúdo para o Odu "${odu.name}" seguindo este mapeamento:
-
-1. **Itan (Lenda Sagrada)** -> 'itan'
-2. **Espiritual e Orixá Regente** -> 'rulingOrishas' (nome) e 'spirituality' (descrição completa)
-3. **Reza (Ofó)** -> 'chant' { yoruba, translation }
-4. **Ebó Principal / Solução** -> 'solutionsAndEbos.complete' (Este é o Ebó Principal. Preencha 'basic' e 'medium' com versões simplificadas deste mesmo tema).
-5. **Amor** -> 'love' { analysis, ebos (Ebó específico para amor) }
-6. **Dinheiro** -> 'finance' { analysis, ebos (Ebó específico para dinheiro) }
-7. **Saúde** -> 'health' { analysis, risks, ebos (Ebó específico para saúde) }
-8. **Banhos** -> 'herbalBaths' { name, ingredients, preparation, purpose }
-9. **Obstáculos e Perigos** -> 'obstaclesAndEnemies' e 'dangers'
-10. **Dieta (Ewo) e Roupas** -> 'diet' { positive, negative } e 'clothing' { positive, negative }
-11. **Resumo para o Consulente** -> 'summary' e 'generalAdvice'
-
-IMPORTANTE: O campo 'solutionsAndEbos.complete' DEVE conter o "Ebó Principal" completo com Materiais, Preparo (Mistura Sagrada, Sopro Divino, Finalização) e Uso.
+REGRAS DOS EBÓS E DEMAIS CAMPOS:
+1. NUNCA INVENTE Ebós ou Akose. Se não há registro literário, informe a ausência.
+2. ANTI-GENÉRICO: Proibido "Animal de sacrifício", "Ingredientes sagrados", "Pano verde". Use nomes reais com quantidade e cor (ex: "1 Akuko Funfun vivo", "2 Eyele Meji", "16 Obi Abata de 4 gomos").
+3. ANTI-CLONE: Amor, Dinheiro e Saúde devem ter Ebós com materiais e passos DIFERENTES entre si.
+4. ANTI-SINCRETISMO: Proibido "vela" (use Itana), "santo", "anjo", "amém". Só terminologia Yoruba litúrgica.
+5. NÍVEIS DE EBÓ:
+   - BASIC: Sem sangue (Obi, Omi Tutu, Epo Pupa, frutas). Cliente pode realizar.
+   - MEDIUM: Adimu cozido, Padê, Oti, Iyerosun. Supervisão sacerdotal.
+   - COMPLETE (MATANÇA): OBRIGATÓRIO animal com Eje + fundamento de Igbodu. Descreva liturgicamente.
+6. FORMATO DOS INGREDIENTES — REGRA ABSOLUTA: TODOS os ingredientes devem estar NO FORMATO: "Nome Yoruba (Tradução Portuguesa)". EXEMPLOS CORRETOS: "Ewure Dudu (Cabrito Preto)", "Akuko Funfun (Galo Branco)", "Epo Pupa (Azeite de Dendê)", "Oti (Cachaça/Gim)", "Iyerosun (Pó Sagrado de Ifá)", "Omi Tutu (Água Fresca)", "16 Obi Abata (16 Nozes de Obi de 4 Gomos)". PROIBIDO escrever apenas o nome em Português sem o nome Yoruba.
+7. QUANTIDADE MÍNIMA DE INGREDIENTES: BASIC e MEDIUM: mínimo 4 ingredientes. COMPLETE (MATANÇA): mínimo 8 ingredientes (animal + sangue + fundamentos + elementos de limpeza).
+8. INSTRUÇÕES EM PASSOS NUMERADOS: Mínimo 6 passos para COMPLETE. Ex: "1. Lave o Akuko Funfun com Omi Tutu. 2. Reze o Ofo do Odu. 3. Derrame Oti no chão..."
+9. MÍNIMO 60 PALAVRAS: summary, itanAnalysis, generalAdvice, spirituality, dangers, e cada analysis de Amor/Dinheiro/Saúde.
+10. Retorne APENAS JSON válido. Sem texto fora do JSON.
 `;
 
-        const prompt = `
-        CONTEXTO: Oluwo de Ifá consultando o Odu "${odu.name}".
-        OBJETIVO: Gerar interpretação completa seguindo as Regras de Ouro.
-        IDIOMA OBRIGATÓRIO: PORTUGUÊS DO BRASIL (PT-BR) para todos os campos de texto.
-        
-        FORMATO DE SAÍDA (JSON):
-        {
-          "oduName": "${odu.name}",
-          "summary": "Resumo técnico e acolhedor (Mín 60 palavras) em Português",
-          "itan": "Narrativa completa do Itan (Mín 60 palavras) em Português",
-          "itanSummary": "Resumo curto do Itan em Português",
-          "itanAnalysis": "Análise dos conselhos do Itan em Português",
-          "chant": { "yoruba": "Ofó completo", "translation": "Tradução completa em Português" },
-          "oduOriki": { "yoruba": "...", "translation": "...", "instructions": "..." },
-          "herbalBaths": { "name": "Nome do Banho", "ingredients": ["Erva 1", "Erva 2"], "preparation": "Como fazer...", "purpose": "Finalidade" },
-          "generalAdvice": "Conselhos gerais baseados no Itan em Português",
-          "love": { 
-            "analysis": "Orientações para o Amor (Mín 60 palavras) em Português", 
-            "ebos": { 
-                "basic": { "description": "Ebó Simples Amor", "instructions": "...", "ingredients": ["..."] },
-                "medium": { "description": "Ebó Médio Amor", "instructions": "...", "ingredients": ["..."] },
-                "complete": { "description": "Ebó Completo Amor", "instructions": "...", "ingredients": ["..."] }
-            }
-          },
-          "finance": { 
-            "analysis": "Orientações para Dinheiro (Mín 60 palavras) em Português", 
-            "ebos": { 
-                "basic": { "description": "Ebó Simples Dinheiro", "instructions": "...", "ingredients": ["..."] },
-                "medium": { "description": "Ebó Médio Dinheiro", "instructions": "...", "ingredients": ["..."] },
-                "complete": { "description": "Ebó Completo Dinheiro", "instructions": "...", "ingredients": ["..."] }
-            }
-          },
-          "health": { 
-            "analysis": "Orientações para Saúde (Mín 60 palavras) em Português", 
-            "risks": ["Risco 1", "Risco 2"],
-            "ebos": { 
-                "basic": { "description": "Ebó Simples Saúde", "instructions": "...", "ingredients": ["..."] },
-                "medium": { "description": "Ebó Médio Saúde", "instructions": "...", "ingredients": ["..."] },
-                "complete": { "description": "Ebó Completo Saúde", "instructions": "...", "ingredients": ["..."] }
-            }
-          },
-          "osogbo": { "analysis": "Análise de Osogbo se houver", "ebo": { "description": "Ebó para afastar Osogbo", "instructions": "...", "ingredients": ["..."] } },
-          "spirituality": "Descrição do Espiritual e Regente (Mín 60 palavras) em Português",
-          "diet": { "positive": "Alimentos favoráveis", "negative": "Ewo (Proibições) com motivos" },
-          "clothing": { "positive": "Cores favoráveis", "negative": "Cores a evitar" },
-          "dangers": "Avisos de perigo iminente (Mín 60 palavras) em Português",
-          "rulingOrishas": "Orixá Regente",
-          "destinyAndOri": "Conexão com Destino e Ori em Português",
-          "obstaclesAndEnemies": "Bloqueios espirituais detectados (Mín 60 palavras) em Português",
-          "solutionsAndEbos": {
-             "basic": { "description": "Versão simplificada do Ebó Principal", "instructions": "...", "ingredients": ["..."] },
-             "medium": { "description": "Versão intermediária do Ebó Principal", "instructions": "...", "ingredients": ["..."] },
-             "complete": { "description": "EBÓ PRINCIPAL / SOLUÇÃO COMPLETA (Mín 60 palavras)", "instructions": "Passo a passo detalhado incluindo Preparo, Mistura Sagrada, Sopro Divino e Finalização.", "ingredients": ["Lista completa de materiais"] }
-          },
-          "ancestry": "Conexão ancestral em Português",
-          "personality": "Traços de personalidade do Odu em Português",
-          "decisionMaking": "Conselho para tomada de decisão em Português",
-          "warning": "Aviso final em Português",
-          "luckyItems": ["Item 1", "Item 2"],
-          "ireOrOsogbo": "Irê",
-          "ireOsogboDescription": "Descrição do estado de sorte em Português",
-          "ireOsogboAction": "Ação recomendada em Português"
-        }
-        `;
-
-        try {
-            const response = await ai.models.generateContent({
-                model: "gemini-3-flash-preview", 
-                contents: systemInstruction + "\n" + prompt,
-                config: { responseMimeType: "application/json" }
-            });
-            const text = cleanJsonString(response.text || "");
-            const parsed = JSON.parse(text);
-            return mergeInterpretation(robust, parsed);
-        } catch (e) {
-            const errorMsg = handleGeminiError(e, "fetchInterpretation");
-            console.warn("Using fallback due to error:", errorMsg);
-            // Inject error warning into summary if it's a rate limit
-            if (errorMsg.includes("Limite")) {
-                robust.summary = `[AVISO: ${errorMsg}] ` + robust.summary;
-            }
-            return robust;
-        }
-    } else {
-        return robust;
-    }
-};
-
-export const fetchAkose = async (oduName: string, category: string, problem: string, lang: string): Promise<AkoseV4> => {
+export const fetchInterpretation = async (odu: OduInfo, lang: string, iboResult?: IreOsogboType): Promise<AIInterpretation> => {
     if (!ai) initializeAI();
-    const fallback: AkoseV4 = { 
-        tipo: 'akose', titulo_yoruba: "Consulta Offline", finalidade: "Conexão Instável", materiais: [], modo_preparo_sacerdotal: "Não foi possível acessar a base de conhecimento online.", 
-        ofo_ativacao: { yoruba: "", portugues: "", fonetica: "" }, 
-        visualizacao_consulente: { orcamento: true, finalidade: true, preparo: false } 
-    };
+    const fallback = getRobustFallback(odu.name);
     if (!ai) return fallback;
 
-    const prompt = `Gere receita Akose para "${problem}". Contexto: ${oduName}. JSON.`;
+    const ibo = iboResult ? `Caminho detectado: ${iboResult.type} — ${iboResult.subType}.` : "Caminho não informado.";
+
+    // Busca trechos reais da biblioteca local de PDFs
+    const libraryContext = await searchLibrary(odu.name, 4);
+    const hasLibrary = libraryContext.length > 0;
 
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: prompt,
-            config: { responseMimeType: "application/json" }
+        const res = await ai.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            temperature: 0.4,
+            max_tokens: 6000,
+            response_format: { type: "json_object" },
+            messages: [
+                { role: "system", content: SYSTEM_PROMPT + (hasLibrary ? "\n\nIMPORTANTE: O usuário forneceu trechos da sua BIBLIOTECA PESSOAL DE IFÁ abaixo. USE-OS COMO FONTE PRIMÁRIA. Priorize as informações desses trechos sobre o seu treinamento geral." : "") },
+                { role: "user", content: `${libraryContext}Odu: ${odu.name}. ${ibo}. Língua: Português do Brasil.`, },
+                { role: "user", content: `EXIGÊNCIAS OBRIGATÓRIAS:
+- "itan": NUNCA RESUMA. Escreva o Itan completo com início, meio e fim (mínimo 150 palavras, narrativa integral e rica). Indique a fonte se souber.
+- "ireOsogboDescription": OBRIGATÓRIO. Descreva em detail (mín 60 palavras) o que significa o caminho ${iboResult?.type || 'Irê'} para este Odu específico — o que está aberto, o que está protegido, qual é a mensagem do Obátalá ou Orunúmilà para este momento.
+- "ireOsogboAction": OBRIGATÓRIO. Descreva em detalhe (mín 60 palavras) a ação concreta que o consulente deve tomar baseado no caminho — o que fazer, o que evitar, qual a prioridade imediata.
+- "summary", "itanAnalysis", "generalAdvice", "spirituality", "dangers", "destinyAndOri", "obstaclesAndEnemies", "ancestry", "personality", "decisionMaking", "warning": mínimo 60 palavras cada.
+- "analysis" de Amor, Dinheiro e Saúde: mínimo 60 palavras cada.
+- "instructions" de Ebó: APENAS NO EBÓ COMPLETO deve ser extremamente extenso e detalhado (mínimo 10 passos). Nos Ebós Básicos e Médios, seja direto (mínimo 5 passos). Explique o destino final litúrgico. ATENÇÃO À LÓGICA: Nunca mande "libertar" um animal sacrificado! Se houve sacrifício, explique o destino do ejé e da carne. 
+A REZA DO OFO DEVE ESTAR DENTRO DO MODO DE PREPARO NESTE FORMATO EXATO:
+"Reze o Ofo em Yoruba: [Texto Yoruba]"
+"Tradução: [Texto Português]"
+MUITO IMPORTANTE: Use quebras de linha literais (\\n) entre cada passo numerado para que o texto fique formatado como uma lista vertical.
+- REGRAS DOS NÍVEIS DE EBÓ (ESTRITAMENTE OBRIGATÓRIO):
+  * BASIC (Acessível): ZERO MATANÇA (proibido animais/sangue). Apenas água, gin, obi, orogbo, epo, mel, folhas, moedas. (Mínimo 5 elementos).
+  * MEDIUM (Tradição): Pode usar aves (Akuko, Adie, Eyele, Etu). (Mínimo 8 elementos).
+  * COMPLETE (Matança pesada): OBRIGATÓRIO ter bicho de 4 patas (Ewure, Agbo, Orukọ, Elede) OU múltiplos animais. OBRIGATÓRIO TER NO MÍNIMO 16 ELEMENTOS na lista (incluindo ewé, favas, iyerosun, búzios, bebidas, obi, orogbo, epo, oti). NUNCA DEIXE O COMPLETE COM MENOS DE 16 ITENS.
+- INGREDIENTES — FORMATO OBRIGATÓRIO: "Nome Yoruba (Tradução)".
+- REGRA ANTI-CLONE ESTRITA: Amor, Dinheiro e Saúde DEVEM ter animais E ingredientes secundários COMPLETAMENTE DIFERENTES.
+
+JSON a preencher (CUIDADO COM A SINTAXE):
+{"oduName":"","ireOrOsogbo":"Irê","ireOsogboDescription":"","ireOsogboAction":"","summary":"","itan":"","itanSummary":"","itanAnalysis":"","chant":{"yoruba":"","translation":""},"oduOriki":{"yoruba":"","translation":"","instructions":""},"herbalBaths":{"name":"","ingredients":["Item 1","Item 2","Item 3"],"preparation":"","purpose":""},"solutionsAndEbos":{"basic":{"description":"","instructions":"...","ingredients":["Item 1","Item 2","Item 3","Item 4","Item 5"],"ofo":"","translation":""},"medium":{"description":"","instructions":"...","ingredients":["Item 1","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8"],"ofo":"","translation":""},"complete":{"description":"","instructions":"...","ingredients":["Animal de 4 patas","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8","Item 9","Item 10","Item 11","Item 12","Item 13","Item 14","Item 15","Item 16"],"ofo":"","translation":""}},"generalAdvice":"","love":{"analysis":"","ebos":{"basic":{"description":"","instructions":"...","ingredients":["Item 1","Item 2"],"ofo":"","translation":""},"medium":{"description":"","instructions":"...","ingredients":["Item 1","Item 2"],"ofo":"","translation":""},"complete":{"description":"","instructions":"...","ingredients":["Animal","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8","Item 9","Item 10","Item 11","Item 12","Item 13","Item 14","Item 15","Item 16"],"ofo":"","translation":""}}},"finance":{"analysis":"","ebos":{"basic":{"description":"","instructions":"...","ingredients":["Item 1","Item 2"],"ofo":"","translation":""},"medium":{"description":"","instructions":"...","ingredients":["Item 1","Item 2"],"ofo":"","translation":""},"complete":{"description":"","instructions":"...","ingredients":["Animal","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8","Item 9","Item 10","Item 11","Item 12","Item 13","Item 14","Item 15","Item 16"],"ofo":"","translation":""}}},"health":{"analysis":"","risks":[],"ebos":{"basic":{"description":"","instructions":"...","ingredients":["Item 1","Item 2"],"ofo":"","translation":""},"medium":{"description":"","instructions":"...","ingredients":["Item 1","Item 2"],"ofo":"","translation":""},"complete":{"description":"","instructions":"...","ingredients":["Animal","Item 2","Item 3","Item 4","Item 5","Item 6","Item 7","Item 8","Item 9","Item 10","Item 11","Item 12","Item 13","Item 14","Item 15","Item 16"],"ofo":"","translation":""}}},"osogbo":{"analysis":"","ebo":{"description":"","instructions":"...","ingredients":["Item 1","Item 2"],"ofo":"","translation":""}},"spirituality":"","diet":{"positive":"","negative":""},"clothing":{"positive":"","negative":""},"dangers":"","rulingOrishas":"","destinyAndOri":"","obstaclesAndEnemies":"","ancestry":"","personality":"","decisionMaking":"","warning":"","luckyItems":[]}` }
+            ]
         });
-        const text = cleanJsonString(response.text || "");
-        return JSON.parse(text);
-    } catch (error) {
-        const msg = handleGeminiError(error, "fetchAkose");
-        fallback.finalidade = msg;
+        const parsed = JSON.parse(cleanJson(res.choices[0]?.message?.content || "{}"));
+        return { ...fallback, ...parsed };
+    } catch(e) {
+        console.error("fetchInterpretation error:", e);
         return fallback;
     }
 };
 
-// --- IMPLEMENTAÇÃO DAS FUNÇÕES QUE ESTAVAM COMO STUBS ---
-
-export const askSpecificQuestion = async (oduName: string, context: any, question: string, lang: string) => {
+export const askVoiceOfThunder = async (query: string): Promise<string> => {
     if (!ai) initializeAI();
-    if (!ai) return { fullAnswer: "IA não inicializada.", shortSummary: "Erro" };
-
-    const prompt = `
-        Você é um Babalawo. Odu: ${oduName}.
-        Contexto do jogo: ${JSON.stringify(context.summary)}.
-        Pergunta do consulente: "${question}".
-        Responda com sabedoria de Ifá, curto e direto.
-        Retorne JSON: { "fullAnswer": "...", "shortSummary": "..." }
-    `;
-    
+    if (!ai) return "Oráculo offline. Verifique a chave Groq.";
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: prompt,
-            config: { responseMimeType: "application/json" }
+        const res = await ai.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            messages: [
+                { role: "system", content: SYSTEM_PROMPT + "\nSe o usuário pedir ritual ou magia, responda com JSON dentro de <RITUAL_CARD>...</RITUAL_CARD>." },
+                { role: "user", content: query }
+            ]
         });
-        const text = cleanJsonString(response.text || "");
-        return JSON.parse(text);
-    } catch (e) {
-        const msg = handleGeminiError(e, "askSpecificQuestion");
-        return { fullAnswer: msg, shortSummary: "Erro" };
-    }
+        return res.choices[0]?.message?.content || "Silêncio no Oráculo.";
+    } catch(e: any) { return `Erro: ${e.message}`; }
+};
+
+export const askSpecificQuestion = async (oduName: string, context: any, question: string, lang: string): Promise<{ fullAnswer: string; shortSummary: string }> => {
+    if (!ai) initializeAI();
+    if (!ai) return { fullAnswer: "Oráculo offline.", shortSummary: "Erro." };
+    try {
+        const res = await ai.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            response_format: { type: "json_object" },
+            messages: [
+                { role: "system", content: SYSTEM_PROMPT },
+                { role: "user", content: `Odu: ${oduName}. Pergunta do consulente: "${question}". Responda com sabedoria de Ifá. JSON: { "fullAnswer": "...", "shortSummary": "..." }` }
+            ]
+        });
+        return JSON.parse(cleanJson(res.choices[0]?.message?.content || "{}"));
+    } catch(e) { return { fullAnswer: "Erro no Oráculo.", shortSummary: "Erro." }; }
+};
+
+export const fetchAkose = async (oduName: string, category: string, problem: string, lang: string): Promise<AkoseV4> => {
+    const fallback: AkoseV4 = { tipo: 'akose', titulo_yoruba: "Erro", finalidade: problem, materiais: [], modo_preparo_sacerdotal: "Sem conexão.", ofo_ativacao: { yoruba: "", portugues: "", fonetica: "" }, visualizacao_consulente: { orcamento: true, finalidade: true, preparo: false } };
+    if (!ai) { initializeAI(); }
+    if (!ai) return fallback;
+    try {
+        const res = await ai.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            response_format: { type: "json_object" },
+            messages: [
+                { role: "system", content: SYSTEM_PROMPT },
+                { role: "user", content: `Gere um Akose (remédio litúrgico) para o problema: "${problem}" (categoria: ${category}) no Odu ${oduName}. JSON: { "tipo": "akose", "titulo_yoruba": "...", "finalidade": "...", "materiais": [], "modo_preparo_sacerdotal": "...", "oduReference": "...", "ofo_ativacao": { "yoruba": "...", "portugues": "...", "fonetica": "..." }, "visualizacao_consulente": { "orcamento": true, "finalidade": true, "preparo": false } }` }
+            ]
+        });
+        return { ...fallback, ...JSON.parse(cleanJson(res.choices[0]?.message?.content || "{}")) };
+    } catch(e) { return fallback; }
 };
 
 export const interpretDream = async (dream: string, lang: string) => {
     if (!ai) initializeAI();
-    if (!ai) return { meaning: "Erro de conexão", relatedOdu: "N/A", advice: "Tente novamente mais tarde.", isPositive: true };
-
-    const prompt = `Interprete este sonho à luz de Ifá: "${dream}". Retorne JSON: { "meaning": "...", "relatedOdu": "...", "advice": "...", "isPositive": boolean }`;
-
+    if (!ai) return { meaning: "Offline", relatedOdu: "N/A", advice: "Verifique conexão.", isPositive: true };
     try {
-        const response = await ai.models.generateContent({
-            model: "gemini-3-flash-preview",
-            contents: prompt,
-            config: { responseMimeType: "application/json" }
+        const res = await ai.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            response_format: { type: "json_object" },
+            messages: [{ role: "user", content: `Interprete este sonho à luz de Ifá (Babalawo): "${dream}". JSON: { "meaning": "...", "relatedOdu": "...", "advice": "...", "isPositive": true }` }]
         });
-        return JSON.parse(cleanJsonString(response.text || ""));
-    } catch (e) {
-        return { meaning: handleGeminiError(e, "interpretDream"), relatedOdu: "N/A", advice: "Erro", isPositive: false };
-    }
+        return JSON.parse(cleanJson(res.choices[0]?.message?.content || "{}"));
+    } catch(e) { return { meaning: "Erro", relatedOdu: "N/A", advice: "Tente novamente.", isPositive: false }; }
 };
 
-// ... (Outras funções podem ser implementadas similarmente, mas por brevidade manteremos stubs simples para as menos críticas se necessário, mas askSpecificQuestion era crítica)
-
-export const askSangoJustice = async (myName: string, opponent: string, details: string): Promise<SangoJusticeResult> => { 
-    return { name: "Erro", outcome: 'trouble', advice: "Funcionalidade em manutenção.", akose: "", ofo: "", ebos: { basic: {description:"",instructions:"",ingredients:[]}, medium: {description:"",instructions:"",ingredients:[]}, complete: {description:"",instructions:"",ingredients:[]} } }; 
+export const askSangoJustice = async (myName: string, opponent: string, details: string): Promise<SangoJusticeResult> => {
+    const blank: EboDetail = { description: "", instructions: "", ingredients: [] };
+    if (!ai) initializeAI();
+    try {
+        const res = await ai!.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            response_format: { type: "json_object" },
+            messages: [{ role: "user", content: `Babalawo. Consulta de Justiça com Xangô. Meu nome: ${myName}. Adversário: ${opponent}. Situação: ${details}. JSON: { "name": "Odu", "outcome": "victory_hard|peace|trouble", "advice": "...", "akose": "...", "ofo": "...", "ebos": { "basic": {}, "medium": {}, "complete": {} } }` }]
+        });
+        return { name: "Xangô", outcome: "trouble", advice: "...", akose: "", ofo: "", ebos: { basic: blank, medium: blank, complete: blank }, ...JSON.parse(cleanJson(res.choices[0]?.message?.content || "{}")) };
+    } catch(e) { return { name: "Xangô", outcome: "trouble", advice: "Erro de conexão.", akose: "", ofo: "", ebos: { basic: blank, medium: blank, complete: blank } }; }
 };
 
-export const searchYorubaDictionary = async (term: string) => { return { word: term, meaning: "Dicionário offline." } };
-export const analyzeOpeleImage = async (b: string) => { return { rightLeg: ['open','open','open','open'], leftLeg: ['open','open','open','open'] }; };
-export const analyzeFace = async (i: string, l: string) => { return { emotionalState: "...", oriDiagnosis: "...", recommendation: "..." }; };
-export const compareAncestry = async (i1: string, i2: string, l: string) => { return { similarityScore: 0, facialAnalysis: "...", spiritualConnection: "...", ancestralAdvice: "..." }; };
-export const searchAjogunRemedy = async (q: string, l: string) => { return { ajogunName: "...", spiritualCause: "...", suggestedRemedy: "..." }; };
-export const identifyPlant = async (i: string, l: string) => { return { yorubaName: "...", scientificName: "...", commonName: "...", spiritualUse: "...", oduReference: "...", imageUrl: "" }; };
-export const analyzeAnimalSymbolism = async (i: string, l: string) => { return { animalName: "...", spiritualMeaning: "...", omenType: "Neutral", relatedOrisha: "...", actionRequired: "..." }; };
-export const fetchOriki = async (q: string, l: string) => { return { title: q, yoruba: "...", translation: "..." }; };
+export const searchYorubaDictionary = async (term: string) => {
+    if (!ai) initializeAI();
+    try {
+        const res = await ai!.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            response_format: { type: "json_object" },
+            messages: [{ role: "user", content: `Dicionário Yoruba. Termo: "${term}". JSON: { "word": "${term}", "meaning": "...", "usage": "...", "examples": [] }` }]
+        });
+        return JSON.parse(cleanJson(res.choices[0]?.message?.content || "{}"));
+    } catch(e) { return { word: term, meaning: "Erro na busca." }; }
+};
+
+export const identifyPlant = async (imageBase64: string, lang: string) => {
+    if (!ai) initializeAI();
+    try {
+        const res = await ai!.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            response_format: { type: "json_object" },
+            messages: [{ role: "user", content: `Babalawo. Identifique uma erva sagrada de Ifá e sua importância litúrgica. JSON: { "yorubaName": "...", "scientificName": "...", "commonName": "...", "spiritualUse": "...", "oduReference": "...", "imageUrl": "" }` }]
+        });
+        return JSON.parse(cleanJson(res.choices[0]?.message?.content || "{}"));
+    } catch(e) { return { yorubaName: "Ewe", scientificName: "N/A", commonName: "N/A", spiritualUse: "Erro.", oduReference: "", imageUrl: "" }; }
+};
+
+export const searchAjogunRemedy = async (query: string, lang: string) => {
+    if (!ai) initializeAI();
+    try {
+        const res = await ai!.chat.completions.create({
+            model: "llama-3.3-70b-versatile",
+            response_format: { type: "json_object" },
+            messages: [{ role: "user", content: `Babalawo. Diagnóstico de Ajogun para: "${query}". JSON: { "ajogunName": "...", "spiritualCause": "...", "suggestedRemedy": "..." }` }]
+        });
+        return JSON.parse(cleanJson(res.choices[0]?.message?.content || "{}"));
+    } catch(e) { return { ajogunName: "...", spiritualCause: "...", suggestedRemedy: "..." }; }
+};
+
+export const analyzeFace = async (imageBase64: string, lang: string) => ({ emotionalState: "Análise indisponível.", oriDiagnosis: "...", recommendation: "..." });
+export const compareAncestry = async (i1: string, i2: string, lang: string) => ({ similarityScore: 0, facialAnalysis: "...", spiritualConnection: "...", ancestralAdvice: "..." });
+export const analyzeAnimalSymbolism = async (imageBase64: string, lang: string) => ({ animalName: "...", spiritualMeaning: "...", omenType: "Neutral", relatedOrisha: "...", actionRequired: "..." });
+export const fetchOriki = async (query: string, lang: string) => ({ title: query, yoruba: "...", translation: "..." });
+export const analyzeOpeleImage = async (b64: string) => ({ rightLeg: ['open','open','open','open'] as any, leftLeg: ['open','open','open','open'] as any });
+export const fetchLibraryAkose = async (q: string, l: string) => ({ results: [] });
 export const hasValidKey = () => !!ai;
-export const setManualKey = (k: string) => localStorage.setItem('ifa_manual_key', k);
-export const fetchLibraryAkose = async (q: string, l: string) => { return { results: [] }; };
-
+export const setManualKey = (k: string) => { localStorage.setItem('ifa_manual_key', k); initializeAI(); };

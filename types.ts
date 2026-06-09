@@ -19,7 +19,7 @@ export interface OduInfo {
     binaryRepresentation: string;
 }
 
-export type SubscriptionPlan = 'free' | 'pro_semester' | 'pro_annual';
+export type SubscriptionPlan = 'free' | 'student_monthly' | 'pro_monthly' | 'pro_annual';
 
 export interface UserProfile {
     uid: string;
@@ -27,6 +27,9 @@ export interface UserProfile {
     plan: SubscriptionPlan;
     validUntil?: string;
     name: string;
+    role?: 'admin' | 'user';
+    consultationCount?: number;
+    studyCount?: number;
 }
 
 export interface BabalawoProfile {

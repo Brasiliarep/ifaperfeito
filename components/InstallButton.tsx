@@ -26,8 +26,9 @@ const InstallButton = () => {
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
         if (isStandalone) {
             setIsVisible(false);
-        } else if (ios) {
-            // Always show install button on iOS web since event doesn't fire
+        } else {
+            // Se não estiver instalado, mostra o botão sempre. 
+            // Se não houver prompt nativo, exibimos as instruções ao clicar.
             setIsVisible(true);
         }
 
@@ -56,9 +57,9 @@ const InstallButton = () => {
         <>
             <button 
                 onClick={handleInstallClick}
-                className="fixed top-4 left-4 z-50 bg-ifa-gold text-ifa-base px-3 py-1.5 rounded-full text-xs font-bold uppercase shadow-lg flex items-center gap-2 hover:scale-105 transition-transform"
+                className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 bg-ifa-gold text-ifa-base px-4 py-3 rounded-full text-xs font-bold uppercase shadow-[0_8px_30px_rgb(0,0,0,0.5)] flex items-center gap-2 hover:scale-105 transition-transform"
             >
-                <Download size={14} /> Instalar App
+                <Download size={16} /> Instalar App
             </button>
 
             {showInstructions && (

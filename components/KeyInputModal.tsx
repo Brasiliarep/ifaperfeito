@@ -19,7 +19,7 @@ const KeyInputModal: React.FC<Props> = ({ onSave }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[9999] bg-[#1a1510] flex items-center justify-center p-6 text-white font-sans">
+        <div className="fixed inset-0 z-[9999] bg-[#1a1510] flex flex-col items-center justify-start md:justify-center p-6 text-white font-sans overflow-y-auto pt-10 md:pt-0">
             <div className="max-w-md w-full text-center">
                 <div className="w-20 h-20 bg-[#D4AF37] rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(212,175,55,0.3)]">
                     <Key size={40} className="text-black" />

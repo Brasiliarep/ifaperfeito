@@ -8,9 +8,15 @@ import ItaAssistant from './ItaAssistant';
 
 const OracleHub = ({ onBack }: { onBack: () => void }) => {
     const [activeOracle, setActiveOracle] = useState<'menu' | 'obi' | 'ibo' | 'ikin' | 'ita'>('menu');
+    const [iboResult, setIboResult] = useState<{ type: 'ire' | 'osogbo', detail: string } | null>(null);
+
+    const handleIboComplete = (result: { type: 'ire' | 'osogbo', detail: string }) => {
+        setIboResult(result);
+        setActiveOracle('menu');
+    };
 
     if (activeOracle === 'obi') return <ObiDivination onBack={() => setActiveOracle('menu')} />;
-    if (activeOracle === 'ibo') return <IboOracle onBack={() => setActiveOracle('menu')} />;
+    if (activeOracle === 'ibo') return <IboOracle onBack={() => setActiveOracle('menu')} onComplete={handleIboComplete} />;
     if (activeOracle === 'ikin') return <IkinDivination onBack={() => setActiveOracle('menu')} />;
     if (activeOracle === 'ita') return <ItaAssistant onBack={() => setActiveOracle('menu')} />;
 

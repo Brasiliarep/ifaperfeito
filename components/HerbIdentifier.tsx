@@ -221,7 +221,12 @@ const HerbIdentifier = ({ onBack }: { onBack: () => void }) => {
                             className="bg-ifa-base border border-ifa-border rounded-2xl overflow-hidden hover:border-ifa-gold transition-all cursor-pointer group shadow-lg"
                         >
                             <div className="h-32 bg-ifa-base-dark relative overflow-hidden">
-                                <img src={herb.imageUrl} alt={herb.yorubaName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100" />
+                                <img
+                                    src={herb.imageUrl}
+                                    alt={herb.yorubaName}
+                                    onError={(e) => { (e.target as HTMLImageElement).src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="#1a1611" width="100" height="100"/><text x="50" y="55" text-anchor="middle" font-size="40">🌿</text></svg>`)}`; }}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-80 group-hover:opacity-100"
+                                />
                                 <div className="absolute top-2 right-2">
                                     <div className="bg-black/40 backdrop-blur-sm p-1.5 rounded-full border border-white/20">
                                         <ElementIcon type={herb.element} />
@@ -273,6 +278,7 @@ const HerbIdentifier = ({ onBack }: { onBack: () => void }) => {
                                 )}
                                 <img
                                     src={liveImageUrl || (selectedHerb || result)?.imageUrl || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/600px-No_image_available.svg.png'}
+                                    onError={(e) => { (e.target as HTMLImageElement).src = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="#1a1611" width="100" height="100"/><text x="50" y="55" text-anchor="middle" font-size="40">🌿</text></svg>`)}`; }}
                                     className="w-full h-full object-cover opacity-80"
                                     alt="Herb"
                                 />

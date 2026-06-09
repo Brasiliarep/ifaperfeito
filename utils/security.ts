@@ -4,10 +4,10 @@
 export const initSecurity = () => {
     // Bypass if in development mode, if admin flag is present, or if Dev Mode is saved in storage
     if (
-        process.env.NODE_ENV === 'development' || 
+        process.env.NODE_ENV === 'development' ||
         window.location.search.includes('admin=true') ||
         localStorage.getItem('ifa_dev_mode') === 'true'
-    ) return; 
+    ) return;
 
     // 1. Disable Right Click
     document.addEventListener('contextmenu', (e) => {
@@ -38,18 +38,18 @@ export const initSecurity = () => {
 export const checkDomainLock = (): boolean => {
     // 1. Developer Bypass Check (URL or Saved LocalStorage)
     if (
-        process.env.NODE_ENV === 'development' || 
-        window.location.search.includes('admin=true') || 
+        process.env.NODE_ENV === 'development' ||
+        window.location.search.includes('admin=true') ||
         localStorage.getItem('ifa_dev_mode') === 'true'
     ) return true; // Allowed
 
     // Replace with your actual production domains
-    const ALLOWED_DOMAINS = ['localhost', '127.0.0.1', 'ifa-guia.netlify.app', 'seusite.com'];
-    
+    const ALLOWED_DOMAINS = ['localhost', '127.0.0.1', 'precious-elf-a0c59d.netlify.app', 'ifa-guia.netlify.app', 'ifaoluwo.com', 'www.ifaoluwo.com', 'ifaoluwo.com.br', 'www.ifaoluwo.com.br'];
+
     const currentDomain = window.location.hostname;
-    
-    // Simple check - allows subdomains
-    const isAllowed = ALLOWED_DOMAINS.some(d => currentDomain.includes(d));
+
+    // Simple check - allows subdomains or general netlify
+    const isAllowed = ALLOWED_DOMAINS.some(d => currentDomain.includes(d)) || currentDomain.endsWith('.netlify.app');
 
     return isAllowed;
 };
