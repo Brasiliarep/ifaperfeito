@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ifa-guia-v3';
+const CACHE_NAME = 'ifa-guia-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -58,9 +58,15 @@ self.addEventListener('fetch', (event) => {
             });
         }
         return networkResponse;
+      }).catch(() => {
+        // Network failed — return cached response if available, otherwise offline fallback
+        return cachedResponse || new Response('Offline', { status: 503 });
       });
       // Return cached response immediately if available, otherwise wait for network
       return cachedResponse || fetchPromise;
+    }).catch(() => {
+      // Fallback if cache API itself fails
+      return fetch(event.request);
     })
   );
 });

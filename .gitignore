@@ -22,3 +22,7 @@ build_log.txt
 *.csv
 __BACKUP__/
 precificador-sfimports/
+create_paypal_plans.ps1
+
+# Local Netlify folder
+.netlify

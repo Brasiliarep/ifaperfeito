@@ -241,30 +241,20 @@ export function searchLibrary(oduName: string): string {
 
     return `
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📚 CONTEXTO DA BIBLIOTECA DE IFÁ (USE COMO BASE — NÃO INVENTE)
+📚 CONTEXTO — ${entry.odu}
 Fonte: ${entry.source}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-ODÙ: ${entry.odu}
-ORIXÁS REGENTES: ${entry.rulingOrishas.join(', ')}
+ITAN:
+${entry.itan.length > 500 ? entry.itan.slice(0, 500) + '...' : entry.itan}
 
-ITAN TRADICIONAL:
-${entry.itan}
+EBÓ:
+${entry.ebo.length > 350 ? entry.ebo.slice(0, 350) + '...' : entry.ebo}
 
-EBÓ PRESCRITO NA LITERATURA:
-${entry.ebo}
-
-EWO (INTERDIÇÕES CONFIRMADAS):
-${entry.ewo}
-
-OFÓ EM IORUBÁ:
-${entry.ofo}
-
-TRADUÇÃO DO OFÓ:
-${entry.ofoTranslation}
+EWO:
+${entry.ewo.length > 250 ? entry.ewo.slice(0, 250) + '...' : entry.ewo}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-INSTRUÇÃO CRÍTICA: Use EXCLUSIVAMENTE os elementos acima como base para Itan, Ebó, Ewo e Ofó.
-Você PODE expandir com mais detalhes do Corpus de Ifá, mas NUNCA contradiga ou ignore os dados acima.
+Use como base — não invente.
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `;
 }

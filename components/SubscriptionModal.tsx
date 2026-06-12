@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Crown, CheckCircle2, Star, Shield, Lock, X, Globe, GraduationCap, Sparkles } from 'lucide-react';
 
 interface Props {
@@ -8,41 +8,107 @@ interface Props {
     featureName?: string;
 }
 
-const LINKS = {
-    estudante_brl: "https://www.paypal.com/ncp/payment/5GYD6ULS9G3ZC",
-    mensal_brl:  "https://www.paypal.com/ncp/payment/V46XYHBYC222N",
-    anual_brl:   "https://www.paypal.com/ncp/payment/MZFKA686ZB5AC",
-    estudante_usd: "https://www.paypal.com/ncp/payment/F8BV7L9FKF2AE",
-    mensal_usd:  "https://www.paypal.com/ncp/payment/QRMCQL77NBGFE",
-    anual_usd:   "https://www.paypal.com/ncp/payment/P8S25W7653QZJ",
+const PLAN_IDS = {
+    estudante_brl: "P-9S304494S91035709NIVTAXQ",
+    mensal_brl:  "P-1PL22728YL341025ANIVTAXY",
+    anual_brl:   "P-3L826926MA095250FNIVTAYA",
+    estudante_usd: "P-7PX300165U894823ENIVTAXY",
+    mensal_usd:  "P-6C735938DC578305RNIVTAYA",
+    anual_usd:   "P-7JE39745J5153271YNIVTAYA",
 };
+
+declare global {
+    interface Window { paypal: any; }
+}
 
 const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, featureName }) => {
     const [isBrazil, setIsBrazil] = useState(true);
+    const [sdkReady, setSdkReady] = useState(false);
+    const onSubscribeRef = useRef(onSubscribe);
+    onSubscribeRef.current = onSubscribe;
+    const buttonsRendered = useRef(false);
+    const currentCurrency = useRef('');
+
+    const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
     useEffect(() => {
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const lang = navigator.language || '';
-        const isBR = tz.startsWith('America/Sao_Paulo') ||
-                     tz.startsWith('America/Fortaleza') ||
-                     tz.startsWith('America/Recife') ||
-                     tz.startsWith('America/Belem') ||
-                     tz.startsWith('America/Manaus') ||
-                     tz.startsWith('America/Porto_Velho') ||
-                     tz.startsWith('America/Cuiaba') ||
-                     lang.startsWith('pt-BR');
-        setIsBrazil(isBR);
+        setIsBrazil(
+            tz.startsWith('America/Sao_Paulo') ||
+            tz.startsWith('America/Fortaleza') ||
+            tz.startsWith('America/Recife') ||
+            tz.startsWith('America/Belem') ||
+            tz.startsWith('America/Manaus') ||
+            tz.startsWith('America/Porto_Velho') ||
+            tz.startsWith('America/Cuiaba') ||
+            lang.startsWith('pt-BR')
+        );
     }, []);
+
+    useEffect(() => {
+        buttonsRendered.current = false;
+    }, [isBrazil]);
+
+    useEffect(() => {
+        if (!isOpen || !clientId || sdkReady) return;
+        if (document.querySelector('script[src*="paypal.com/sdk/js"]')) {
+            setSdkReady(true);
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&vault=true&intent=subscription&locale=${isBrazil ? 'pt_BR' : 'en_US'}`;
+        script.async = true;
+        script.crossOrigin = 'anonymous';
+        const existing = document.querySelector('script[src*="paypal.com/sdk/js"]');
+        if (existing) {
+            setSdkReady(true);
+        } else {
+            script.onload = () => setSdkReady(true);
+            document.body.appendChild(script);
+        }
+        return () => {};
+    }, [isOpen, clientId, sdkReady, isBrazil]);
+
+    useEffect(() => {
+        const currencyKey = isBrazil ? 'brl' : 'usd';
+        if (!sdkReady || buttonsRendered.current || !isOpen || currencyKey === currentCurrency.current) return;
+
+        buttonsRendered.current = true;
+        currentCurrency.current = currencyKey;
+
+        const plans = [
+            { key: 'estudante', planId: isBrazil ? PLAN_IDS.estudante_brl : PLAN_IDS.estudante_usd },
+            { key: 'mensal', planId: isBrazil ? PLAN_IDS.mensal_brl : PLAN_IDS.mensal_usd },
+            { key: 'anual', planId: isBrazil ? PLAN_IDS.anual_brl : PLAN_IDS.anual_usd },
+        ];
+
+        const timer = setTimeout(() => {
+            if (!window.paypal) return;
+            plans.forEach(({ key, planId }) => {
+                const container = document.getElementById(`paypal-button-${key}`);
+                if (!container || container.hasChildNodes()) return;
+                window.paypal.Buttons({
+                    createSubscription: (_data: any, actions: any) =>
+                        actions.subscription.create({ plan_id: planId }),
+                    onApprove: () => onSubscribeRef.current(),
+                    style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
+                }).render(`#paypal-button-${key}`);
+            });
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [sdkReady, isOpen, isBrazil]);
 
     if (!isOpen) return null;
 
-    const estudante_link = isBrazil ? LINKS.estudante_brl : LINKS.estudante_usd;
-    const mensal_link = isBrazil ? LINKS.mensal_brl : LINKS.mensal_usd;
-    const anual_link  = isBrazil ? LINKS.anual_brl  : LINKS.anual_usd;
+    const estudante_planId = isBrazil ? PLAN_IDS.estudante_brl : PLAN_IDS.estudante_usd;
+    const mensal_planId = isBrazil ? PLAN_IDS.mensal_brl : PLAN_IDS.mensal_usd;
+    const anual_planId  = isBrazil ? PLAN_IDS.anual_brl  : PLAN_IDS.anual_usd;
     const currency    = isBrazil ? 'R$' : '$';
-    const estudante_price = isBrazil ? '39,90' : '29,90';
-    const mensal_price = isBrazil ? '79,90' : '59,90';
-    const anual_price  = isBrazil ? '575,28' : '431,28';
+    const estudante_price = isBrazil ? '39,90' : '29.90';
+    const mensal_price = isBrazil ? '79,90' : '59.90';
+    const anual_price  = isBrazil ? '575,28' : '431.28';
 
     return (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[100] p-4 overflow-y-auto">
@@ -103,10 +169,7 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
 
                             <div className="mt-auto text-[10px] text-amber-500/70 italic mb-3">{isBrazil ? 'Ideal para iniciantes' : 'Best for beginners'}</div>
 
-                            <a href={estudante_link} target="_blank" rel="noreferrer" onClick={onSubscribe}
-                                className="w-full py-3 text-center border border-amber-500/50 text-amber-400 font-bold uppercase tracking-widest rounded-lg hover:bg-amber-500/10 transition-colors text-sm">
-                                {isBrazil ? 'Assinar Estudante' : 'Subscribe Student'}
-                            </a>
+                            <div id="paypal-button-estudante" className="min-h-[40px] w-full"></div>
                         </div>
 
                         {/* PLANO MENSAL */}
@@ -134,10 +197,7 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
                                 <li className="flex items-start gap-3 text-white font-medium"><Shield size={16} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Todas as ferramentas liberadas' : 'All tools unlocked'}</li>
                             </ul>
 
-                            <a href={mensal_link} target="_blank" rel="noreferrer" onClick={onSubscribe}
-                                className="w-full py-3 text-center bg-gradient-to-r from-yellow-600 to-yellow-700 text-white font-black uppercase tracking-widest rounded-lg shadow-lg hover:shadow-ifa-gold/40 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 text-sm">
-                                <Sparkles size={16} /> {isBrazil ? 'Assinar Mensal' : 'Subscribe Monthly'}
-                            </a>
+                            <div id="paypal-button-mensal" className="min-h-[40px] w-full"></div>
                         </div>
 
                         {/* PLANO ANUAL */}
@@ -153,14 +213,12 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
                                 </h3>
                             </div>
 
-                            {/* Preço com desconto destacado */}
                             <div className="flex items-baseline gap-2 mb-1">
                                 <span className="text-sm text-ifa-neutral">{currency}</span>
                                 <span className="text-4xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]">{anual_price.split(',')[0]}<span className="text-3xl">,{anual_price.split(',')[1]}</span></span>
                                 <span className="text-sm text-ifa-neutral">/{isBrazil ? 'ano' : 'yr'}</span>
                             </div>
 
-                            {/* Preço original riscado + badge 40% OFF */}
                             <div className="flex items-center gap-3 mb-5">
                                 <span className="text-sm text-ifa-neutral line-through opacity-50">{isBrazil ? 'R$ 958,80' : '$718,80'}</span>
                                 <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-black px-2.5 py-0.5 rounded-full tracking-wider">40% OFF</span>
@@ -178,10 +236,7 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
 
                             <div className="mt-auto text-[10px] text-ifa-gold/70 italic mb-3">{isBrazil ? 'Melhor custo-benefício' : 'Best value'}</div>
 
-                            <a href={anual_link} target="_blank" rel="noreferrer" onClick={onSubscribe}
-                                className="w-full py-3 text-center border border-ifa-gold text-ifa-gold font-bold uppercase tracking-widest rounded-lg hover:bg-ifa-gold/10 transition-colors text-sm">
-                                {isBrazil ? 'Assinar Anual VIP' : 'Subscribe Annual VIP'}
-                            </a>
+                            <div id="paypal-button-anual" className="min-h-[40px] w-full"></div>
                         </div>
 
                     </div>

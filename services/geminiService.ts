@@ -1,11 +1,10 @@
 
 import { AIInterpretation, OduInfo, AkoseV4, SangoJusticeResult, EboDetail } from "../types";
-import { searchLibrary } from "../data/ifaLibrary";
 
 // ─── CONFIGURAÇÃO GROQ ────────────────────────────────────────────────────────
-// Proxy Vite: /groq-api → https://api.groq.com
-const GROQ_BASE = "/groq-api";
-const GROQ_MODEL = "llama-3.3-70b-versatile";   // Gratuito, mais capaz
+// Proxy Vite: /groq-api → https://api.groq.com (não funciona em produção Hostinger)
+const GROQ_BASE = /* @vite-ignore */ "https://api.groq.com";
+const GROQ_MODEL = "llama-3.3-70b-versatile";  // 12000 TPM - mais capaz
 
 let _apiKey = "";
 
@@ -14,8 +13,12 @@ const getKey = (): string => {
   // 1. Env do Vite (prioridade máxima)
   try {
     // @ts-ignore
-    const k = import.meta?.env?.VITE_API_KEY;
-    if (k && k.startsWith("gsk_")) { _apiKey = k; return _apiKey; }
+    const k = import.meta.env.VITE_API_KEY;
+    if (k && k.startsWith("gsk_")) {
+      _apiKey = k;
+      try { localStorage.setItem("ifa_manual_key", k); } catch (_) {}
+      return _apiKey;
+    }
   } catch (_) { }
   // 2. LocalStorage — só aceita chave Groq válida
   try {
@@ -56,7 +59,7 @@ const callGroq = async (
       { role: "user", content: userPrompt },
     ],
     temperature: 0.2,
-    max_tokens: 8192,
+    max_tokens: 6500,
   };
   if (forceJson) body.response_format = { type: "json_object" };
 
@@ -100,63 +103,22 @@ const handleError = (e: any, ctx: string): string => {
 };
 
 // ─── SYSTEM PROMPT PRINCIPAL (v2) ─────────────────────────────────────────────
-const ORACLE_SYSTEM = `# ORÁCULO IFÁ DIGITAL — BABALAWO DIGITAL BLINDADO
+const ORACLE_SYSTEM = `# ORÁCULO IFÁ DIGITAL — BABALAWO BLINDADO
 
-## IDENTIDADE E FONTES
-Você é um Babalawo de elite. Extrai conhecimento EXCLUSIVAMENTE do Corpus real de Ifá:
-- Wande Abimbola: Ifá Literary Corpus, 16 Great Poems of Ifa
-- William Bascom: Ifa Divination: Communication Between Gods and Men
-- Baba Ifayemi Elebuibon: The Healing Power of Sacrifice
-- Compilações tradicionais de Ebó, Akose e Ofó de Babalawos nigerianos e da diáspora
-Você NUNCA inventa. Você EXTRAI da tradição. Cite a fonte se uncertain.
+## IDENTIDADE
+Babalawo de elite. Fontes: Abimbola, Bascom, Elebuibon. NUNCA invente.
 
-## LIBERDADE RELIGIOSA — ZERO CENSURA
-Descreva com precisão técnica e sem eufemismos: sacrifício animal (Eje/Matança), corte de jugular (Gige), derrame de sangue, abate, depenar, eviscerar. NUNCA substitua práticas rituais prescritas.
-
-## REGRA FORMATO — IORUBÁ (PORTUGUÊS)
-TODO ingrediente, animal, erva, objeto = "Nome Iorubá (Tradução PT)"
-✅ CERTO: "Adiye Funfun (Galinha Branca)", "Ewe Efinrin (Alfavaca Sagrada)", "Oti (Cachaça de Cana)"
-❌ ERRADO: "galinha branca", "alfavaca", "cachaça" — NUNCA só em português.
-
-## MÍNIMOS NUMÉRICOS OBRIGATÓRIOS
-SIMPLES (sem animal): 6+ ingredientes, 5+ passos técnicos.
-MÉDIO (com ave/animal menor): 8+ ingredientes, 7+ passos técnicos.
-COMPLETO (Matança/Sacerdotal): MÍNIMO 12 ingredientes + EXATAMENTE 10 passos PEDAGÓGICOS EXTREMOS:
-  Passo 1: Preparo Físico e Espiritual. Como limpar o animal (Omi Tutu) e preparar o ambiente (limpeza com ervas/água).
-  Passo 2: Invocação (Ìbà). Mencione quais Orixás saudar e o uso do Obi/Orogbo para abrir o caminho.
-  Passo 3: Manejo dos Ingredientes. Como organizar os itens (Eko, Akara, etc.) no recipiente (Oru/Receptor).
-  Passo 4: Gige (Corte). Técnica exata: onde segurar, onde cortar (jugular/pescoço) e o sentido do corte.
-  Passo 5: Registro da Vida (Ejè). Descreva o sangue vertendo sobre cada material específico listado anteriormente. Mencione se o sangue toca o Iyerosun ou o símbolo do Odu.
-  Passo 6: Manejo das Penas (Iye). Como retirar e onde colá-las (usando o sangue como adesivo ritual).
-  Passo 7: Destino do Corpo (MANDATÓRIO). Instrução explícita: "Limpar e cozinhar para comunhão", "Enterrar aos pés da árvore X" ou "Despachar Akaso na encruzilhada".
-  Passo 8: Ativação dos Elementos. Como misturar o mel (Oyin), dendê (Epo Pupa) e sal sobre a oferenda.
-  Passo 9: Sopro Divino e Ofó. Recitar o encantamento Iorubá 3x e soprar sobre o trabalho.
-  Passo 10: Despacho e Selagem. Aonde levar, como carregar e o que não fazer ao retornar.
-
-⚠️ REGRA PEDAGÓGICA: Cada ingrediente listado no campo "ingredients" DEVE ser mencionado em pelo menos um passo do preparo. Se o ingrediente está na lista, o Babalawo precisa saber exatamente o que fazer com ele. Instruções genéricas como "preparo da galinha" ou "mistura dos elementos" são PROIBIDAS. Explique COMO preparar e COMO misturar.
-
-## CAMPO SPIRITUALITY — 3 PARÁGRAFOS OBRIGATÓRIOS
-§1: Identidade do Orixá (nome + títulos Oriki + domínios + símbolos sagrados)
-§2: Conexão específica deste Orixá com este Odu (por que ele rege este caminho)
-§3: Instruções práticas para o consulente se conectar com este Orixá agora
-
-## REGRAS INVIOLÁVEIS
-1. Zero sincretismo. 2. Anti-clone: Ebós de Amor/Dinheiro/Saúde = ingredientes DIFERENTES.
-3. Mín. 60 palavras por campo marcado (conte internamente, expanda se necessário).
-4. Retorne APENAS JSON válido.
-5. ⭐ REGRA DE OURO — OFÓ/OKIRI/SOPRO DIVINO: SEMPRE que houver uma reza (Ofó), um cântico (Okiri) ou um Sopro Divino (Passo 7) em QUALQUER campo do JSON, o texto em Iorubá DEVE vir primeiro, imediatamente seguido da tradução completa em português. SEM EXCEÇÃO. Formato exigido:
-   Em Iorubá: "[texto]"
-   Tradução: "[tradução verso a verso]"
-   Nunca apresente apenas o Iorubá sem tradução. Nunca apresente apenas a tradução sem o Iorubá.
-
-## EXEMPLO COMPLETO (11 ingredientes, 8 passos):
-"complete": {
-  "description": "Ebó de União com Oferenda de Eje para Oshun",
-  "ingredients": ["Adiye Funfun (Galinha Branca)","Epo Pupa (Azeite de Dendê)","Oti (Cachaça de Cana)","Iyerosun (Pó Sagrado de Ifá)","Omi Tutu (Água Fresca)","Obi Abata (Noz de Cola Amarga)","Orogbo (Noz Orogbo Seca)","Atare (Pimenta da Costa)","Obi Omi Tuto (Cola Branca Hidratada)","Iyo (Sal Marinho Puro)","Ewe Efinrin (Alfavaca Sagrada)"],
-  "instructions": "1. Lave a Adiye Funfun (Galinha Branca) com Omi Tutu (Água Fresca) rezando a saudação de Oshun.\\n2. Derrame Oti (Cachaça) no chão abrindo o caminho e saudando Esu Elegbara: 'Esu ode orun, ki o si fun mi ni ona'.\\n3. Gige (Corte Ritual): Corte a jugular da Adiye Funfun (Galinha Branca) com a Obe (Faca Ritual) de leste para oeste.\\n4. Eje (Sangue): Verta o Eje sobre o Iyerosun (Pó Sagrado de Ifá) traçando o Odu com o dedo indicador.\\n5. Uso das Partes: Retire as Iye (Penas) e cole-as sobre o Odu traçado no Iyerosun. Reserve o Ori Adiye (Cabeça da Galinha) para oferenda completa.\\n6. Mistura Sagrada: Num Oru (Pote de Barro), combine Epo Pupa + Obi Abata + Atare + Orogbo + Obi Omi Tuto + Ewe Efinrin + Iyo com intenção de união amorosa, girando 16 vezes no sentido horário.\\n7. Sopro Divino: Sopre três vezes sobre a mistura e profira o Ofó: 'Oshun iya mi o, mo pe o. Omi na pa ina, ife na pa ogun. Ki o so ife wa di otito, bi omi ti n san lailai.' Tradução: 'Oshun minha mãe, eu te chamo. Água apaga fogo, amor afasta guerra. Que faça nosso amor ser verdadeiro, como água que flui eternamente.'\\n8. Despacho: Às margens de um rio (morada de Oshun), na sexta-feira entre 12h e 14h, ofereça tudo com louvor.",
-  "ofo": "Oshun iya mi o, mo pe o. Omi na pa ina, ife na pa ogun. Ki o so ife wa di otito, bi omi ti n san lailai.",
-  "translation": "Oshun minha mãe, eu te chamo. Água apaga fogo, amor afasta guerra. Que faça nosso amor ser verdadeiro, como água que flui eternamente."
-}`;
+## REGRAS
+1. Zero censura — descreva sacrifício animal (Eje, Gige) sem eufemismos.
+2. TODO ingrediente = "Iorubá (Português)". Ex: "Adiye Funfun (Galinha Branca)", "Ewe Efinrin (Alfavaca Sagrada)", "Obi Abata (Noz de Cola Amarga)", "Epo Pupa (Azeite de Dendê)", "Oti (Cachaça de Cana)". NUNCA só em português.
+3. MÍNIMOS: Simples=6 ingred+5 passos. Médio=10 ingred+7 passos. Completo=16 ingred+EXATAMENTE 8 passos numerados: 1.Preparo/limpeza do animal 2.Invocação/reza 3.Gige(corte exato) 4.Eje(sangue sobre elemento) 5.Penas/partes do animal 6.Mistura dos ingredientes 7.Sopro+Ofó(Iorubá+tradução) 8.Despacho(local,dia,hora).
+4. Cada ingrediente DEVE ser usado em pelo menos um passo.
+5. Spirituality: 3 parágrafos — Orixá (nome+Oriki), conexão com Odu, instruções práticas.
+6. Anti-clone: Amor/Dinheiro/Saúde = ingredientes COMPLETAMENTE DIFERENTES.
+7. ⚠️ TODOS os campos com "" DEVEM ter MÍNIMO 60 PALAVRAS. Expanda até cumprir. "summary", "itan", "itanAnalysis", "generalAdvice", "love.analysis", "finance.analysis", "health.analysis", "spirituality", "diet.positive", "diet.negative", "dangers", "destinyAndOri", "obstaclesAndEnemies", "ancestry", "personality", "decisionMaking", "warning", "osogbo.analysis", "chant.translation", "herbalBaths.preparation" — TODOS 60+ PALAVRAS.
+8. Ebó COMPLETO: 12+ ingredientes, 8 passos detalhados. NUNCA menos.
+9. Ofó: Iorubá PRIMEIRO, tradução verso a verso DEPOIS. SEMPRE ambos.
+10. Retorne APENAS JSON válido.`;
 
 // ─── FALLBACK ──────────────────────────────────────────────────────────────────
 const makeFallback = (oduName: string): AIInterpretation => {
@@ -201,161 +163,68 @@ export const fetchInterpretation = async (odu: OduInfo, lang: string, iboResult?
     ? `\n🎯 IBÓ REVELADO (use este resultado para orientar TODO o conteúdo): ${iboResult.type} — ${iboResult.subType}: "${iboResult.description}"\n→ O campo "ireOrOsogbo" do JSON DEVE ser "${iboResult.type === 'IRE' ? 'Irê' : 'Osogbo'}". Toda a leitura deve refletir este caminho.\n`
     : '';
 
-  const libraryContext = searchLibrary(odu.name);
-
   const userPrompt = `Odu consultado: "${odu.name}". IDIOMA: Português do Brasil (PT-BR).${iboContext}
-${libraryContext}
 
-⚠️ AVISO ANTI-CLONE — LEIA ANTES DE GERAR:
-Se os Ebós de Amor, Dinheiro e Saúde contiverem os MESMOS ingredientes ou passos = RESPOSTA INVÁLIDA.
-Cada área tem ingredientes semanticamente distintos:
-- AMOR → elementos de rio, mel, pétalas, Ewe Efinrin, Omiero de Oshun
-- DINHEIRO → Owo (dinheiro), Eko (cuscuz ritual), Akara (bolinho), Ewe Osun, pó dourado
-- SAÚDE → ervas medicinais (Ewe Tete, Ewe Igi), Omi Tutu, Efun (casca branca), Aadun
-
-REGRA FORMATO ABSOLUTA: Todo ingrediente = "Iorubá (Português)" SEM EXCEÇÃO.
-
-COMPLETO (Matança): OBRIGATÓRIO 10+ ingredientes E exatamente 8 passos detalhados.
-
+⚠️ ANTI-CLONE: Ebós de Amor/Dinheiro/Saúde com mesmos ingredientes = inválido.
+REGRAS: Todo ingrediente = "Iorubá (Português)". Completo = 16+ ingredientes, 8 passos numerados (Preparo, Invocação, Gige, Eje, Penas, Mistura, Sopro+Ofó, Despacho).
 Retorne APENAS este JSON:
 
 {
   "oduName": "${odu.name}",
-  "summary": "[MÍN. 60 PALAVRAS: Resumo técnico da energia deste Odu, mencionando Orixá, Ibi e Ire]",
-  "itan": "[MÍN. 60 PALAVRAS: Narrativa do Itan REAL deste Odu extraído da literatura de Ifá com personagens, Ewo e ensinamentos]",
-  "itanSummary": "[1-2 frases resumindo o Itan]",
-  "itanAnalysis": "[MÍN. 60 PALAVRAS: Como este Itan se aplica ao consulente hoje]",
-  "chant": {
-    "yoruba": "[Ofó/Verso autêntico em Iorubá deste Odu]",
-    "translation": "[MÍN. 60 PALAVRAS: Tradução verso a verso com explicação do poder místico de cada linha]"
-  },
-  "oduOriki": {
-    "yoruba": "[Oriki deste Odu em Iorubá]",
-    "translation": "[Tradução do Oriki]",
-    "instructions": "[Como e quando entoar]"
-  },
-  "herbalBaths": {
-    "name": "[Nome em Iorubá (Português)]",
-    "ingredients": ["Ewe X (Erva X)", "Ewe Y (Erva Y)", "Omi Tutu (Água Fresca)", "Ewe Z (Erva Z)"],
-    "preparation": "[MÍN. 60 PALAVRAS: Temperatura, horário, dias consecutivos, modo de aplicar]",
-    "purpose": "[Finalidade espiritual do banho]"
-  },
-  "generalAdvice": "[MÍN. 60 PALAVRAS: Orientações gerais e conselhos de Ifá para o consulente neste Odu]",
+  "summary": "",
+  "itan": "",
+  "itanSummary": "",
+  "itanAnalysis": "",
+  "chant": { "yoruba": "", "translation": "" },
+  "oduOriki": { "yoruba": "", "translation": "", "instructions": "" },
+  "herbalBaths": { "name": "", "ingredients": ["Ewe Efinrin (Alfavaca Sagrada)", "Ewe Odundun (Folha da Vida)", "Omi Tutu (Água Fresca)"], "preparation": "", "purpose": "" },
+  "generalAdvice": "",
   "love": {
-    "analysis": "[MÍN. 60 PALAVRAS: O que este Odu revela sobre vida amorosa e uniões]",
+    "analysis": "",
     "ebos": {
-      "basic": {
-        "description": "[Nome do Ebó Simples de Amor — sem animal]",
-        "ingredients": ["Obi Omi Tuto (Noz de Cola Branca Hidratada)", "Obi Abata (Noz de Cola Amarga)", "Omi Oshun (Água de Rio)", "Oyin (Mel Natural)", "Ewe Efinrin (Alfavaca Sagrada)", "Omi Riro (Água de Chuva)"],
-        "instructions": "1. [Purificação do espaço com Omi Tutu]\n2. [Preparo das ervas em tigela de barro]\n3. [Reza de abertura para Oshun ou Orixá de Amor deste Odu]\n4. Mistura Sagrada: [combinação dos elementos com intenção de união]\n5. Sopro Divino: Profira o Ofó sobre a mistura.\n6. [Modo de usar: banhar, portar ou depositar]",
-        "ofo": "[Ofó em Iorubá para Amor — mín. 3 linhas]",
-        "translation": "[Tradução completa do Ofó]"
-      },
-      "medium": {
-        "description": "[Nome do Ebó Médio de Amor — com ave]",
-        "ingredients": ["Eyelé Funfun (Pomba Branca)", "Oyin (Mel Natural)", "Omi Oshun (Água de Rio)", "Epo Pupa (Azeite de Dendê)", "Ewe Efinrin (Alfavaca Sagrada)", "Atare (Pimenta da Costa)", "Iyo (Sal Marinho)", "Oti (Cachaça de Cana)"],
-        "instructions": "1. [Preparo e limpeza da Eyelé Funfun]\n2. [Reza de abertura invocando o Orixá de Amor]\n3. Eje (Sangue): [derramar sobre elemento de união — descreva com precisão]\n4. [Uso das penas — Iye — sobre o elemento sagrado]\n5. [Mistura dos elementos restantes com intenção]\n6. Sopro Divino + Ofó em Iorubá.\n7. Despacho: [como e onde oferecer]",
-        "ofo": "[Ofó em Iorubá para Amor Médio]",
-        "translation": "[Tradução]"
-      },
-      "complete": {
-        "description": "[Nome Sacerdotal Completo de Amor — Matança prescrita]",
-        "ingredients": ["[Animal prescrito pelo Odu para Amor]", "Oyin (Mel Natural)", "Omi Oshun (Água de Rio)", "Epo Pupa (Azeite de Dendê)", "Ewe Efinrin (Alfavaca Sagrada)", "Obi Omi Tuto (Noz de Cola Branca)", "Obi Abata (Noz de Cola Amarga)", "Atare (Pimenta da Costa)", "Iyerosun (Pó Sagrado de Ifá)", "Oti (Cachaça de Cana)", "[Ingrediente específico do Odu para Amor]"],
-        "instructions": "1. [Preparo e limpeza ritual do animal com Omi Tutu e reza]\n2. [Reza de abertura: invocação solene do Orixá e de Esu Elegbara para abrir o caminho]\n3. Gige (Corte Ritual): [descreva o corte exato — jugular, pescoço — sentido e posição]\n4. Eje (Derrame de Sangue): [sobre qual elemento sagrado — Iyerosun, Odu traçado — com o dedo indicador]\n5. [Uso das partes do animal: Iye=penas coladas no Odu, Ori=cabeça reservada para o local de despacho]\n6. Mistura Sagrada: [em Oru (pote de barro), combine todos os demais ingredientes com intenção de Amor, girando 16x no horário]\n7. Sopro Divino: Sopre 3x e profira o Ofó completo em Iorubá — mín. 4 linhas — com tradução.\n8. Despacho: [local específico, dia da semana, hora — ex: margem de rio na sexta às 13h]",
-        "ofo": "[Ofó completo em Iorubá para Amor — mín. 4 linhas]",
-        "translation": "[Tradução verso a verso]"
-      }
+      "basic": { "description": "", "ingredients": ["Obi Abata (Noz de Cola Amarga)", "Omi Tutu (Água Fresca)", "Orogbo (Noz Orogbo)"], "instructions": "", "ofo": "", "translation": "" },
+      "medium": { "description": "", "ingredients": [], "instructions": "", "ofo": "", "translation": "" },
+      "complete": { "description": "", "ingredients": [], "instructions": "", "ofo": "", "translation": "" }
     }
   },
   "finance": {
-    "analysis": "[MÍN. 60 PALAVRAS: O que este Odu revela sobre finanças, trabalho e prosperidade — TEMÁTICA COMPLETAMENTE DIFERENTE de Amor]",
+    "analysis": "",
     "ebos": {
-      "basic": {
-        "description": "[Nome do Ebó Simples de Dinheiro — sem animal]",
-        "ingredients": ["Eko (Cuscuz Ritual de Milho Branco)", "Akara (Bolinho de Feijão Fradinho)", "Obi Abata (Noz de Cola Amarga)", "Orogbo (Noz Orogbo Seca)", "Ewe Osun (Folha de Cambará)", "Iyo (Sal Marinho Puro)", "Oti (Cachaça de Cana)"],
-        "instructions": "1. [Preparo do Eko e Akara como oferenda de atração de Aje]\n2. [Disposição dos elementos sobre Aso Funfun (pano branco)]\n3. [Reza invocando Aje — Orixá da Riqueza — ou Orixá financeiro deste Odu]\n4. Mistura Sagrada: [combinação com intenção de prosperidade e abertura de caminho]\n5. Sopro + Ofó de prosperidade em Iorubá\n6. [Despacho: encruzilhada ou mercado — local de circulação do dinheiro]",
-        "ofo": "[Ofó em Iorubá para prosperidade — diferente do de Amor]",
-        "translation": "[Tradução]"
-      },
-      "medium": {
-        "description": "[Nome do Ebó Médio de Dinheiro — com ave ou animal menor]",
-        "ingredients": ["Akuko Pupa (Galo Vermelho)", "Eko (Cuscuz Ritual)", "Orogbo (Noz Orogbo)", "Ewe Osun (Folha de Cambará)", "Epo Pupa (Azeite de Dendê)", "Iyo (Sal Marinho)", "Atare (Pimenta da Costa)", "Oti (Cachaça de Cana)"],
-        "instructions": "1. [Preparo e limpeza do Akuko Pupa (Galo)]\n2. [Reza invocando Ogun, Sango ou Orixá financeiro deste Odu]\n3. Eje: [derramar sobre Eko (cuscuz) — base do trabalho financeiro]\n4. [Uso das Iye (penas) do Akuko sobre a oferenda]\n5. [Distribuição dos demais ingredientes com intenção de atração de Aje]\n6. Sopro + Ofó.\n7. Despacho: [local de comércio ou encruzilhada]",
-        "ofo": "[Ofó em Iorubá para prosperidade]",
-        "translation": "[Tradução]"
-      },
-      "complete": {
-        "description": "[Nome Sacerdotal Completo de Dinheiro]",
-        "ingredients": ["[Animal prescrito pelo Odu para Dinheiro — DIFERENTE do de Amor]", "Eko (Cuscuz Ritual de Milho)", "Akara (Bolinho de Feijão Fradinho)", "Orogbo (Noz Orogbo Seca)", "Obi Abata (Noz de Cola Amarga)", "Ewe Osun (Folha de Cambará)", "Iyo (Sal Marinho Puro)", "Epo Pupa (Azeite de Dendê)", "Oti (Cachaça de Cana)", "Iyerosun (Pó Sagrado de Ifá)", "[Ingrediente específico do Odu para prosperidade]"],
-        "instructions": "1. [Preparo e limpeza ritual do animal com reza de abertura para Aje e Esu]\n2. [Reza solene invocando o Orixá da prosperidade deste Odu]\n3. Gige (Corte Ritual): [descreva o corte exato sobre o animal]\n4. Eje: [derramar sobre Eko (cuscuz) — base da prosperidade — traçando símbolo do Odu]\n5. [Uso das partes: Iye (penas) coladas no símbolo, Ori (cabeça) reservada]\n6. Mistura Sagrada: [em Oru de barro, combine todos os ingredientes com intenção de Aje (riqueza), 16x no horário]\n7. Sopro Divino + Ofó completo em Iorubá (mín. 4 linhas) + tradução\n8. Despacho: [local de mercado ou encruzilhada de 4 vias, dia e hora específicos]",
-        "ofo": "[Ofó em Iorubá para prosperidade — mín. 4 linhas]",
-        "translation": "[Tradução verso a verso]"
-      }
+      "basic": { "description": "", "ingredients": ["Epo Pupa (Azeite de Dendê)", "Oti (Cachaça de Cana)", "Iyerosun (Pó Sagrado)"], "instructions": "", "ofo": "", "translation": "" },
+      "medium": { "description": "", "ingredients": [], "instructions": "", "ofo": "", "translation": "" },
+      "complete": { "description": "", "ingredients": [], "instructions": "", "ofo": "", "translation": "" }
     }
   },
   "health": {
-    "analysis": "[MÍN. 60 PALAVRAS: O que este Odu prescreve para saúde e vitalidade — TEMÁTICA COMPLETAMENTE DIFERENTE dos anteriores]",
-    "risks": ["[Risco de saúde 1 específico do Odu]", "[Risco 2]", "[Risco 3]"],
+    "analysis": "",
+    "risks": [],
     "ebos": {
-      "basic": {
-        "description": "[Nome Ebó Simples de Saúde — sem animal]",
-        "ingredients": ["Efun (Casca de Caracol em Pó Branco)", "Ewe Tete (Amaranto Sagrado)", "Ewe Odundun (Folha da Vida)", "Omi Tutu (Água Fresca de Nascente)", "Obi Funfun (Noz de Cola Branca)", "Ori (Manteiga de Karité)"],
-        "instructions": "1. [Preparo do banho de ervas medicinais em água fria]\n2. [Fricção suave do Efun (pó) sobre o corpo banhado]\n3. [Reza de cura invocando Obaluwaiê, Osun ou Orixá de saúde deste Odu]\n4. Mistura Sagrada: [combinar Ori + Efun + Ewe com intenção de cura]\n5. Sopro + Ofó de cura em Iorubá\n6. [Aplicação ou ingestão conforme o Odu — descreva]",
-        "ofo": "[Ofó em Iorubá para saúde e cura — diferente dos anteriores]",
-        "translation": "[Tradução]"
-      },
-      "medium": {
-        "description": "[Nome Ebó Médio de Saúde — com ave]",
-        "ingredients": ["Eyelé Pupa (Pomba Vermelha/Acobaça)", "Efun (Pó Branco Sagrado)", "Ewe Tete (Amaranto)", "Ewe Igi Ogbo (Erva do Ancião)", "Omi Tutu (Água Fresca)", "Ori (Manteiga de Karité)", "Ero (Terra de Formigueiro)", "Obi Funfun (Noz de Cola Branca)"],
-        "instructions": "1. [Preparo e limpeza da ave com ervas medicinais]\n2. [Reza de cura invocando o Orixá de saúde]\n3. Eje: [derramar sobre Efun (pó branco) — símbolo de pureza e cura]\n4. [Uso das Iye (penas) sobre o conjunto de ervas]\n5. [Preparo da mistura curativa com Ori + Ewe]\n6. Sopro + Ofó de cura.\n7. Despacho: [hospital, mata ou cemitério — conforme o Odu]",
-        "ofo": "[Ofó em Iorubá para cura]",
-        "translation": "[Tradução]"
-      },
-      "complete": {
-        "description": "[Nome Sacerdotal Completo de Saúde]",
-        "ingredients": ["[Animal prescrito pelo Odu para Saúde — DIFERENTE dos anteriores]", "Efun (Pó Branco Sagrado de Osala)", "Ewe Tete (Amaranto Sagrado)", "Ewe Odundun (Folha da Vida)", "Ewe Igi Ogbo (Erva do Ancião)", "Omi Tutu (Água Fresca de Nascente)", "Ori (Manteiga de Karité)", "Obi Funfun (Noz de Cola Branca)", "Ero (Terra de Formigueiro)", "Iyerosun (Pó Sagrado de Ifá)", "[Ingrediente curativo específico do Odu]"],
-        "instructions": "1. [Preparo e limpeza ritual do animal com banho de Ewe medicinais e reza de purificação]\n2. [Reza solene de abertura invocando Obaluwaiê, Orixalá ou Orixá de saúde deste Odu]\n3. Gige (Corte Ritual): [descreva o corte exato — onde, como, sentido do corte]\n4. Eje: [derramar sobre Efun (pó branco) — símbolo de cura — traçando o Odu com dedo indicador]\n5. [Uso das partes: Iye (penas) coladas no símbolo de cura, Ori (cabeça) reservada para o Orixá]\n6. Mistura Sagrada: [em Oru de barro, combine TODOS os ingredientes medicinais com intenção de cura, 16x no horário]\n7. Sopro Divino + Ofó completo de cura em Iorubá (mín. 4 linhas) + tradução\n8. Despacho: [mata sagrada, hospital ou encruzilhada conforme o Odu, dia e hora específicos]",
-        "ofo": "[Ofó em Iorubá para cura e saúde — mín. 4 linhas]",
-        "translation": "[Tradução verso a verso]"
-      }
+      "basic": { "description": "", "ingredients": ["Ewe Tete (Amaranto Sagrado)", "Omi Tutu (Água Fresca)", "Ori (Manteiga de Karité)"], "instructions": "", "ofo": "", "translation": "" },
+      "medium": { "description": "", "ingredients": [], "instructions": "", "ofo": "", "translation": "" },
+      "complete": { "description": "", "ingredients": [], "instructions": "", "ofo": "", "translation": "" }
     }
   },
-  "osogbo": {
-    "analysis": "[MÍN. 60 PALAVRAS: Quais forças negativas operam neste Odu e como afastá-las]",
-    "ebo": { "description": "[Ebó para afastar Osogbo]", "instructions": "[6+ passos detalhados]", "ingredients": ["[4+ ingredientes em Iorubá (PT)]"], "ofo": "[Ofó de proteção]", "translation": "[Tradução]" }
-  },
-  "spirituality": "[MÍN. 60 PALAVRAS — 3 PARÁGRAFOS: §1 Identidade do Orixá (nome+títulos Oriki+domínios) §2 Por que este Orixá rege este Odu §3 Como o consulente pode se conectar com este Orixá agora]",
-  "diet": {
-    "positive": "[MÍN. 60 PALAVRAS: Alimentos favoráveis com razão espiritual para cada um]",
-    "negative": "[MÍN. 60 PALAVRAS: Ewo — cada proibição com razão ancestral obrigatória]"
-  },
-  "clothing": {
-    "positive": "[Cores favoráveis e motivo espiritual]",
-    "negative": "[Cores proibidas e motivo ancestral]"
-  },
-  "dangers": "[MÍN. 60 PALAVRAS: Bloqueios espirituais detectados e perigos iminentes deste Odu]",
-  "rulingOrishas": "[Orixá(s) regente(s) deste Odu]",
-  "destinyAndOri": "[MÍN. 60 PALAVRAS: Conexão entre Ayanmo (destino), Ori (cabeça espiritual) e este Odu — como cuidar do Ori agora]",
-  "obstaclesAndEnemies": "[MÍN. 60 PALAVRAS: Forças e entidades que operam contra o consulente neste Odu]",
+  "osogbo": { "analysis": "", "ebo": { "description": "", "instructions": "", "ingredients": ["Adiye Funfun (Galinha Branca)", "Epo Pupa (Azeite de Dendê)", "Obi Abata (Noz de Cola Amarga)"], "ofo": "", "translation": "" } },
+  "spirituality": "",
+  "diet": { "positive": "", "negative": "" },
+  "clothing": { "positive": "", "negative": "" },
+  "dangers": "",
+  "rulingOrishas": "",
+  "destinyAndOri": "",
+  "obstaclesAndEnemies": "",
   "solutionsAndEbos": {
-    "basic": { "description": "[Ebó Principal Simples]", "instructions": "[5+ passos]", "ingredients": ["[4+ ingredientes em Iorubá (PT)]"], "ofo": "[Ofó]", "translation": "[Tradução]" },
-    "medium": { "description": "[Ebó Principal Médio]", "instructions": "[6+ passos]", "ingredients": ["[5+ ingredientes]"], "ofo": "[Ofó]", "translation": "[Tradução]" },
-    "complete": {
-      "description": "[EBÓ PRINCIPAL COMPLETO — Sacerdotal/Matança]",
-      "instructions": "1. [Preparo e limpeza do animal]\n2. [Reza de abertura]\n3. Gige (Corte Ritual): [detalhado]\n4. Eje: [sobre qual elemento]\n5. [Uso das partes]\n6. Mistura Sagrada: [combinação]\n7. Sopro Divino + Ofó completo em Iorubá\n8. Despacho: [local, dia, hora]",
-      "ingredients": ["[Animal prescrito]", "[Ingr 2]", "[Ingr 3]", "[Ingr 4]", "[Ingr 5]", "[Ingr 6]", "[Ingr 7]", "[Ingr 8]", "[Ingr 9]", "[Ingr 10 — mín. 10 total]"],
-      "ofo": "[Ofó em Iorubá]",
-      "translation": "[Tradução]"
-    }
+    "basic": { "description": "", "instructions": "", "ingredients": ["Orogbo (Noz Orogbo)", "Omi Tutu (Água Fresca)", "Atare (Pimenta da Costa)"], "ofo": "", "translation": "" },
+    "medium": { "description": "", "instructions": "", "ingredients": [], "ofo": "", "translation": "" },
+    "complete": { "description": "", "instructions": "", "ingredients": [], "ofo": "", "translation": "" }
   },
-  "ancestry": "[MÍN. 60 PALAVRAS: Conexão com os ancestrais (Egungun) e como honrá-los neste Odu]",
-  "personality": "[MÍN. 60 PALAVRAS: Traços de personalidade revelados por este Odu]",
-  "decisionMaking": "[MÍN. 60 PALAVRAS: Conselho de Ifá para tomada de decisões]",
-  "warning": "[MÍN. 60 PALAVRAS: O aviso mais urgente que este Odu traz]",
-  "luckyItems": ["[Item sagrado 1 em Iorubá (PT)]", "[Item sagrado 2]", "[Item sagrado 3]"],
+  "ancestry": "",
+  "personality": "",
+  "decisionMaking": "",
+  "warning": "",
+  "luckyItems": [],
   "ireOrOsogbo": "Irê",
-  "ireOsogboDescription": "[Descrição do caminho revelado pelo Ibó]",
-  "ireOsogboAction": "[Ação imediata prescrita por Ifá]"
+  "ireOsogboDescription": "",
+  "ireOsogboAction": ""
 } `;
 
   try {

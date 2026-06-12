@@ -78,7 +78,7 @@ export const fetchInterpretation = async (odu: OduInfo, lang: string, iboResult?
 
     try {
         const res = await ai.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "llama-3.1-8b-instant",
             temperature: 0.4,
             max_tokens: 6000,
             response_format: { type: "json_object" },
@@ -120,7 +120,7 @@ export const askVoiceOfThunder = async (query: string): Promise<string> => {
     if (!ai) return "Oráculo offline. Verifique a chave Groq.";
     try {
         const res = await ai.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "llama-3.1-8b-instant",
             messages: [
                 { role: "system", content: SYSTEM_PROMPT + "\nSe o usuário pedir ritual ou magia, responda com JSON dentro de <RITUAL_CARD>...</RITUAL_CARD>." },
                 { role: "user", content: query }
@@ -135,7 +135,7 @@ export const askSpecificQuestion = async (oduName: string, context: any, questio
     if (!ai) return { fullAnswer: "Oráculo offline.", shortSummary: "Erro." };
     try {
         const res = await ai.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "llama-3.1-8b-instant",
             response_format: { type: "json_object" },
             messages: [
                 { role: "system", content: SYSTEM_PROMPT },
@@ -152,7 +152,7 @@ export const fetchAkose = async (oduName: string, category: string, problem: str
     if (!ai) return fallback;
     try {
         const res = await ai.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "llama-3.1-8b-instant",
             response_format: { type: "json_object" },
             messages: [
                 { role: "system", content: SYSTEM_PROMPT },
@@ -168,7 +168,7 @@ export const interpretDream = async (dream: string, lang: string) => {
     if (!ai) return { meaning: "Offline", relatedOdu: "N/A", advice: "Verifique conexão.", isPositive: true };
     try {
         const res = await ai.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "llama-3.1-8b-instant",
             response_format: { type: "json_object" },
             messages: [{ role: "user", content: `Interprete este sonho à luz de Ifá (Babalawo): "${dream}". JSON: { "meaning": "...", "relatedOdu": "...", "advice": "...", "isPositive": true }` }]
         });
@@ -181,7 +181,7 @@ export const askSangoJustice = async (myName: string, opponent: string, details:
     if (!ai) initializeAI();
     try {
         const res = await ai!.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "llama-3.1-8b-instant",
             response_format: { type: "json_object" },
             messages: [{ role: "user", content: `Babalawo. Consulta de Justiça com Xangô. Meu nome: ${myName}. Adversário: ${opponent}. Situação: ${details}. JSON: { "name": "Odu", "outcome": "victory_hard|peace|trouble", "advice": "...", "akose": "...", "ofo": "...", "ebos": { "basic": {}, "medium": {}, "complete": {} } }` }]
         });
@@ -193,7 +193,7 @@ export const searchYorubaDictionary = async (term: string) => {
     if (!ai) initializeAI();
     try {
         const res = await ai!.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "llama-3.1-8b-instant",
             response_format: { type: "json_object" },
             messages: [{ role: "user", content: `Dicionário Yoruba. Termo: "${term}". JSON: { "word": "${term}", "meaning": "...", "usage": "...", "examples": [] }` }]
         });
@@ -205,7 +205,7 @@ export const identifyPlant = async (imageBase64: string, lang: string) => {
     if (!ai) initializeAI();
     try {
         const res = await ai!.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "llama-3.1-8b-instant",
             response_format: { type: "json_object" },
             messages: [{ role: "user", content: `Babalawo. Identifique uma erva sagrada de Ifá e sua importância litúrgica. JSON: { "yorubaName": "...", "scientificName": "...", "commonName": "...", "spiritualUse": "...", "oduReference": "...", "imageUrl": "" }` }]
         });
@@ -217,7 +217,7 @@ export const searchAjogunRemedy = async (query: string, lang: string) => {
     if (!ai) initializeAI();
     try {
         const res = await ai!.chat.completions.create({
-            model: "llama-3.3-70b-versatile",
+            model: "llama-3.1-8b-instant",
             response_format: { type: "json_object" },
             messages: [{ role: "user", content: `Babalawo. Diagnóstico de Ajogun para: "${query}". JSON: { "ajogunName": "...", "spiritualCause": "...", "suggestedRemedy": "..." }` }]
         });
