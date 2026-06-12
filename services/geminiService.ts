@@ -2,39 +2,34 @@
 import { AIInterpretation, OduInfo, AkoseV4, SangoJusticeResult, EboDetail } from "../types";
 
 // ─── CONFIGURAÇÃO GROQ ────────────────────────────────────────────────────────
-// Proxy Vite: /groq-api → https://api.groq.com (não funciona em produção Hostinger)
-const GROQ_BASE = /* @vite-ignore */ "https://api.groq.com";
-const GROQ_MODEL = "llama-3.3-70b-versatile";  // 12000 TPM - mais capaz
+// Em produção: chave fica server-side na Netlify Function (/api/groq-proxy)
+// Em dev local: fallback para VITE_API_KEY no .env
+const GROQ_DIRECT = "https://api.groq.com";
+const GROQ_PROXY = "/.netlify/functions/groq-proxy";
+const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 let _apiKey = "";
 
-const getKey = (): string => {
+const getLocalKey = (): string => {
   if (_apiKey) return _apiKey;
-  // 1. Env do Vite (prioridade máxima)
   try {
     // @ts-ignore
     const k = import.meta.env.VITE_API_KEY;
     if (k && k.startsWith("gsk_")) {
       _apiKey = k;
-      try { localStorage.setItem("ifa_manual_key", k); } catch (_) {}
       return _apiKey;
     }
   } catch (_) { }
-  // 2. LocalStorage — só aceita chave Groq válida
   try {
     const k = localStorage.getItem("ifa_manual_key") || "";
     if (k.startsWith("gsk_")) { _apiKey = k; return _apiKey; }
-    // Limpa chave inválida (xAI ou outra) guardada anteriormente
-    if (k.length > 0) {
-      localStorage.removeItem("ifa_manual_key");
-      console.warn("Chave antiga removida do localStorage:", k.slice(0, 10) + "...");
-    }
+    if (k.length > 0) localStorage.removeItem("ifa_manual_key");
   } catch (_) { }
   return "";
 };
 
-export const hasValidKey = (): boolean => !!getKey();
-export const initializeAI = (): boolean => !!getKey();
+export const hasValidKey = (): boolean => true;
+export const initializeAI = (): boolean => true;
 initializeAI();
 
 export const setManualKey = (k: string) => {
@@ -49,9 +44,6 @@ const callGroq = async (
   userPrompt: string,
   forceJson = false
 ): Promise<string> => {
-  const key = getKey();
-  if (!key) throw new Error("Chave API não configurada.");
-
   const body: any = {
     model: GROQ_MODEL,
     messages: [
@@ -63,7 +55,30 @@ const callGroq = async (
   };
   if (forceJson) body.response_format = { type: "json_object" };
 
-  const res = await fetch(`${GROQ_BASE}/openai/v1/chat/completions`, {
+  // 1) Tenta proxy server-side (Netlify Function — produção)
+  try {
+    const proxyRes = await fetch(GROQ_PROXY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (proxyRes.ok) {
+      const data = await proxyRes.json();
+      const content = data?.choices?.[0]?.message?.content ?? "";
+      console.log("✅ Groq proxy ok (primeiros 200 chars):", content.slice(0, 200));
+      return content;
+    }
+    const errText = await proxyRes.text();
+    console.warn("Groq proxy falhou:", proxyRes.status, errText);
+  } catch (_) {
+    console.warn("Groq proxy indisponível (dev local?), caindo para direto");
+  }
+
+  // 2) Fallback: chamada direta (dev local com VITE_API_KEY)
+  const key = getLocalKey();
+  if (!key) throw new Error("Chave API não configurada.");
+
+  const res = await fetch(`${GROQ_DIRECT}/openai/v1/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -80,7 +95,7 @@ const callGroq = async (
 
   const data = await res.json();
   const content = data?.choices?.[0]?.message?.content ?? "";
-  console.log("✅ Groq resposta (primeiros 200 chars):", content.slice(0, 200));
+  console.log("✅ Groq direto ok (primeiros 200 chars):", content.slice(0, 200));
   return content;
 };
 
@@ -154,7 +169,7 @@ const makeFallback = (oduName: string): AIInterpretation => {
 // ─── INTERPRETAÇÃO PRINCIPAL ───────────────────────────────────────────────────
 export const fetchInterpretation = async (odu: OduInfo, lang: string, iboResult?: { type: string; subType: string; description: string }): Promise<AIInterpretation> => {
   const fallback = makeFallback(odu.name);
-  if (!getKey()) {
+  if (!getLocalKey()) {
     console.warn("fetchInterpretation: sem chave Groq.");
     return fallback;
   }
@@ -250,7 +265,7 @@ const THUNDER_SYSTEM = `IDENTIDADE: Você é o Ifá Ọlwo, inteligência litúr
 Para perguntas simples, responda em texto normal.`;
 
 export const askVoiceOfThunder = async (query: string): Promise<string> => {
-  if (!getKey()) return "O sistema não está ativo. Configure sua chave Groq nas configurações.";
+  if (!getLocalKey()) return "O sistema não está ativo. Configure sua chave Groq nas configurações.";
   try { return await callGroq(THUNDER_SYSTEM, query, false); }
   catch (e) { return handleError(e, "VoiceOfThunder"); }
 };
@@ -263,7 +278,7 @@ export const fetchAkose = async (oduName: string, category: string, problem: str
     ofo_ativacao: { yoruba: "", portugues: "", fonetica: "" },
     visualizacao_consulente: { orcamento: true, finalidade: true, preparo: false },
   };
-  if (!getKey()) return fallback;
+  if (!getLocalKey()) return fallback;
   try {
     const raw = await callGroq(
       "Especialista em Akose de Ifá. Responda APENAS com JSON válido.",
@@ -283,7 +298,7 @@ const QUESTION_SYSTEM = `Você é um Babalawo experiente. Responda perguntas esp
   Retorne APENAS JSON válido.`;
 
 export const askSpecificQuestion = async (oduName: string, context: any, question: string, lang: string) => {
-  if (!getKey()) return { fullAnswer: "Configure sua chave Groq.", shortSummary: "Erro", ritualType: "ebo", ritualTitle: "", basic: null, medium: null, complete: null };
+  if (!getLocalKey()) return { fullAnswer: "Configure sua chave Groq.", shortSummary: "Erro", ritualType: "ebo", ritualTitle: "", basic: null, medium: null, complete: null };
   try {
     const raw = await callGroq(
       QUESTION_SYSTEM,
@@ -336,7 +351,7 @@ Retorne APENAS este JSON:
 
 // ─── DIÁRIO DE SONHOS ─────────────────────────────────────────────────────────
 export const interpretDream = async (dream: string, lang: string) => {
-  if (!getKey()) return { meaning: "Erro", relatedOdu: "N/A", advice: "Tente novamente.", isPositive: true };
+  if (!getLocalKey()) return { meaning: "Erro", relatedOdu: "N/A", advice: "Tente novamente.", isPositive: true };
   try {
     const raw = await callGroq(
       "Interprete sonhos à luz de Ifá. APENAS JSON.",
@@ -387,7 +402,7 @@ export const askSangoJustice = async (
     }
   };
 
-  if (!getKey()) return fallback;
+  if (!getLocalKey()) return fallback;
 
   try {
     const raw = await callGroq(
@@ -433,7 +448,7 @@ export const searchAjogunRemedy = async (symptom: string, lang: string = 'pt-BR'
     ofo: 'Ori mi, jowo gba. Arun jade lara mi. Omi tutu na okan mi.',
     oduReference: 'Oyeku Meji'
   };
-  if (!getKey()) return defaultResult;
+  if (!getLocalKey()) return defaultResult;
   try {
     const systemPrompt = `Você é um Babalawo especialista na cosmologia Yorùbá dos Ajoguns.
 Os 8 Ajoguns líderes: Ikú, Àrùn, Òfò, Òràn, Ẹjọ, Èwọn, Àìsàn, Èṣe.
@@ -478,7 +493,7 @@ export const identifyPlant = async (input: string, lang: string = 'pt-BR') => {
     } catch { return ''; }
   };
 
-  if (!getKey()) return fallback;
+  if (!getLocalKey()) return fallback;
   try {
     const isTextSearch = input.startsWith('TEXT_SEARCH:');
     const query = isTextSearch ? input.replace('TEXT_SEARCH:', '').trim() : '';
@@ -551,7 +566,7 @@ export const fetchAjogunFullEbo = async (
     observacoes: `Este Ebó deve ser realizado às ${new Date().getHours() < 12 ? 'manhã' : 'tarde'}, de preferência em dia de Orunmila (Quarta-feira). O consulente deve estar em jejum leve.`,
   };
 
-  if (!getKey()) return fallback;
+  if (!getLocalKey()) return fallback;
   try {
     const systemPrompt = `Você é um Babalawo (Alaworo) experiente ensinando um noviço.
     REGRAS INVIOLÁVEIS (REGRA DE OURO):

@@ -13,9 +13,7 @@ export default defineConfig(({ mode }) => {
       sourcemap: false
     },
     define: {
-      'process.env.API_KEY': JSON.stringify(env.API_KEY || env.VITE_API_KEY || ""),
       'process.env': {},
-      '__VITE_API_KEY__': JSON.stringify(env.VITE_API_KEY || env.API_KEY || ""),
     },
     server: {
       proxy: {
