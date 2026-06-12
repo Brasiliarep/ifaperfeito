@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Loader2, Sparkles } from 'lucide-react';
-import { askVoiceOfThunder } from '../services/geminiService';
+import { askAssistant } from '../services/geminiService';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -32,7 +32,7 @@ export const AIAssistant: React.FC = () => {
     setMessages(prev => [...prev, { role: 'user', text: q }]);
     setLoading(true);
     try {
-      const answer = await askVoiceOfThunder(q);
+      const answer = await askAssistant(q);
       setMessages(prev => [...prev, { role: 'assistant', text: answer }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', text: 'O Oráculo está em silêncio. Tente novamente em instantes.' }]);
@@ -43,21 +43,19 @@ export const AIAssistant: React.FC = () => {
 
   return (
     <>
-      {/* FLOATING BUTTON */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-ifa-gold to-yellow-700 text-black shadow-[0_0_25px_rgba(212,175,55,0.5)] hover:shadow-[0_0_40px_rgba(212,175,55,0.8)] hover:scale-110 transition-all duration-300 flex items-center justify-center"
+        className="fixed bottom-28 right-6 z-50 flex items-center gap-2 bg-gradient-to-br from-ifa-gold to-yellow-700 text-black font-bold text-xs uppercase tracking-wider px-4 py-3 rounded-full shadow-[0_0_25px_rgba(212,175,55,0.5)] hover:shadow-[0_0_40px_rgba(212,175,55,0.8)] hover:scale-105 transition-all duration-300"
         title="Assistente Ifá"
       >
-        <MessageSquare size={24} />
+        <MessageSquare size={20} />
+        Assistente
       </button>
 
-      {/* CHAT PANEL */}
       {open && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)} />
           <div className="relative bg-[#1a1611] border border-ifa-gold/40 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md sm:max-h-[600px] h-[85vh] sm:h-auto flex flex-col overflow-hidden animate-fade-in">
-            {/* HEADER */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-ifa-border/40 bg-black/30">
               <div className="flex items-center gap-3">
                 <div className="bg-ifa-gold/20 p-2 rounded-full">
@@ -65,7 +63,7 @@ export const AIAssistant: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-white uppercase tracking-widest">Assistente Ifá</h2>
-                  <p className="text-[10px] text-ifa-neutral">Voz do Trovão</p>
+                  <p className="text-[10px] text-ifa-neutral">Respostas diretas e objetivas</p>
                 </div>
               </div>
               <button onClick={() => setOpen(false)} className="text-ifa-neutral hover:text-white p-1">
@@ -73,7 +71,6 @@ export const AIAssistant: React.FC = () => {
               </button>
             </div>
 
-            {/* MESSAGES */}
             <div ref={listRef} className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -97,7 +94,6 @@ export const AIAssistant: React.FC = () => {
               )}
             </div>
 
-            {/* INPUT */}
             <div className="border-t border-ifa-border/40 p-3 bg-black/30">
               <form
                 onSubmit={e => { e.preventDefault(); handleSend(); }}
