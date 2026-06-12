@@ -399,9 +399,12 @@ function App() {
                 
                 {/* HEADER */}
                 <div className="w-full flex justify-between items-start mb-6 pt-12 md:pt-4">
-                    <div className="flex flex-col gap-2">
-                        <img src="/logo.png" alt="Ifá Oluwo Logo" className="w-56 md:w-64 h-auto object-contain rounded-xl drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]" />
-                        <span className="text-[10px] md:text-xs text-ifa-neutral uppercase tracking-wider pl-2 border-l-2 border-ifa-gold">Codex Sacerdotal</span>
+                    <div className="flex flex-col gap-2 items-center md:items-start text-center md:text-left">
+                        <img src="/logo.png" alt="Ifá Oluwo Logo" className="w-20 h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_0_15px_rgba(212,175,55,0.4)]" />
+                        <div className="flex flex-col mt-1">
+                            <h1 className="text-2xl md:text-3xl font-serif font-black text-ifa-gold tracking-widest uppercase leading-none">IFÁ OLUWO</h1>
+                            <span className="text-[10px] md:text-xs text-ifa-neutral uppercase tracking-wider mt-1">Codex Sacerdotal</span>
+                        </div>
                     </div>
                     {/* Estes controles vão para o topo da área direita no desktop */}
                     <div className="flex gap-3 md:hidden">
