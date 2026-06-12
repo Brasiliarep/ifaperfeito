@@ -3,6 +3,7 @@ import { auth, db } from './firebaseConfig';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { collection, getDocs, query, where, doc, getDoc, setDoc } from 'firebase/firestore';
 import { UserProfile } from '../types';
+import { firestoreCache, scheduleWrite, acquireWriteSlot } from './overloadGuard';
 
 interface AuthContextType {
     user: User | null;
@@ -27,17 +28,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const updateUsageCounters = async (type: 'consultation' | 'study') => {
         if (!user || !userProfile) return;
+        const key = `usage_${user.uid}_${type}`;
         const newCount = (type === 'consultation' ? (userProfile.consultationCount || 0) : (userProfile.studyCount || 0)) + 1;
         const updates = type === 'consultation' ? { consultationCount: newCount } : { studyCount: newCount };
-        
-        await setDoc(doc(db, 'users', user.uid), updates, { merge: true });
+
         setUserProfile({ ...userProfile, ...updates });
+
+        scheduleWrite(key, async () => {
+            await acquireWriteSlot();
+            await setDoc(doc(db, 'users', user.uid), updates, { merge: true });
+        });
     };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (u) => {
             setUser(u);
             if (u) {
+                const cacheKey = 'profile_' + u.uid;
+                const cached = firestoreCache.get<UserProfile>(cacheKey);
+
+                if (cached) {
+                    setUserProfile(cached);
+                    setLoading(false);
+                }
+
                 const docRef = doc(db, 'users', u.uid);
                 const docSnap = await getDoc(docRef);
                 const VIP_EMAILS = ['safffnb@gmail.com', 'raquel.rafen@gmail.com'];
@@ -58,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 return rank(b) - rank(a);
                             });
                         profile = { ...sorted[0], uid: u.uid };
+                        await acquireWriteSlot();
                         await setDoc(docRef, profile);
                     }
                 } catch { }
@@ -67,6 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                     profile = docSnap.data() as UserProfile;
                     if (profile.validUntil && new Date(profile.validUntil).getTime() < new Date().getTime()) {
                         profile = { ...profile, plan: 'free', validUntil: undefined };
+                        await acquireWriteSlot();
                         await setDoc(docRef, { plan: 'free', validUntil: null }, { merge: true });
                     }
                 }
@@ -85,6 +101,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         termsAcceptedAt: termsAccepted || undefined,
                         privacyAcceptedAt: termsAccepted || undefined,
                     };
+                    await acquireWriteSlot();
                     await setDoc(docRef, profile);
                     localStorage.removeItem('ifa_terms_accepted');
                 }
@@ -92,14 +109,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 // 4) FORÇA VIPs a terem acesso total (sobrescreve qualquer coisa)
                 if (isVip && (profile.plan !== 'pro_annual' || profile.role !== 'admin')) {
                     profile = { ...profile, role: 'admin', plan: 'pro_annual', validUntil: undefined };
+                    await acquireWriteSlot();
                     await setDoc(docRef, { role: 'admin', plan: 'pro_annual', validUntil: null }, { merge: true });
                 }
 
+                firestoreCache.set(cacheKey, profile);
                 setUserProfile(profile);
+                if (!cached) setLoading(false);
             } else {
+                firestoreCache.invalidate('profile_' + (user?.uid || ''));
                 setUserProfile(null);
+                setLoading(false);
             }
-            setLoading(false);
         });
         return () => unsubscribe();
     }, []);

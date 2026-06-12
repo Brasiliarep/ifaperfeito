@@ -1,5 +1,13 @@
 
 import { AIInterpretation, OduInfo, AkoseV4, SangoJusticeResult, EboDetail } from "../types";
+import { CircuitBreaker } from "./circuitBreaker";
+
+// ─── CIRCUIT BREAKER ──────────────────────────────────────────────────────────
+const groqBreaker = new CircuitBreaker({
+  failureThreshold: 3,
+  successThreshold: 2,
+  cooldownMs: 30_000,
+});
 
 // ─── CONFIGURAÇÃO GROQ ────────────────────────────────────────────────────────
 // Em produção: chave fica server-side na Netlify Function (/api/groq-proxy)
@@ -57,60 +65,67 @@ const callGroq = async (
   userPrompt: string,
   forceJson = false
 ): Promise<string> => {
-  checkRateLimit();
-  const body: any = {
-    model: GROQ_MODEL,
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ],
-    temperature: 0.2,
-    max_tokens: 6500,
-  };
-  if (forceJson) body.response_format = { type: "json_object" };
+  return groqBreaker.call(
+    async () => {
+      checkRateLimit();
+      const body: any = {
+        model: GROQ_MODEL,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.2,
+        max_tokens: 6500,
+      };
+      if (forceJson) body.response_format = { type: "json_object" };
 
-  // 1) Tenta proxy server-side (Netlify Function — produção)
-  try {
-    const proxyRes = await fetch(GROQ_PROXY, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    if (proxyRes.ok) {
-      const data = await proxyRes.json();
+      // 1) Tenta proxy server-side (Netlify Function — produção)
+      try {
+        const proxyRes = await fetch(GROQ_PROXY, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (proxyRes.ok) {
+          const data = await proxyRes.json();
+          const content = data?.choices?.[0]?.message?.content ?? "";
+          console.log("✅ Groq proxy ok (primeiros 200 chars):", content.slice(0, 200));
+          return content;
+        }
+        const errText = await proxyRes.text();
+        console.warn("Groq proxy falhou:", proxyRes.status, errText);
+      } catch (_) {
+        console.warn("Groq proxy indisponível (dev local?), caindo para direto");
+      }
+
+      // 2) Fallback: chamada direta (dev local com VITE_API_KEY)
+      const key = getLocalKey();
+      if (!key) throw new Error("Chave API não configurada.");
+
+      const res = await fetch(`${GROQ_DIRECT}/openai/v1/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${key}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error("Groq HTTP error:", res.status, errText);
+        throw new Error(`Groq API erro ${res.status}: ${errText}`);
+      }
+
+      const data = await res.json();
       const content = data?.choices?.[0]?.message?.content ?? "";
-      console.log("✅ Groq proxy ok (primeiros 200 chars):", content.slice(0, 200));
+      console.log("✅ Groq direto ok (primeiros 200 chars):", content.slice(0, 200));
       return content;
-    }
-    const errText = await proxyRes.text();
-    console.warn("Groq proxy falhou:", proxyRes.status, errText);
-  } catch (_) {
-    console.warn("Groq proxy indisponível (dev local?), caindo para direto");
-  }
-
-  // 2) Fallback: chamada direta (dev local com VITE_API_KEY)
-  const key = getLocalKey();
-  if (!key) throw new Error("Chave API não configurada.");
-
-  const res = await fetch(`${GROQ_DIRECT}/openai/v1/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${key}`,
     },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error("Groq HTTP error:", res.status, errText);
-    throw new Error(`Groq API erro ${res.status}: ${errText}`);
-  }
-
-  const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content ?? "";
-  console.log("✅ Groq direto ok (primeiros 200 chars):", content.slice(0, 200));
-  return content;
+    () => {
+      throw new Error("Circuito aberto: Groq API temporariamente indisponível.");
+    }
+  );
 };
 
 // ─── UTILIDADES ───────────────────────────────────────────────────────────────

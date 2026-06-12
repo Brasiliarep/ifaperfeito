@@ -5,6 +5,7 @@ import { db } from '../services/firebaseConfig';
 import { UserProfile, SubscriptionPlan } from '../types';
 import { Shield, Search, Loader2, Calendar, Crown, XCircle, ArrowLeft, Pencil, Trash2, X, Check, AlertTriangle, RefreshCw, UserPlus, Sparkles } from 'lucide-react';
 import { auth } from '../services/firebaseConfig';
+import { firestoreCache, acquireWriteSlot } from '../services/overloadGuard';
 
 interface AdminPanelProps {
     onBack: () => void;
@@ -210,6 +211,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({ onClose, onCreated })
 
             const { setDoc, doc } = await import('firebase/firestore');
             const { db } = await import('../services/firebaseConfig');
+            await acquireWriteSlot();
             await setDoc(doc(db, 'users', uid), profile);
 
             setSuccess(`Sacerdote "${name || email}" criado com sucesso!`);
@@ -322,7 +324,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     const fetchUsers = async () => {
-        setLoading(true);
+        const cached = firestoreCache.get<UserProfile[]>('admin_users');
+        if (cached) {
+            setUsers(cached);
+        } else {
+            setLoading(true);
+        }
+
         try {
             const querySnapshot = await getDocs(collection(db, 'users'));
             const usersData: UserProfile[] = [];
@@ -334,10 +342,11 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                 if (a.role !== 'admin' && b.role === 'admin') return 1;
                 return a.email.localeCompare(b.email);
             });
+            firestoreCache.set('admin_users', usersData, 60_000);
             setUsers(usersData);
         } catch (error) {
             console.error("Erro ao buscar usuários:", error);
-            alert("Erro ao buscar usuários. Verifique as permissões do banco de dados.");
+            if (!cached) alert("Erro ao buscar usuários. Verifique as permissões do banco de dados.");
         } finally {
             setLoading(false);
         }
@@ -357,6 +366,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
                 date.setDate(date.getDate() + days);
                 validUntil = date.toISOString();
             }
+            await acquireWriteSlot();
             await updateDoc(userRef, { plan, validUntil });
             setUsers(users.map(u => u.uid === userId ? { ...u, plan, validUntil: validUntil || undefined } : u));
         } catch (error) {
@@ -372,6 +382,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
         setUpdatingUserId(userId);
         try {
             const userRef = doc(db, 'users', userId);
+            await acquireWriteSlot();
             await updateDoc(userRef, { plan: 'free', validUntil: null });
             setUsers(users.map(u => u.uid === userId ? { ...u, plan: 'free', validUntil: undefined } : u));
         } catch (error) {
@@ -386,6 +397,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
         setSavingEdit(true);
         try {
             const userRef = doc(db, 'users', uid);
+            await acquireWriteSlot();
             await updateDoc(userRef, { name: newName, email: newEmail, note: newNote });
             setUsers(users.map(u => u.uid === uid ? { ...u, name: newName, email: newEmail, note: newNote } as any : u));
             setEditingUser(null);
@@ -400,6 +412,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onBack }) => {
     const handleDeleteUser = async (uid: string) => {
         setConfirmingDelete(true);
         try {
+            await acquireWriteSlot();
             await deleteDoc(doc(db, 'users', uid));
             setUsers(users.filter(u => u.uid !== uid));
             setDeletingUser(null);
