@@ -46,7 +46,7 @@ export const AIAssistant: React.FC = () => {
       {/* FLOATING BUTTON */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-ifa-gold to-yellow-700 text-black shadow-[0_0_25px_rgba(212,175,55,0.5)] hover:shadow-[0_0_40px_rgba(212,175,55,0.8)] hover:scale-110 transition-all duration-300 flex items-center justify-center"
+        className="fixed bottom-24 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-ifa-gold to-yellow-700 text-black shadow-[0_0_25px_rgba(212,175,55,0.5)] hover:shadow-[0_0_40px_rgba(212,175,55,0.8)] hover:scale-110 transition-all duration-300 flex items-center justify-center"
         title="Assistente Ifá"
       >
         <MessageSquare size={24} />
