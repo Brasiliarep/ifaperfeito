@@ -10,6 +10,19 @@ const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 let _apiKey = "";
 
+// Rate limiting: no mínimo 2s entre chamadas
+let _lastCallTime = 0;
+const MIN_INTERVAL_MS = 2000;
+
+const checkRateLimit = (): void => {
+  const now = Date.now();
+  const elapsed = now - _lastCallTime;
+  if (elapsed < MIN_INTERVAL_MS) {
+    throw new Error(`Aguarde ${Math.ceil((MIN_INTERVAL_MS - elapsed) / 1000)}s antes de nova consulta.`);
+  }
+  _lastCallTime = now;
+};
+
 const getLocalKey = (): string => {
   if (_apiKey) return _apiKey;
   try {
@@ -44,6 +57,7 @@ const callGroq = async (
   userPrompt: string,
   forceJson = false
 ): Promise<string> => {
+  checkRateLimit();
   const body: any = {
     model: GROQ_MODEL,
     messages: [
@@ -111,8 +125,8 @@ const cleanJson = (str: string): string => {
 const handleError = (e: any, ctx: string): string => {
   const msg = e?.message ?? String(e);
   console.error(`Groq Error [${ctx}]:`, e);
-  if (msg.includes("429") || msg.includes("quota") || msg.includes("rate")) {
-    return "O Oráculo está em silêncio (Limite de requisições excedido). Aguarde alguns instantes.";
+  if (msg.includes("429") || msg.includes("quota") || msg.includes("rate") || msg.includes("Aguarde")) {
+    return `O Oráculo está em silêncio. ${msg.includes("Aguarde") ? msg : "Aguarde alguns instantes."}`;
   }
   return `Interferência espiritual detectada. Detalhe: ${msg}`;
 };

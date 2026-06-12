@@ -73,6 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 // 3) Se não achou nada, cria novo
                 if (!profile) {
+                    const termsAccepted = localStorage.getItem('ifa_terms_accepted');
                     profile = {
                         uid: u.uid,
                         email: u.email || '',
@@ -80,9 +81,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         plan: isAdmin ? 'pro_annual' : 'free',
                         role: isAdmin ? 'admin' : 'user',
                         consultationCount: 0,
-                        studyCount: 0
+                        studyCount: 0,
+                        termsAcceptedAt: termsAccepted || undefined,
+                        privacyAcceptedAt: termsAccepted || undefined,
                     };
                     await setDoc(docRef, profile);
+                    localStorage.removeItem('ifa_terms_accepted');
                 }
 
                 // 4) FORÇA VIPs a terem acesso total (sobrescreve qualquer coisa)

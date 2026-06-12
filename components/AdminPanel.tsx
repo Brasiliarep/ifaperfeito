@@ -154,7 +154,7 @@ const DeleteModal: React.FC<DeleteModalProps> = ({ user, onConfirm, onClose, del
     </div>
 );
 
-const API_KEY = "AIzaSyDHW0PpLoUAVaFQrkLt5hSAMQ-ZVOZlK40";
+const API_KEY = (import.meta as any).env?.VITE_FIREBASE_API_KEY || "AIzaSyDHW0PpLoUAVaFQrkLt5hSAMQ-ZVOZlK40";
 
 interface CreateUserModalProps {
     onClose: () => void;

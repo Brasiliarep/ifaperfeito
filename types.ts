@@ -30,6 +30,8 @@ export interface UserProfile {
     role?: 'admin' | 'user';
     consultationCount?: number;
     studyCount?: number;
+    termsAcceptedAt?: string;
+    privacyAcceptedAt?: string;
 }
 
 export interface BabalawoProfile {

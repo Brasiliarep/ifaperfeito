@@ -59,6 +59,7 @@ import OduLibraryTable from './components/OduLibraryTable';
 import IboRitual from './components/IboRitual';
 import OraclePreparation from './components/OraclePreparation';
 import VirtualRoom from './components/VirtualRoom';
+import CookieConsentBanner from './components/CookieConsentBanner';
 
 import { getTranslation } from './utils/i18n';
 import { checkDomainLock } from './utils/security';
@@ -207,6 +208,12 @@ function App() {
             setVirtualRoomData({ mode: modeParam, room: roomParam });
             setView('virtual_room');
         }
+        const handleLegalEvent = (e: Event) => {
+            const detail = (e as CustomEvent).detail;
+            if (detail === 'terms' || detail === 'privacy') setLegalModalType(detail);
+        };
+        window.addEventListener('open-legal', handleLegalEvent);
+        return () => window.removeEventListener('open-legal', handleLegalEvent);
     }, []);
 
     const requireAuth = (action: () => void) => {
@@ -705,6 +712,8 @@ function App() {
                     onBack={() => { setShowPreparation(false); setPendingMethod(null); }}
                 />
             )}
+
+            <CookieConsentBanner />
         </div>
     );
 }

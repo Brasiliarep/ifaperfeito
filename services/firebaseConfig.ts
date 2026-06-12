@@ -4,7 +4,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDHW0PpLoUAVaFQrkLt5hSAMQ-ZVOZlK40",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDHW0PpLoUAVaFQrkLt5hSAMQ-ZVOZlK40",
   authDomain: "ifa-oluwo.firebaseapp.com",
   projectId: "ifa-oluwo",
   storageBucket: "ifa-oluwo.firebasestorage.app",
