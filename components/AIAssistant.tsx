@@ -7,7 +7,11 @@ interface Message {
   text: string;
 }
 
-export const AIAssistant: React.FC = () => {
+interface AIAssistantProps {
+  lang?: string;
+}
+
+export const AIAssistant: React.FC<AIAssistantProps> = ({ lang = 'pt-BR' }) => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', text: 'Sou seu assistente Ifá. Pergunte sobre rituais, Odùs, Ebós, ou como usar o aplicativo.' },
@@ -32,7 +36,7 @@ export const AIAssistant: React.FC = () => {
     setMessages(prev => [...prev, { role: 'user', text: q }]);
     setLoading(true);
     try {
-      const answer = await askAssistant(q);
+      const answer = await askAssistant(q, lang);
       setMessages(prev => [...prev, { role: 'assistant', text: answer }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', text: 'O Oráculo está em silêncio. Tente novamente em instantes.' }]);

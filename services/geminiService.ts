@@ -309,9 +309,15 @@ REGRAS:
 - Nomenclatura: Yorubá (Português). Ex: "Obi (Noz de Cola)".
 - Se perguntar sobre funções do app, explique rapidamente qual tela usar.`;
 
-export const askAssistant = async (query: string): Promise<string> => {
+export const askAssistant = async (query: string, lang: string = 'pt-BR'): Promise<string> => {
   if (!getLocalKey()) return "Configure sua chave Groq nas Configurações.";
-  try { return await callGroq(ASSISTANT_SYSTEM, query, false); }
+  const systemWithLang = `Você é um assistente especializado em Ifá, liturgia Yorubá e no aplicativo Ifá Oluwo.
+REGRAS:
+- Responda em ${lang === 'pt-BR' ? 'português do Brasil' : lang === 'en' ? 'English' : lang === 'es' ? 'español' : lang === 'yo' ? 'Yorùbá' : 'português de Portugal'}.
+- Seja direto e conciso: 1 a 3 frases para perguntas simples. Se o usuário pedir detalhes, expanda.
+- Proibido sincretismo (não use "santo", "amém", "vela").
+- Nomenclatura: Yorubá (Português). Ex: "Obi (Noz de Cola)".`;
+  try { return await callGroq(systemWithLang, query, false); }
   catch (e) { return handleError(e, "Assistant"); }
 };
 

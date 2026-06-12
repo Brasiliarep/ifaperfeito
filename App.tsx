@@ -100,7 +100,18 @@ function App() {
     const [interpretation, setInterpretation] = useState<AIInterpretation | null>(null);
     const [loading, setLoading] = useState<LoadingState>({ isLoading: false });
     const [activeRecord, setActiveRecord] = useState<ConsultationRecord | null>(null);
-    const [language, setLanguage] = useState<Language>('pt-BR');
+    const [language, setLanguage] = useState<Language>(() => {
+      try {
+        const saved = localStorage.getItem('ifa_language') as Language | null;
+        if (saved && ['pt-BR', 'pt-PT', 'en', 'es', 'yo'].includes(saved)) return saved;
+        const nav = (navigator.language || 'pt-BR').slice(0, 2);
+        if (nav === 'pt') return 'pt-BR';
+        if (nav === 'en') return 'en';
+        if (nav === 'es') return 'es';
+        if (nav === 'yo') return 'yo';
+      } catch {}
+      return 'pt-BR';
+    });
     const [showSettings, setShowSettings] = useState(false);
     const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
     const [showQuickStudyModal, setShowQuickStudyModal] = useState(false);
@@ -151,6 +162,14 @@ function App() {
         }
         viewRef.current = view;
     }, [view]);
+
+    // Close language menu on outside click
+    useEffect(() => {
+      if (!isLangMenuOpen) return;
+      const handler = () => setIsLangMenuOpen(false);
+      document.addEventListener('click', handler, { once: true });
+      return () => document.removeEventListener('click', handler);
+    }, [isLangMenuOpen]);
 
     // SWIPE LOGIC - Refined for Android system gestures
     useEffect(() => {
@@ -234,6 +253,12 @@ function App() {
         }
     };
     const handleSubscribe = () => { setShowPaywall(false); };
+
+    const handleChangeLanguage = (lang: Language) => {
+      setLanguage(lang);
+      setIsLangMenuOpen(false);
+      try { localStorage.setItem('ifa_language', lang); } catch {}
+    };
 
     // --- NAVEGAÇÃO PARA CHAT VIA BUSCA ---
     const handleConsultOracle = (query: string) => {
@@ -425,7 +450,19 @@ function App() {
                             </button>
                         )}
                         <button onClick={() => setShowSettings(true)} className="text-ifa-neutral hover:text-ifa-gold p-2 border border-white/10 rounded"><Settings size={20} /></button>
-                        <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="text-ifa-neutral hover:text-ifa-gold p-2 border border-white/10 rounded text-xs font-bold">{language}</button>
+                        <div className="relative">
+                            <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="text-ifa-neutral hover:text-ifa-gold p-2 border border-white/10 rounded text-xs font-bold">{language}</button>
+                            {isLangMenuOpen && (
+                                <div className="absolute right-0 top-full mt-1 bg-[#1a1611] border border-ifa-gold/40 rounded-lg shadow-2xl z-50 overflow-hidden min-w-[140px]">
+                                    {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
+                                        <button key={l} onClick={() => handleChangeLanguage(l)}
+                                            className={`w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-ifa-gold/20 transition-colors ${l === language ? 'text-ifa-gold bg-ifa-gold/10' : 'text-ifa-neutral'}`}>
+                                            {l === 'pt-BR' ? 'Português (BR)' : l === 'pt-PT' ? 'Português (PT)' : l === 'en' ? 'English' : l === 'es' ? 'Español' : 'Yorùbá'}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -466,7 +503,19 @@ function App() {
                             </button>
                         )}
                         <button onClick={() => setShowSettings(true)} className="text-ifa-neutral hover:text-ifa-gold p-2 rounded"><Settings size={20} /></button>
-                        <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="text-ifa-neutral hover:text-ifa-gold p-2 rounded text-xs font-bold uppercase tracking-widest">{language}</button>
+                        <div className="relative">
+                            <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="text-ifa-neutral hover:text-ifa-gold p-2 rounded text-xs font-bold uppercase tracking-widest">{language}</button>
+                            {isLangMenuOpen && (
+                                <div className="absolute right-0 top-full mt-1 bg-[#1a1611] border border-ifa-gold/40 rounded-lg shadow-2xl z-50 overflow-hidden min-w-[140px]">
+                                    {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
+                                        <button key={l} onClick={() => handleChangeLanguage(l)}
+                                            className={`w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-ifa-gold/20 transition-colors ${l === language ? 'text-ifa-gold bg-ifa-gold/10' : 'text-ifa-neutral'}`}>
+                                            {l === 'pt-BR' ? 'Português (BR)' : l === 'pt-PT' ? 'Português (PT)' : l === 'en' ? 'English' : l === 'es' ? 'Español' : 'Yorùbá'}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -715,7 +764,7 @@ function App() {
             )}
 
             <CookieConsentBanner />
-            <AIAssistant />
+            <AIAssistant lang={language} />
         </div>
     );
 }
