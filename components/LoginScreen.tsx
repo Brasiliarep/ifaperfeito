@@ -59,9 +59,7 @@ const LoginScreen: React.FC<Props> = ({ onSuccess }) => {
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-ifa-gold to-yellow-600"></div>
                 
                 <div className="flex flex-col items-center mb-8">
-                    <div className="bg-ifa-gold/20 p-4 rounded-full text-ifa-gold mb-4 ring-1 ring-ifa-gold/50 shadow-[0_0_20px_rgba(212,175,55,0.3)]">
-                        {isLogin ? <Lock size={32} /> : <Crown size={32} />}
-                    </div>
+                    <img src="/logo.png" alt="Ifá Oluwo Logo" className="w-24 h-24 object-contain mb-4 drop-shadow-[0_0_15px_rgba(212,175,55,0.4)]" />
                     <h1 className="text-2xl font-serif text-ifa-gold font-bold uppercase tracking-widest text-center">IFÁ OLUWO</h1>
                     <p className="text-ifa-neutral text-sm mt-1">{isLogin ? 'Acesse o Codex Sacerdotal' : 'Crie sua conta de Sacerdote'}</p>
                 </div>
