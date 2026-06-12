@@ -331,7 +331,7 @@ function App() {
     const handleStudyStart = () => {
         if (!user) {
             if (!canUseFeature('study')) {
-                setBlockedFeature('Modo Estudo Ilimitado');
+                setBlockedFeature(t.btnStudy);
                 setShowPaywall(true);
                 return;
             }
@@ -342,7 +342,7 @@ function App() {
             return;
         }
         if (userProfile?.plan === 'free' && (userProfile.studyCount || 0) >= 3) {
-            setBlockedFeature('Modo Estudo Ilimitado');
+            setBlockedFeature(t.btnStudy);
             setShowPaywall(true);
             return;
         }
@@ -374,7 +374,7 @@ function App() {
     const startNewSession = () => {
         if (!user) {
             if (!canUseFeature('consultation')) {
-                setBlockedFeature('Consultas Grátis');
+                setBlockedFeature(t.btnConsultation);
                 setShowPaywall(true);
                 return;
             }
@@ -387,12 +387,12 @@ function App() {
             return;
         }
         if (userProfile?.plan === 'student_monthly') {
-            setBlockedFeature('Atendimento ao Consulente');
+            setBlockedFeature(t.btnConsultation);
             setShowPaywall(true);
             return;
         }
         if (userProfile?.plan === 'free' && (userProfile.consultationCount || 0) >= 3) {
-            setBlockedFeature('Atendimento Ilimitado');
+            setBlockedFeature(t.btnConsultation);
             setShowPaywall(true);
             return;
         }
@@ -436,16 +436,16 @@ function App() {
                         <img src="/logo.png" alt="Ifá Oluwo Logo" className="w-20 h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_0_15px_rgba(212,175,55,0.4)]" />
                         <div className="flex flex-col mt-1">
                             <h1 className="text-2xl md:text-3xl font-serif font-black text-ifa-gold tracking-widest uppercase leading-none">IFÁ OLUWO</h1>
-                            <span className="text-[10px] md:text-xs text-ifa-neutral uppercase tracking-wider mt-1">Codex Sacerdotal</span>
+                            <span className="text-[10px] md:text-xs text-ifa-neutral uppercase tracking-wider mt-1">{t.homeSubtitle}</span>
                         </div>
                     </div>
                     {/* Estes controles vão para o topo da área direita no desktop */}
                     <div className="flex gap-3 md:hidden">
                         {!user && (
-                            <button onClick={() => setShowLoginModal(true)} className="text-ifa-gold hover:text-yellow-300 p-2 border border-ifa-gold/50 rounded text-xs font-bold uppercase tracking-wider">Entrar</button>
+                            <button onClick={() => setShowLoginModal(true)} className="text-ifa-gold hover:text-yellow-300 p-2 border border-ifa-gold/50 rounded text-xs font-bold uppercase tracking-wider">{t.btnLogin}</button>
                         )}
                         {userProfile?.role === 'admin' && (
-                            <button onClick={() => setView('admin_panel')} className="text-red-400 hover:text-red-300 p-2 border border-red-500/30 rounded bg-red-500/10" title="Painel Admin">
+                            <button onClick={() => setView('admin_panel')} className="text-red-400 hover:text-red-300 p-2 border border-red-500/30 rounded bg-red-500/10" title={t.btnAdmin}>
                                 <Shield size={20} />
                             </button>
                         )}
@@ -457,7 +457,7 @@ function App() {
                                     {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
                                         <button key={l} onClick={() => handleChangeLanguage(l)}
                                             className={`w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-ifa-gold/20 transition-colors ${l === language ? 'text-ifa-gold bg-ifa-gold/10' : 'text-ifa-neutral'}`}>
-                                            {l === 'pt-BR' ? 'Português (BR)' : l === 'pt-PT' ? 'Português (PT)' : l === 'en' ? 'English' : l === 'es' ? 'Español' : 'Yorùbá'}
+                                            {l === 'pt-BR' ? t.langPtBr : l === 'pt-PT' ? t.langPtPt : l === 'en' ? t.langEn : l === 'es' ? t.langEs : t.langYo}
                                         </button>
                                     ))}
                                 </div>
@@ -473,15 +473,15 @@ function App() {
 
                 {/* Search Bar */}
                 <div className="relative mt-4 mb-4 w-full max-w-md">
-                    <input value={homeSearch} onChange={(e) => setHomeSearch(e.target.value)} placeholder="Buscar função..." className="w-full bg-ifa-base-dark/50 backdrop-blur-md border border-white/10 rounded-xl py-3 pl-10 pr-4 text-ifa-text focus:border-ifa-gold outline-none shadow-inner" />
+                    <input value={homeSearch} onChange={(e) => setHomeSearch(e.target.value)} placeholder={t.searchPlaceholder} className="w-full bg-ifa-base-dark/50 backdrop-blur-md border border-white/10 rounded-xl py-3 pl-10 pr-4 text-ifa-text focus:border-ifa-gold outline-none shadow-inner" />
                     <Search className="absolute left-3 top-3.5 text-ifa-neutral" size={18} />
                     {homeSearch && <button onClick={() => setHomeSearch('')} className="absolute right-3 top-3.5 text-ifa-neutral hover:text-white"><X size={16} /></button>}
                 </div>
 
                 {!user && !homeSearch && (
                     <div className="w-full mt-2 p-3 bg-ifa-gold/10 border border-ifa-gold/30 rounded-lg text-xs text-ifa-neutral">
-                        <span className="text-ifa-gold font-bold">Visitante</span> — Você tem <strong className="text-ifa-gold">{getAnonRemaining('consultation')} consulta</strong> e <strong className="text-ifa-gold">{getAnonRemaining('study')} estudos</strong> grátis.
-                        <button onClick={() => setShowLoginModal(true)} className="ml-1 underline text-ifa-gold hover:text-yellow-300">Cadastre-se</button> para continuar usando ou <button onClick={() => { setBlockedFeature(''); setShowPaywall(true); }} className="underline text-ifa-gold hover:text-yellow-300">assine</button> e tenha acesso ilimitado.
+                        <span className="text-ifa-gold font-bold">{t.visitorTitle}</span> — {t.visitorFree.replace('{consults}', getAnonRemaining('consultation').toString()).replace('{studies}', getAnonRemaining('study').toString())}
+                        <button onClick={() => setShowLoginModal(true)} className="ml-1 underline text-ifa-gold hover:text-yellow-300">{t.visitorRegister}</button>{t.visitorOrBefore}<button onClick={() => { setBlockedFeature(''); setShowPaywall(true); }} className="underline text-ifa-gold hover:text-yellow-300">{t.visitorSubscribe}</button>{t.visitorOrAfter}
                     </div>
                 )}
             </div>
@@ -494,12 +494,12 @@ function App() {
                     <div className="flex gap-3 bg-ifa-base-dark/30 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-lg">
                         {!user && (
                             <button onClick={() => setShowLoginModal(true)} className="text-ifa-gold hover:text-yellow-300 p-2 rounded text-xs font-bold uppercase tracking-wider border border-ifa-gold/30">
-                                Entrar / Registar
+                                {t.btnLoginRegister}
                             </button>
                         )}
                         {userProfile?.role === 'admin' && (
                             <button onClick={() => setView('admin_panel')} className="text-red-400 hover:text-red-300 p-2 rounded border border-red-500/30 bg-red-500/10 flex items-center gap-2">
-                                <Shield size={16} /> <span className="text-xs font-bold uppercase">Admin</span>
+                                <Shield size={16} /> <span className="text-xs font-bold uppercase">{t.btnAdmin}</span>
                             </button>
                         )}
                         <button onClick={() => setShowSettings(true)} className="text-ifa-neutral hover:text-ifa-gold p-2 rounded"><Settings size={20} /></button>
@@ -510,7 +510,7 @@ function App() {
                                     {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
                                         <button key={l} onClick={() => handleChangeLanguage(l)}
                                             className={`w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-ifa-gold/20 transition-colors ${l === language ? 'text-ifa-gold bg-ifa-gold/10' : 'text-ifa-neutral'}`}>
-                                            {l === 'pt-BR' ? 'Português (BR)' : l === 'pt-PT' ? 'Português (PT)' : l === 'en' ? 'English' : l === 'es' ? 'Español' : 'Yorùbá'}
+                                            {l === 'pt-BR' ? t.langPtBr : l === 'pt-PT' ? t.langPtPt : l === 'en' ? t.langEn : l === 'es' ? t.langEs : t.langYo}
                                         </button>
                                     ))}
                                 </div>
@@ -523,70 +523,70 @@ function App() {
                     {/* --- SEÇÃO 1: PRINCIPAL (CORE) --- */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4">
                         {/* Botões Dourados e Brilhantes para as funções principais */}
-                        <MenuBtn onClick={startNewSession} label="Atendimento ao Consulente" icon={Users} colorClass="bg-gradient-to-b from-[#FFDF00]/80 via-[#D4AF37]/90 to-[#996515]/90 backdrop-blur-2xl border-t-[2px] border-l-[2px] border-[#FFF8DC]/80 border-b-[3px] border-r-[3px] border-[#664200]/80 shadow-[0_0_40px_rgba(255,215,0,0.6)] hover:shadow-[0_0_80px_rgba(255,223,0,1)] hover:from-[#FFF066]/90 hover:via-[#FFD700]/95 hover:to-[#B8860B]/95 hover:scale-[1.03] text-white drop-shadow-[0_3px_5px_rgba(0,0,0,1)] !py-8 md:!py-12 !text-base md:!text-xl !font-black ring-1 ring-[#FFDF00]/50" fullWidth={false} />
-                        <MenuBtn onClick={handleStudyStart} label="Modo Estudo Individual" icon={GraduationCap} colorClass="bg-gradient-to-b from-[#FFDF00]/80 via-[#D4AF37]/90 to-[#996515]/90 backdrop-blur-2xl border-t-[2px] border-l-[2px] border-[#FFF8DC]/80 border-b-[3px] border-r-[3px] border-[#664200]/80 shadow-[0_0_40px_rgba(255,215,0,0.6)] hover:shadow-[0_0_80px_rgba(255,223,0,1)] hover:from-[#FFF066]/90 hover:via-[#FFD700]/95 hover:to-[#B8860B]/95 hover:scale-[1.03] text-white drop-shadow-[0_3px_5px_rgba(0,0,0,1)] !py-8 md:!py-12 !text-base md:!text-xl !font-black ring-1 ring-[#FFDF00]/50" fullWidth={false} />
+                        <MenuBtn onClick={startNewSession} label={t.btnConsultation} icon={Users} colorClass="bg-gradient-to-b from-[#FFDF00]/80 via-[#D4AF37]/90 to-[#996515]/90 backdrop-blur-2xl border-t-[2px] border-l-[2px] border-[#FFF8DC]/80 border-b-[3px] border-r-[3px] border-[#664200]/80 shadow-[0_0_40px_rgba(255,215,0,0.6)] hover:shadow-[0_0_80px_rgba(255,223,0,1)] hover:from-[#FFF066]/90 hover:via-[#FFD700]/95 hover:to-[#B8860B]/95 hover:scale-[1.03] text-white drop-shadow-[0_3px_5px_rgba(0,0,0,1)] !py-8 md:!py-12 !text-base md:!text-xl !font-black ring-1 ring-[#FFDF00]/50" fullWidth={false} />
+                        <MenuBtn onClick={handleStudyStart} label={t.btnStudy} icon={GraduationCap} colorClass="bg-gradient-to-b from-[#FFDF00]/80 via-[#D4AF37]/90 to-[#996515]/90 backdrop-blur-2xl border-t-[2px] border-l-[2px] border-[#FFF8DC]/80 border-b-[3px] border-r-[3px] border-[#664200]/80 shadow-[0_0_40px_rgba(255,215,0,0.6)] hover:shadow-[0_0_80px_rgba(255,223,0,1)] hover:from-[#FFF066]/90 hover:via-[#FFD700]/95 hover:to-[#B8860B]/95 hover:scale-[1.03] text-white drop-shadow-[0_3px_5px_rgba(0,0,0,1)] !py-8 md:!py-12 !text-base md:!text-xl !font-black ring-1 ring-[#FFDF00]/50" fullWidth={false} />
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                        <MenuBtn onClick={() => setView('virtual_room')} label="Sala de Atendimento (Vídeo)" icon={Video} colorClass="bg-blue-600/30 hover:bg-blue-600/50 md:col-span-2" fullWidth={true} feature="Sala de Atendimento (Vídeo)" />
-                        <MenuBtn onClick={() => setView('oracle_hub')} label="Oráculos Sagrados" icon={CircleDot} colorClass="bg-yellow-500/30 hover:bg-yellow-500/50 md:col-span-2" fullWidth={true} feature="Oráculos Avançados" />
+                        <MenuBtn onClick={() => setView('virtual_room')} label={t.menuVirtualRoom} icon={Video} colorClass="bg-blue-600/30 hover:bg-blue-600/50 md:col-span-2" fullWidth={true} feature={t.featureVirtualRoom} />
+                        <MenuBtn onClick={() => setView('oracle_hub')} label={t.menuOracleHub} icon={CircleDot} colorClass="bg-yellow-500/30 hover:bg-yellow-500/50 md:col-span-2" fullWidth={true} feature={t.featureAdvancedOracles} />
                     </div>
 
                     {/* --- SEÇÃO 2: CONHECIMENTO & ESTUDO --- */}
                     <div>
-                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-ifa-gold">Conhecimento (Imo)</h3>
+                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-ifa-gold">{t.sectionKnowledge}</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                            <MenuBtn onClick={() => setView('odu_library')} label="Biblioteca 256 Odu" icon={Book} colorClass="bg-amber-500/20 hover:bg-amber-500/40" />
-                            <MenuBtn onClick={() => setView('treatise')} label="Tratado Ifá Completo" icon={BookOpen} colorClass="bg-stone-500/20 hover:bg-stone-500/40" feature="Tratado de Ifá" />
-                            <MenuBtn onClick={() => setView('prayers')} label="Bibl. Sagrada (Rezas)" icon={Book} colorClass="bg-indigo-500/20 hover:bg-indigo-500/40" feature="Orações Sagradas" />
-                            <MenuBtn onClick={() => setView('amutorunwa')} label="Nomes Yorubá" icon={Baby} colorClass="bg-pink-500/20 hover:bg-pink-500/40" />
-                            <MenuBtn onClick={() => setView('dictionary')} label="Dicionário Yorubá" icon={Book} colorClass="bg-gray-500/20 hover:bg-gray-500/40" />
-                            <MenuBtn onClick={() => setView('story_mode')} label="Jogos de Ifá (RPG)" icon={Gamepad2} colorClass="bg-yellow-500/20 hover:bg-yellow-500/40" feature="Jogos Interativos" />
+                            <MenuBtn onClick={() => setView('odu_library')} label={t.menuOduLibrary} icon={Book} colorClass="bg-amber-500/20 hover:bg-amber-500/40" />
+                            <MenuBtn onClick={() => setView('treatise')} label={t.menuTreatise} icon={BookOpen} colorClass="bg-stone-500/20 hover:bg-stone-500/40" feature={t.featureTreatise} />
+                            <MenuBtn onClick={() => setView('prayers')} label={t.menuPrayers} icon={Book} colorClass="bg-indigo-500/20 hover:bg-indigo-500/40" feature={t.featurePrayers} />
+                            <MenuBtn onClick={() => setView('amutorunwa')} label={t.menuYorubaNames} icon={Baby} colorClass="bg-pink-500/20 hover:bg-pink-500/40" />
+                            <MenuBtn onClick={() => setView('dictionary')} label={t.menuDictionary} icon={Book} colorClass="bg-gray-500/20 hover:bg-gray-500/40" />
+                            <MenuBtn onClick={() => setView('story_mode')} label={t.menuRPG} icon={Gamepad2} colorClass="bg-yellow-500/20 hover:bg-yellow-500/40" feature={t.featureRPG} />
                         </div>
                     </div>
 
                     {/* --- SEÇÃO 3: FERRAMENTAS ESOTÉRICAS & VOZ --- */}
                     <div>
-                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-purple-500">Esotérico (Awo)</h3>
+                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-purple-500">{t.sectionEsoteric}</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                             <div className="col-span-2 md:col-span-3 lg:col-span-4">
-                                <MenuBtn onClick={() => setView('voice_commander')} label="Voz do Trovão (Comando)" icon={Mic} colorClass="bg-red-600/30 hover:bg-red-600/50" fullWidth={false} feature="Comando de Voz" />
+                                <MenuBtn onClick={() => setView('voice_commander')} label={t.menuVoiceThunder} icon={Mic} colorClass="bg-red-600/30 hover:bg-red-600/50" fullWidth={false} feature={t.featureVoiceCommand} />
                             </div>
-                            <MenuBtn onClick={() => setView('esoteric_hub')} label="Ferramentas Esotéricas" icon={Sparkles} colorClass="bg-purple-500/20 hover:bg-purple-500/40" feature="Ferramentas Esotéricas" />
-                            <MenuBtn onClick={() => setView('ebori')} label="Ori & Ara (Interativo)" icon={UserCheck} colorClass="bg-blue-500/20 hover:bg-blue-500/40" feature="Bori Interativo" />
-                            <MenuBtn onClick={() => setView('reverse_odu')} label="Mat. Reversa" icon={Database} colorClass="bg-teal-500/20 hover:bg-teal-500/40" feature="Matemática Reversa" />
-                            <MenuBtn onClick={() => setView('ebo_sim')} label="Simulador Ebó" icon={Move} colorClass="bg-orange-500/20 hover:bg-orange-500/40" feature="Simulador de Ebó" />
-                            <MenuBtn onClick={() => setView('sound_hub')} label="Sons Sagrados" icon={Music} colorClass="bg-violet-500/20 hover:bg-violet-500/40" feature="Biblioteca de Áudios" />
-                            <MenuBtn onClick={() => setView('dream_journal')} label="Diário de Sonhos" icon={Moon} colorClass="bg-indigo-500/20 hover:bg-indigo-500/40" />
+                            <MenuBtn onClick={() => setView('esoteric_hub')} label={t.menuEsotericTools} icon={Sparkles} colorClass="bg-purple-500/20 hover:bg-purple-500/40" feature={t.featureEsotericTools} />
+                            <MenuBtn onClick={() => setView('ebori')} label={t.menuBori} icon={UserCheck} colorClass="bg-blue-500/20 hover:bg-blue-500/40" feature={t.featureBori} />
+                            <MenuBtn onClick={() => setView('reverse_odu')} label={t.menuReverseMath} icon={Database} colorClass="bg-teal-500/20 hover:bg-teal-500/40" feature={t.featureReverseMath} />
+                            <MenuBtn onClick={() => setView('ebo_sim')} label={t.menuEboSim} icon={Move} colorClass="bg-orange-500/20 hover:bg-orange-500/40" feature={t.featureEboSim} />
+                            <MenuBtn onClick={() => setView('sound_hub')} label={t.menuSacredSounds} icon={Music} colorClass="bg-violet-500/20 hover:bg-violet-500/40" feature={t.featureSacredSounds} />
+                            <MenuBtn onClick={() => setView('dream_journal')} label={t.menuDreamJournal} icon={Moon} colorClass="bg-indigo-500/20 hover:bg-indigo-500/40" />
                         </div>
                     </div>
 
                     {/* --- SEÇÃO 4: MAGIA PRÁTICA --- */}
                     <div>
-                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-red-500">Magia (Oogun)</h3>
+                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-red-500">{t.sectionMagic}</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                            <MenuBtn onClick={() => setView('sango_wheel')} label="Roda de Xangô" icon={Scale} colorClass="bg-red-500/20 hover:bg-red-500/40" feature="Oráculo de Xangô" />
-                            <MenuBtn onClick={() => setView('oogun')} label="ỌỌGÙN (MAGIAS)" icon={FlaskConical} colorClass="bg-emerald-500/20 hover:bg-emerald-500/40" feature="Catálogo de Magias" />
-                            <MenuBtn onClick={() => setView('herb_id')} label="ID Ewé (Ervas)" icon={Leaf} colorClass="bg-green-500/20 hover:bg-green-500/40" feature="Identificador de Ervas" />
-                            <MenuBtn onClick={() => setView('assentamentos')} label="Assentamentos" icon={Hammer} colorClass="bg-stone-500/20 hover:bg-stone-500/40" feature="Guia de Assentamentos" />
-                            <MenuBtn onClick={() => setView('geo_herbs')} label="Mapa de Ervas" icon={MapPin} colorClass="bg-green-500/20 hover:bg-green-500/40" feature="Mapa Geográfico" />
-                            <MenuBtn onClick={() => setView('ajogun')} label="Diagnóstico (Ajogun)" icon={Stethoscope} colorClass="bg-rose-500/20 hover:bg-rose-500/40" feature="Diagnóstico de Ajogun" />
+                            <MenuBtn onClick={() => setView('sango_wheel')} label={t.menuSangoWheel} icon={Scale} colorClass="bg-red-500/20 hover:bg-red-500/40" feature={t.featureSangoWheel} />
+                            <MenuBtn onClick={() => setView('oogun')} label={t.menuOogun} icon={FlaskConical} colorClass="bg-emerald-500/20 hover:bg-emerald-500/40" feature={t.featureOogun} />
+                            <MenuBtn onClick={() => setView('herb_id')} label={t.menuHerbID} icon={Leaf} colorClass="bg-green-500/20 hover:bg-green-500/40" feature={t.featureHerbID} />
+                            <MenuBtn onClick={() => setView('assentamentos')} label={t.menuAssentamentos} icon={Hammer} colorClass="bg-stone-500/20 hover:bg-stone-500/40" feature={t.featureAssentamentos} />
+                            <MenuBtn onClick={() => setView('geo_herbs')} label={t.menuHerbMap} icon={MapPin} colorClass="bg-green-500/20 hover:bg-green-500/40" feature={t.featureHerbMap} />
+                            <MenuBtn onClick={() => setView('ajogun')} label={t.menuAjogun} icon={Stethoscope} colorClass="bg-rose-500/20 hover:bg-rose-500/40" feature={t.featureAjogun} />
                         </div>
                     </div>
 
                     {/* --- SEÇÃO 5: GESTÃO E SOCIAL --- */}
                     <div>
-                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-blue-500">Gestão do Templo</h3>
+                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-blue-500">{t.sectionManagement}</h3>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                            <MenuBtn onClick={() => setView('inventory_hub')} label="Gestão Templo" icon={Package} colorClass="bg-orange-500/20 hover:bg-orange-500/40" feature="Gestão de Templo" />
-                            <MenuBtn onClick={() => setView('agenda')} label="Agenda Litúrgica" icon={CalendarDays} colorClass="bg-blue-500/20 hover:bg-blue-500/40" />
-                            <MenuBtn onClick={() => setView('lineage_tree')} label="Linhagem (Axé)" icon={GitBranch} colorClass="bg-cyan-500/20 hover:bg-cyan-500/40" feature="Árvore de Linhagem" />
-                            <MenuBtn onClick={() => setView('analytics')} label="Painel Egrégora" icon={BarChart3} colorClass="bg-gray-500/20 hover:bg-gray-500/40" feature="Análise Financeira" />
+                            <MenuBtn onClick={() => setView('inventory_hub')} label={t.menuInventory} icon={Package} colorClass="bg-orange-500/20 hover:bg-orange-500/40" feature={t.featureInventory} />
+                            <MenuBtn onClick={() => setView('agenda')} label={t.menuAgenda} icon={CalendarDays} colorClass="bg-blue-500/20 hover:bg-blue-500/40" />
+                            <MenuBtn onClick={() => setView('lineage_tree')} label={t.menuLineage} icon={GitBranch} colorClass="bg-cyan-500/20 hover:bg-cyan-500/40" feature={t.featureLineage} />
+                            <MenuBtn onClick={() => setView('analytics')} label={t.menuAnalytics} icon={BarChart3} colorClass="bg-gray-500/20 hover:bg-gray-500/40" feature={t.featureAnalytics} />
                         </div>
                     </div>
 
                     {/* FOOTER BUTTON */}
                     <div className="pt-6 mt-6 border-t border-ifa-border/30">
-                        <MenuBtn onClick={() => setView('manual')} label="Manual do Sacerdote" icon={BookOpen} colorClass="bg-stone-500/20 hover:bg-stone-500/40" />
+                        <MenuBtn onClick={() => setView('manual')} label={t.menuManual} icon={BookOpen} colorClass="bg-stone-500/20 hover:bg-stone-500/40" />
                     </div>
                 </div>
             </div>
@@ -679,43 +679,43 @@ function App() {
 
                     {!divinationMethod ? (
                         <div className="w-full max-w-2xl animate-fade-in">
-                            <p className="text-center text-ifa-neutral text-[10px] uppercase tracking-widest mb-5">Escolha o Oráculo Sagrado</p>
+                            <p className="text-center text-ifa-neutral text-[10px] uppercase tracking-widest mb-5">{t.oracleTitle}</p>
                             <div className="grid grid-cols-2 gap-4">
 
                                 <button onClick={() => handleMethodSelection('opele')} className="bg-ifa-base border-2 border-ifa-border rounded-2xl p-6 flex flex-col items-center text-center gap-3 hover:border-ifa-gold hover:bg-ifa-surface transition-all group">
                                     <div className="w-16 h-16 rounded-full bg-amber-900/40 border border-amber-600/30 flex items-center justify-center text-amber-400 group-hover:bg-ifa-gold group-hover:text-black transition-all"><GripHorizontal size={30} /></div>
-                                    <span className="font-bold font-serif uppercase text-ifa-text tracking-wide">Opele Ifá</span>
-                                    <span className="text-[10px] text-ifa-gold tracking-widest uppercase">Corrente Sagrada</span>
-                                    <span className="text-[10px] text-ifa-neutral">16 sementes · Uso diário</span>
+                                    <span className="font-bold font-serif uppercase text-ifa-text tracking-wide">{t.oracleOpele}</span>
+                                    <span className="text-[10px] text-ifa-gold tracking-widest uppercase">{t.oracleOpeleSub}</span>
+                                    <span className="text-[10px] text-ifa-neutral">{t.oracleOpeleDesc}</span>
                                 </button>
 
                                 <button onClick={() => handleMethodSelection('opon')} className="bg-ifa-base border-2 border-ifa-border rounded-2xl p-6 flex flex-col items-center text-center gap-3 hover:border-ifa-gold hover:bg-ifa-surface transition-all group">
                                     <div className="w-16 h-16 rounded-full bg-yellow-900/40 border border-yellow-600/30 flex items-center justify-center text-yellow-400 group-hover:bg-ifa-gold group-hover:text-black transition-all"><CircleDot size={30} /></div>
-                                    <span className="font-bold font-serif uppercase text-ifa-text tracking-wide">Opon Ifá</span>
-                                    <span className="text-[10px] text-ifa-gold tracking-widest uppercase">Tabuleiro Sagrado</span>
-                                    <span className="text-[10px] text-ifa-neutral">Marcas no Iyerosun</span>
+                                    <span className="font-bold font-serif uppercase text-ifa-text tracking-wide">{t.oracleOpon}</span>
+                                    <span className="text-[10px] text-ifa-gold tracking-widest uppercase">{t.oracleOponSub}</span>
+                                    <span className="text-[10px] text-ifa-neutral">{t.oracleOponDesc}</span>
                                 </button>
 
                                 <button onClick={() => handleMethodSelection('ikin')} className="bg-ifa-base border-2 border-ifa-gold/40 rounded-2xl p-6 flex flex-col items-center text-center gap-3 hover:border-ifa-gold hover:bg-ifa-surface transition-all group relative overflow-hidden">
-                                    <div className="absolute top-2 right-2 bg-ifa-gold/20 text-ifa-gold text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Sacerdotal</div>
+                                    <div className="absolute top-2 right-2 bg-ifa-gold/20 text-ifa-gold text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">{t.badgeSacerdotal}</div>
                                     <div className="w-16 h-16 rounded-full bg-orange-900/40 border border-orange-500/40 flex items-center justify-center text-orange-400 group-hover:bg-ifa-gold group-hover:text-black transition-all"><Stars size={30} /></div>
-                                    <span className="font-bold font-serif uppercase text-ifa-text tracking-wide">Ikin Ifá</span>
-                                    <span className="text-[10px] text-ifa-gold tracking-widest uppercase">Sementes de Palma</span>
-                                    <span className="text-[10px] text-ifa-neutral">16 Ikin · Orunmila</span>
+                                    <span className="font-bold font-serif uppercase text-ifa-text tracking-wide">{t.oracleIkin}</span>
+                                    <span className="text-[10px] text-ifa-gold tracking-widest uppercase">{t.oracleIkinSub}</span>
+                                    <span className="text-[10px] text-ifa-neutral">{t.oracleIkinDesc}</span>
                                 </button>
 
                                 <button onClick={() => handleMethodSelection('merindilogun')} className="bg-ifa-base border-2 border-ifa-border rounded-2xl p-6 flex flex-col items-center text-center gap-3 hover:border-ifa-gold hover:bg-ifa-surface transition-all group">
                                     <div className="w-16 h-16 rounded-full bg-rose-900/40 border border-rose-600/30 flex items-center justify-center text-rose-400 group-hover:bg-ifa-gold group-hover:text-black transition-all"><Move size={30} /></div>
-                                    <span className="font-bold font-serif uppercase text-ifa-text tracking-wide">Mérìndílógún</span>
-                                    <span className="text-[10px] text-ifa-gold tracking-widest uppercase">Dezesseis Búzios</span>
-                                    <span className="text-[10px] text-ifa-neutral">Oráculo de Oshun</span>
+                                    <span className="font-bold font-serif uppercase text-ifa-text tracking-wide">{t.oracleMerindilogun}</span>
+                                    <span className="text-[10px] text-ifa-gold tracking-widest uppercase">{t.oracleMerindilogunSub}</span>
+                                    <span className="text-[10px] text-ifa-neutral">{t.oracleMerindilogunDesc}</span>
                                 </button>
 
                             </div>
                         </div>
                     ) : (
                         <div className="animate-fade-in w-full flex flex-col items-center">
-                            <button onClick={() => setDivinationMethod(null)} className="mb-4 text-xs font-bold uppercase text-ifa-neutral hover:text-ifa-gold flex items-center gap-2"><ArrowLeft size={14} /> Trocar Método</button>
+                            <button onClick={() => setDivinationMethod(null)} className="mb-4 text-xs font-bold uppercase text-ifa-neutral hover:text-ifa-gold flex items-center gap-2"><ArrowLeft size={14} /> {t.oracleChangeMethod}</button>
                             {renderBoard()}
                             <div className="text-center mb-8 bg-ifa-surface p-4 rounded-lg border border-ifa-border/30 w-full max-w-md mt-4">
                                 <p className="text-ifa-neutral text-xs uppercase mb-1">{t.oduDetected}</p>
@@ -739,7 +739,7 @@ function App() {
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
                     <div className="bg-ifa-base border border-ifa-border rounded-xl p-6 md:p-8 max-w-lg w-full relative shadow-2xl flex flex-col max-h-[90vh] overflow-y-auto">
                         <button onClick={() => setShowQuickStudyModal(false)} className="absolute top-4 right-4 text-ifa-neutral hover:text-ifa-text"><X size={24} /></button>
-                        <h2 className="text-2xl font-serif text-ifa-gold mb-2 text-center">Selecionar Odu</h2>
+                        <h2 className="text-2xl font-serif text-ifa-gold mb-2 text-center">{t.studySelectOdu}</h2>
                         {/* Selectores Simplificados para Odu Manual */}
                         <div className="flex flex-col gap-4 mt-4">
                             <select value={studySelection.right} onChange={(e) => setStudySelection({ ...studySelection, right: e.target.value })} className="bg-ifa-base-dark p-3 rounded border text-white">{(Object.values(SIGN_NAMES) as string[]).sort().map(n => <option key={n} value={n}>{n}</option>)}</select>
@@ -749,7 +749,7 @@ function App() {
                                 const l = valueToLeg(NAME_TO_VALUE[studySelection.left]);
                                 setOpele({ rightLeg: r, leftLeg: l });
                                 setShowQuickStudyModal(false);
-                            }} className="bg-ifa-gold text-black p-3 rounded font-bold">Confirmar</button>
+                            }} className="bg-ifa-gold text-black p-3 rounded font-bold">{t.studyConfirm}</button>
                         </div>
                     </div>
                 </div>
