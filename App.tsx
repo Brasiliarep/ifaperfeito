@@ -398,12 +398,12 @@ function App() {
             <div className="w-full md:w-[320px] lg:w-[360px] p-4 flex flex-col items-center md:items-stretch md:border-r md:border-ifa-border/20 md:h-screen md:sticky md:top-0 md:overflow-y-auto md:bg-black/40 md:backdrop-blur-sm z-10 scrollbar-hide">
                 
                 {/* HEADER */}
-                <div className="w-full flex justify-between items-center mb-6 pt-12 md:pt-4">
-                    <div className="flex items-center gap-3">
-                        <img src="/logo.png" alt="Ifá Oluwo Logo" className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]" />
+                <div className="w-full flex justify-between items-start mb-6 pt-12 md:pt-4">
+                    <div className="flex flex-col gap-3">
+                        <img src="/logo.png" alt="Ifá Oluwo Logo" className="w-24 h-24 md:w-36 md:h-36 object-contain drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]" />
                         <div className="flex flex-col">
-                            <h1 className="text-xl md:text-2xl font-serif font-black text-ifa-gold tracking-widest uppercase leading-none">IFÁ OLUWO</h1>
-                            <span className="text-[10px] text-ifa-neutral uppercase tracking-wider hidden md:block">Codex Sacerdotal</span>
+                            <h1 className="text-2xl md:text-3xl font-serif font-black text-ifa-gold tracking-widest uppercase leading-none">IFÁ OLUWO</h1>
+                            <span className="text-[10px] md:text-xs text-ifa-neutral uppercase tracking-wider mt-1">Codex Sacerdotal</span>
                         </div>
                     </div>
                     {/* Estes controles vão para o topo da área direita no desktop */}
