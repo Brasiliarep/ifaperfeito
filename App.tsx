@@ -60,6 +60,7 @@ import IboRitual from './components/IboRitual';
 import OraclePreparation from './components/OraclePreparation';
 import VirtualRoom from './components/VirtualRoom';
 import CookieConsentBanner from './components/CookieConsentBanner';
+import { AIAssistant } from './components/AIAssistant';
 
 import { getTranslation } from './utils/i18n';
 import { checkDomainLock } from './utils/security';
@@ -714,6 +715,7 @@ function App() {
             )}
 
             <CookieConsentBanner />
+            <AIAssistant />
         </div>
     );
 }
