@@ -34,7 +34,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         darkMode: ['class', '[data-theme="dark"]'],
@@ -42,13 +42,17 @@
           extend: {
             fontFamily: {
               serif: ['Cinzel', 'serif'],
-              sans: ['Lato', 'sans-serif'],
+              sans: ['Inter', 'sans-serif'],
             },
             colors: {
               'ifa-base': 'var(--color-bg)',
               'ifa-base-dark': 'var(--color-bg-dark)',
               'ifa-surface': 'var(--color-surface)',
               'ifa-gold': 'var(--color-gold)',
+              'ifa-gold-light': 'var(--color-gold-light)',
+              'ifa-gold-dark': 'var(--color-gold-dark)',
+              'ifa-green': 'var(--color-green)',
+              'ifa-green-light': 'var(--color-green-light)',
               'ifa-wood': 'var(--color-wood)',
               'ifa-neutral': 'var(--color-neutral)',
               'ifa-text': 'var(--color-text)',
@@ -67,47 +71,231 @@
       :root {
         --color-bg: #1a1510;
         --color-bg-dark: #0f0c08;
-        --color-surface: #2a2420;
-        --color-gold: #D4AF37;
+        --color-surface: rgba(255,255,255,0.04);
+        --color-gold: #E8C84A;
+        --color-gold-light: #D4A82A;
+        --color-gold-dark: #C8A028;
+        --color-green: #14A050;
+        --color-green-light: #3CC878;
         --color-wood: #5D4037;
         --color-neutral: #a8a29e;
         --color-text: #F5F5DC;
         --color-text-light: #e5e5e5;
-        --color-border: #5D4037;
-        /* Safe Area Defaults */
+        --color-border: rgba(255,255,255,0.08);
+        --color-glass-bg: rgba(255,255,255,0.04);
+        --color-glass-border: rgba(255,255,255,0.06);
         --sat: env(safe-area-inset-top);
         --sab: env(safe-area-inset-bottom);
       }
-      [data-theme='light'] {
-        --color-bg: #F2EFE9;
-        --color-bg-dark: #E6E0D4;
-        --color-surface: #FFFFFF;
-        --color-gold: #B08D26;
-        --color-wood: #8D6E63;
-        --color-neutral: #5D4037;
-        --color-text: #3E2723;
-        --color-text-light: #4E342E;
-        --color-border: #A1887F;
-      }
       body {
-        background-color: var(--color-bg);
+        background-color: #0a0608;
         color: var(--color-text-light);
-        transition: background-color 0.3s ease, color 0.3s ease;
         overscroll-behavior-y: none;
         padding-top: var(--sat);
         padding-bottom: var(--sab);
+        font-family: 'Inter', sans-serif;
       }
-      /* Fix for sticky headers on iOS */
       .sticky-safe {
         position: sticky;
         top: var(--sat);
       }
-      ::-webkit-scrollbar { width: 8px; }
-      ::-webkit-scrollbar-track { background: var(--color-bg); }
-      ::-webkit-scrollbar-thumb { background: var(--color-wood); border-radius: 4px; }
-      ::-webkit-scrollbar-thumb:hover { background: var(--color-gold); }
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: rgba(232,200,74,0.3); }
 
-      /* --- BOTÃO RAIO RITUAL (MODO GUIADO) --- */
+      /* ========== HALOS RADIAIS ========== */
+      #root {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+      #root::before {
+        content: '';
+        position: fixed;
+        top: -30%;
+        left: -15%;
+        width: 70vw;
+        height: 70vw;
+        background: radial-gradient(circle, rgba(232,200,74,0.12) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+      }
+      #root::after {
+        content: '';
+        position: fixed;
+        bottom: -20%;
+        right: -10%;
+        width: 60vw;
+        height: 60vw;
+        background: radial-gradient(circle, rgba(20,160,80,0.10) 0%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* ========== GLASS CARD ========== */
+      .glass-card {
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 0.5px solid rgba(255,255,255,0.06);
+        position: relative;
+        transition: all 0.3s ease;
+      }
+      .glass-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 10%;
+        right: 10%;
+        height: 0.5px;
+        background: linear-gradient(90deg, transparent, rgba(232,200,74,0.5), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .glass-card:hover::after {
+        opacity: 1;
+      }
+      .glass-card:hover {
+        background: rgba(255,255,255,0.06);
+        border-color: rgba(255,255,255,0.12);
+      }
+
+      /* ========== GLASS VARIANTS ========== */
+      .glass-gold {
+        background: linear-gradient(135deg, rgba(232,200,74,0.15), rgba(212,168,42,0.08));
+        border-color: rgba(232,200,74,0.15);
+        box-shadow: 0 4px 24px rgba(232,200,74,0.08);
+      }
+      .glass-gold::after {
+        background: linear-gradient(90deg, transparent, rgba(232,200,74,0.7), transparent);
+      }
+      .glass-gold:hover {
+        background: linear-gradient(135deg, rgba(232,200,74,0.22), rgba(212,168,42,0.12));
+        box-shadow: 0 8px 32px rgba(232,200,74,0.15);
+      }
+
+      .glass-green {
+        background: linear-gradient(135deg, rgba(20,160,80,0.12), rgba(60,200,120,0.06));
+        border-color: rgba(20,160,80,0.15);
+        box-shadow: 0 4px 24px rgba(20,160,80,0.08);
+      }
+      .glass-green::after {
+        background: linear-gradient(90deg, transparent, rgba(20,160,80,0.6), transparent);
+      }
+      .glass-green:hover {
+        background: linear-gradient(135deg, rgba(20,160,80,0.20), rgba(60,200,120,0.10));
+        box-shadow: 0 8px 32px rgba(20,160,80,0.15);
+      }
+
+      .glass-blue {
+        background: linear-gradient(135deg, rgba(59,130,246,0.10), rgba(37,99,235,0.05));
+        border-color: rgba(59,130,246,0.12);
+        box-shadow: 0 4px 24px rgba(59,130,246,0.06);
+      }
+      .glass-blue::after {
+        background: linear-gradient(90deg, transparent, rgba(59,130,246,0.5), transparent);
+      }
+
+      .glass-terra {
+        background: linear-gradient(135deg, rgba(180,130,70,0.10), rgba(140,100,50,0.05));
+        border-color: rgba(180,130,70,0.12);
+        box-shadow: 0 4px 24px rgba(180,130,70,0.06);
+      }
+      .glass-terra::after {
+        background: linear-gradient(90deg, transparent, rgba(180,130,70,0.5), transparent);
+      }
+
+      /* ========== MINI GLASS (GRID CARDS) ========== */
+      .glass-mini {
+        background: rgba(255,255,255,0.03);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 0.5px solid rgba(255,255,255,0.05);
+        position: relative;
+        transition: all 0.3s ease;
+      }
+      .glass-mini::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 20%;
+        right: 20%;
+        height: 0.5px;
+        background: linear-gradient(90deg, transparent, rgba(232,200,74,0.3), transparent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .glass-mini:hover::after {
+        opacity: 1;
+      }
+      .glass-mini:hover {
+        background: rgba(255,255,255,0.06);
+        transform: translateY(-2px);
+      }
+
+      /* ========== SIDEBAR GLASS ========== */
+      .glass-sidebar {
+        background: rgba(255,255,255,0.02);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-right: 0.5px solid rgba(255,255,255,0.05);
+      }
+
+      /* ========== TOPBAR GLASS ========== */
+      .glass-topbar {
+        background: rgba(255,255,255,0.03);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 0.5px solid rgba(232,200,74,0.10);
+      }
+
+      /* ========== GLASS BUTTON ========== */
+      .glass-btn {
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 0.5px solid rgba(232,200,74,0.15);
+        transition: all 0.25s ease;
+      }
+      .glass-btn:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(232,200,74,0.3);
+      }
+
+      /* ========== FAB ========== */
+      .fab-gold {
+        background: linear-gradient(135deg, rgba(232,200,74,0.2), rgba(212,168,42,0.1));
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 0.5px solid rgba(232,200,74,0.25);
+        box-shadow: 0 4px 32px rgba(232,200,74,0.12);
+        transition: all 0.3s ease;
+      }
+      .fab-gold:hover {
+        background: linear-gradient(135deg, rgba(232,200,74,0.3), rgba(212,168,42,0.18));
+        box-shadow: 0 8px 48px rgba(232,200,74,0.2);
+        transform: translateY(-2px);
+      }
+
+      /* ========== SECTION LABEL ========== */
+      .section-label {
+        font-size: 9px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: rgba(232,200,74,0.45);
+        font-weight: 600;
+      }
+
+      /* ========== DIA DESTAQUE (CALENDAR) ========== */
+      .day-highlight {
+        font-size: 2rem;
+        font-family: 'Cinzel', serif;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      /* Legacy styles preserved */
       .btn-raio-ritual {
           width: 45px; 
           height: 45px;
@@ -127,21 +315,17 @@
       .btn-raio-ritual:active {
           transform: scale(0.9);
       }
-
-      /* --- MICROFONE PULSANTE (RESPIRAÇÃO) --- */
       .ouvindo-ativo {
-          background-color: #28a745 !important; /* Verde Aceso */
+          background-color: #28a745 !important;
           border-color: #28a745 !important;
           box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
           animation: respirar 1.5s infinite cubic-bezier(0.66, 0, 0, 1);
       }
-      
       @keyframes respirar {
           0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
           70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(40, 167, 69, 0); }
           100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
       }
-
       @keyframes pulse-gold {
           0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7); }
           50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 215, 0, 0); }

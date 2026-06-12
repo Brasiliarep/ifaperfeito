@@ -411,185 +411,209 @@ function App() {
         }
     }
 
-    const MenuBtn = ({ onClick, label, icon: Icon, colorClass, fullWidth = false, feature }: any) => {
+    const GlassCard = ({ onClick, label, icon: Icon, variant = 'mini', feature, className = '' }: any) => {
         if (homeSearch && !label.toLowerCase().includes(homeSearch.toLowerCase())) return null;
+        const variantClass = variant === 'hero' ? 'glass-gold' : variant === 'green' ? 'glass-green' : variant === 'blue' ? 'glass-blue' : variant === 'terra' ? 'glass-terra' : 'glass-mini';
+        const handleClick = () => { setHomeSearch(''); feature ? handleProFeature(feature, onClick) : onClick(); };
         return (
-            <button
-                onClick={() => { setHomeSearch(''); feature ? handleProFeature(feature, onClick) : onClick(); }}
-                className={`w-full ${fullWidth ? 'col-span-2' : ''} backdrop-blur-xl border-t border-l border-white/30 border-b border-r border-black/30 text-white font-bold text-sm uppercase rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.3)] flex items-center justify-center gap-3 py-4 px-4 hover:-translate-y-1 hover:shadow-[0_15px_35px_rgba(0,0,0,0.5)] hover:border-white/50 relative overflow-hidden group min-h-[60px] transition-all duration-300 ${colorClass}`}
-            >
-                <Icon size={24} className="shrink-0 drop-shadow-md z-10" /> <span className="text-center font-sans drop-shadow-md z-10">{label}</span>
-                {/* Efeito de brilho de reflexo do vidro */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
+            <button onClick={handleClick} className={`${variant === 'mini' ? 'glass-mini' : 'glass-card ' + variantClass} rounded-2xl flex flex-col items-center justify-center gap-3 ${variant === 'hero' ? 'p-8 md:p-12' : variant === 'mini' ? 'p-5 min-h-[100px]' : 'p-6 min-h-[80px]'} text-white cursor-pointer hover:-translate-y-0.5 transition-all duration-300 ${className}`}>
+                {Icon && <Icon size={variant === 'hero' ? 32 : variant === 'mini' ? 20 : 24} className="shrink-0 drop-shadow-md opacity-90" />}
+                <span className={`${variant === 'hero' ? 'font-serif text-lg md:text-2xl tracking-wider' : variant === 'mini' ? 'text-[10px] uppercase tracking-widest font-medium opacity-80' : 'text-xs uppercase tracking-widest font-medium'} drop-shadow-md`}>{label}</span>
             </button>
         );
     };
 
     const renderHome = () => (
-        <div className="min-h-screen bg-gradient-to-br from-black to-[#0f0c08] flex flex-col md:flex-row relative">
-            {/* SIDEBAR (Desktop) / TOPO (Mobile) */}
-            <div className="w-full md:w-[320px] lg:w-[360px] p-4 flex flex-col items-center md:items-stretch md:border-r md:border-ifa-border/20 md:h-screen md:sticky md:top-0 md:overflow-y-auto md:bg-black/40 md:backdrop-blur-sm z-10 scrollbar-hide">
-                
-                {/* HEADER */}
-                <div className="w-full flex justify-between items-start mb-6 pt-12 md:pt-4">
-                    <div className="flex flex-col gap-2 items-center md:items-start text-center md:text-left">
-                        <img src="/logo.png" alt="Ifá Oluwo Logo" className="w-20 h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_0_15px_rgba(212,175,55,0.4)]" />
-                        <div className="flex flex-col mt-1">
-                            <h1 className="text-2xl md:text-3xl font-serif font-black text-ifa-gold tracking-widest uppercase leading-none">IFÁ OLUWO</h1>
-                            <span className="text-[10px] md:text-xs text-ifa-neutral uppercase tracking-wider mt-1">{t.homeSubtitle}</span>
-                        </div>
-                    </div>
-                    {/* Estes controles vão para o topo da área direita no desktop */}
-                    <div className="flex gap-3 md:hidden">
-                        {!user && (
-                            <button onClick={() => setShowLoginModal(true)} className="text-ifa-gold hover:text-yellow-300 p-2 border border-ifa-gold/50 rounded text-xs font-bold uppercase tracking-wider">{t.btnLogin}</button>
-                        )}
-                        {userProfile?.role === 'admin' && (
-                            <button onClick={() => setView('admin_panel')} className="text-red-400 hover:text-red-300 p-2 border border-red-500/30 rounded bg-red-500/10" title={t.btnAdmin}>
-                                <Shield size={20} />
-                            </button>
-                        )}
-                        <button onClick={() => setShowSettings(true)} className="text-ifa-neutral hover:text-ifa-gold p-2 border border-white/10 rounded"><Settings size={20} /></button>
-                        <div className="relative">
-                            <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="text-ifa-neutral hover:text-ifa-gold p-2 border border-white/10 rounded text-xs font-bold">{language}</button>
-                            {isLangMenuOpen && (
-                                <div className="absolute right-0 top-full mt-1 bg-[#1a1611] border border-ifa-gold/40 rounded-lg shadow-2xl z-50 overflow-hidden min-w-[140px]">
-                                    {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
-                                        <button key={l} onClick={() => handleChangeLanguage(l)}
-                                            className={`w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-ifa-gold/20 transition-colors ${l === language ? 'text-ifa-gold bg-ifa-gold/10' : 'text-ifa-neutral'}`}>
-                                            {l === 'pt-BR' ? t.langPtBr : l === 'pt-PT' ? t.langPtPt : l === 'en' ? t.langEn : l === 'es' ? t.langEs : t.langYo}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+        <div className="min-h-screen flex flex-col md:flex-row relative z-[1]">
+            {/* ===== SIDEBAR ===== */}
+            <aside className="glass-sidebar w-full md:w-[260px] shrink-0 p-5 flex flex-col gap-4 md:h-screen md:sticky md:top-0 md:overflow-y-auto z-10 scrollbar-hide">
+                {/* Logo */}
+                <div className="flex items-center gap-3 md:flex-col md:items-start mb-2 mt-2">
+                    <img src="/logo.png" alt="Ifá Oluwo" className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-[0_0_20px_rgba(232,200,74,0.3)]" />
+                    <div>
+                        <h1 className="font-serif font-black text-ifa-gold tracking-widest uppercase leading-none text-lg md:text-xl" style={{textShadow: '0 0 30px rgba(232,200,74,0.3)'}}>IFÁ OLUWO</h1>
+                        <span className="text-[9px] tracking-[3px] text-ifa-neutral/60 uppercase mt-0.5 block">{t.homeSubtitle}</span>
                     </div>
                 </div>
 
-                {/* Calendar Widget */}
-                {!homeSearch && <YorubaCalendarWidget onOpenIgbadu={() => handleProFeature('Igbadu Virtual', () => setView('igbadu'))} />}
-                
-                {!homeSearch && <IleIfeCompass />}
-
-                {/* Search Bar */}
-                <div className="relative mt-4 mb-4 w-full max-w-md">
-                    <input value={homeSearch} onChange={(e) => setHomeSearch(e.target.value)} placeholder={t.searchPlaceholder} className="w-full bg-ifa-base-dark/50 backdrop-blur-md border border-white/10 rounded-xl py-3 pl-10 pr-4 text-ifa-text focus:border-ifa-gold outline-none shadow-inner" />
-                    <Search className="absolute left-3 top-3.5 text-ifa-neutral" size={18} />
-                    {homeSearch && <button onClick={() => setHomeSearch('')} className="absolute right-3 top-3.5 text-ifa-neutral hover:text-white"><X size={16} /></button>}
+                {/* Mobile top controls */}
+                <div className="flex md:hidden items-center gap-2">
+                    {!user && (
+                        <button onClick={() => setShowLoginModal(true)} className="glass-btn text-ifa-gold text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                            <span>{t.btnLogin}</span>
+                        </button>
+                    )}
+                    <button onClick={() => setShowSettings(true)} className="glass-btn text-ifa-neutral px-2.5 py-1.5 rounded-lg"><Settings size={14} /></button>
+                    <div className="relative">
+                        <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="glass-btn text-ifa-neutral text-xs font-bold px-2.5 py-1.5 rounded-lg">{language}</button>
+                        {isLangMenuOpen && (
+                            <div className="absolute right-0 top-full mt-1 bg-[#0a0608]/95 backdrop-blur-xl border border-ifa-gold/30 rounded-xl shadow-2xl z-50 overflow-hidden min-w-[150px]">
+                                {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
+                                    <button key={l} onClick={() => handleChangeLanguage(l)} className={`w-full text-left px-4 py-2.5 text-xs font-bold uppercase tracking-wider hover:bg-ifa-gold/15 transition-colors ${l === language ? 'text-ifa-gold' : 'text-ifa-neutral'}`}>
+                                        {l === 'pt-BR' ? t.langPtBr : l === 'pt-PT' ? t.langPtPt : l === 'en' ? t.langEn : l === 'es' ? t.langEs : t.langYo}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {!user && !homeSearch && (
-                    <div className="w-full mt-2 p-3 bg-ifa-gold/10 border border-ifa-gold/30 rounded-lg text-xs text-ifa-neutral">
-                        <span className="text-ifa-gold font-bold">{t.visitorTitle}</span> — {t.visitorFree.replace('{consults}', getAnonRemaining('consultation').toString()).replace('{studies}', getAnonRemaining('study').toString())}
-                        <button onClick={() => setShowLoginModal(true)} className="ml-1 underline text-ifa-gold hover:text-yellow-300">{t.visitorRegister}</button>{t.visitorOrBefore}<button onClick={() => { setBlockedFeature(''); setShowPaywall(true); }} className="underline text-ifa-gold hover:text-yellow-300">{t.visitorSubscribe}</button>{t.visitorOrAfter}
+                {/* Calendar */}
+                {!homeSearch && (
+                    <div className="glass-card rounded-xl overflow-hidden">
+                        <YorubaCalendarWidget onOpenIgbadu={() => handleProFeature('Igbadu Virtual', () => setView('igbadu'))} />
                     </div>
                 )}
-            </div>
 
-            {/* ÁREA PRINCIPAL (Workspace) */}
-            <div className="flex-1 p-4 pb-24 md:p-8 flex flex-col items-center md:items-start overflow-y-auto">
-                
-                {/* Header Desktop Controls */}
-                <div className="hidden md:flex w-full justify-end items-center mb-8">
-                    <div className="flex gap-3 bg-ifa-base-dark/30 backdrop-blur-md p-2 rounded-xl border border-white/10 shadow-lg">
-                        {!user && (
-                            <button onClick={() => setShowLoginModal(true)} className="text-ifa-gold hover:text-yellow-300 p-2 rounded text-xs font-bold uppercase tracking-wider border border-ifa-gold/30">
-                                {t.btnLoginRegister}
-                            </button>
-                        )}
-                        {userProfile?.role === 'admin' && (
-                            <button onClick={() => setView('admin_panel')} className="text-red-400 hover:text-red-300 p-2 rounded border border-red-500/30 bg-red-500/10 flex items-center gap-2">
-                                <Shield size={16} /> <span className="text-xs font-bold uppercase">{t.btnAdmin}</span>
-                            </button>
-                        )}
-                        <button onClick={() => setShowSettings(true)} className="text-ifa-neutral hover:text-ifa-gold p-2 rounded"><Settings size={20} /></button>
-                        <div className="relative">
-                            <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="text-ifa-neutral hover:text-ifa-gold p-2 rounded text-xs font-bold uppercase tracking-widest">{language}</button>
-                            {isLangMenuOpen && (
-                                <div className="absolute right-0 top-full mt-1 bg-[#1a1611] border border-ifa-gold/40 rounded-lg shadow-2xl z-50 overflow-hidden min-w-[140px]">
-                                    {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
-                                        <button key={l} onClick={() => handleChangeLanguage(l)}
-                                            className={`w-full text-left px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-ifa-gold/20 transition-colors ${l === language ? 'text-ifa-gold bg-ifa-gold/10' : 'text-ifa-neutral'}`}>
-                                            {l === 'pt-BR' ? t.langPtBr : l === 'pt-PT' ? t.langPtPt : l === 'en' ? t.langEn : l === 'es' ? t.langEs : t.langYo}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
+                {/* Compass */}
+                {!homeSearch && (
+                    <div className="glass-green rounded-xl overflow-hidden glass-card">
+                        <IleIfeCompass />
                     </div>
+                )}
+
+                {/* Search */}
+                <div className="relative">
+                    <input value={homeSearch} onChange={(e) => setHomeSearch(e.target.value)} placeholder={t.searchPlaceholder} className="glass-mini w-full rounded-xl py-2.5 pl-9 pr-3 text-xs text-ifa-text placeholder-ifa-neutral/40 outline-none focus:border-ifa-gold/30 transition-colors" style={{border: '0.5px solid rgba(255,255,255,0.06)'}} />
+                    <Search className="absolute left-3 top-2.5 text-ifa-neutral/40" size={14} />
+                    {homeSearch && <button onClick={() => setHomeSearch('')} className="absolute right-3 top-2.5 text-ifa-neutral/40 hover:text-white"><X size={12} /></button>}
                 </div>
 
-                <div className="w-full max-w-md md:max-w-6xl space-y-6 md:space-y-8">
-                    {/* --- SEÇÃO 1: PRINCIPAL (CORE) --- */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 mb-4">
-                        {/* Botões Dourados e Brilhantes para as funções principais */}
-                        <MenuBtn onClick={startNewSession} label={t.btnConsultation} icon={Users} colorClass="bg-gradient-to-b from-[#FFDF00]/80 via-[#D4AF37]/90 to-[#996515]/90 backdrop-blur-2xl border-t-[2px] border-l-[2px] border-[#FFF8DC]/80 border-b-[3px] border-r-[3px] border-[#664200]/80 shadow-[0_0_40px_rgba(255,215,0,0.6)] hover:shadow-[0_0_80px_rgba(255,223,0,1)] hover:from-[#FFF066]/90 hover:via-[#FFD700]/95 hover:to-[#B8860B]/95 hover:scale-[1.03] text-white drop-shadow-[0_3px_5px_rgba(0,0,0,1)] !py-8 md:!py-12 !text-base md:!text-xl !font-black ring-1 ring-[#FFDF00]/50" fullWidth={false} />
-                        <MenuBtn onClick={handleStudyStart} label={t.btnStudy} icon={GraduationCap} colorClass="bg-gradient-to-b from-[#FFDF00]/80 via-[#D4AF37]/90 to-[#996515]/90 backdrop-blur-2xl border-t-[2px] border-l-[2px] border-[#FFF8DC]/80 border-b-[3px] border-r-[3px] border-[#664200]/80 shadow-[0_0_40px_rgba(255,215,0,0.6)] hover:shadow-[0_0_80px_rgba(255,223,0,1)] hover:from-[#FFF066]/90 hover:via-[#FFD700]/95 hover:to-[#B8860B]/95 hover:scale-[1.03] text-white drop-shadow-[0_3px_5px_rgba(0,0,0,1)] !py-8 md:!py-12 !text-base md:!text-xl !font-black ring-1 ring-[#FFDF00]/50" fullWidth={false} />
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-                        <MenuBtn onClick={() => setView('virtual_room')} label={t.menuVirtualRoom} icon={Video} colorClass="bg-blue-600/30 hover:bg-blue-600/50 md:col-span-2" fullWidth={true} feature={t.featureVirtualRoom} />
-                        <MenuBtn onClick={() => setView('oracle_hub')} label={t.menuOracleHub} icon={CircleDot} colorClass="bg-yellow-500/30 hover:bg-yellow-500/50 md:col-span-2" fullWidth={true} feature={t.featureAdvancedOracles} />
-                    </div>
-
-                    {/* --- SEÇÃO 2: CONHECIMENTO & ESTUDO --- */}
-                    <div>
-                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-ifa-gold">{t.sectionKnowledge}</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                            <MenuBtn onClick={() => setView('odu_library')} label={t.menuOduLibrary} icon={Book} colorClass="bg-amber-500/20 hover:bg-amber-500/40" />
-                            <MenuBtn onClick={() => setView('treatise')} label={t.menuTreatise} icon={BookOpen} colorClass="bg-stone-500/20 hover:bg-stone-500/40" feature={t.featureTreatise} />
-                            <MenuBtn onClick={() => setView('prayers')} label={t.menuPrayers} icon={Book} colorClass="bg-indigo-500/20 hover:bg-indigo-500/40" feature={t.featurePrayers} />
-                            <MenuBtn onClick={() => setView('amutorunwa')} label={t.menuYorubaNames} icon={Baby} colorClass="bg-pink-500/20 hover:bg-pink-500/40" />
-                            <MenuBtn onClick={() => setView('dictionary')} label={t.menuDictionary} icon={Book} colorClass="bg-gray-500/20 hover:bg-gray-500/40" />
-                            <MenuBtn onClick={() => setView('story_mode')} label={t.menuRPG} icon={Gamepad2} colorClass="bg-yellow-500/20 hover:bg-yellow-500/40" feature={t.featureRPG} />
+                {/* Visitor CTA */}
+                {!user && !homeSearch && (
+                    <div className="glass-card rounded-xl p-4 text-xs text-ifa-neutral/80 space-y-2">
+                        <span className="text-ifa-gold font-bold text-sm">{t.visitorTitle}</span>
+                        <p>{t.visitorFree.replace('{consults}', getAnonRemaining('consultation').toString()).replace('{studies}', getAnonRemaining('study').toString())}</p>
+                        <div className="flex gap-2 pt-1">
+                            <button onClick={() => setShowLoginModal(true)} className="glass-btn text-ifa-gold text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg">{t.visitorRegister}</button>
+                            <button onClick={() => { setBlockedFeature(''); setShowPaywall(true); }} className="glass-btn text-ifa-green text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg">{t.visitorSubscribe}</button>
                         </div>
                     </div>
+                )}
+            </aside>
 
-                    {/* --- SEÇÃO 3: FERRAMENTAS ESOTÉRICAS & VOZ --- */}
-                    <div>
-                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-purple-500">{t.sectionEsoteric}</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                            <div className="col-span-2 md:col-span-3 lg:col-span-4">
-                                <MenuBtn onClick={() => setView('voice_commander')} label={t.menuVoiceThunder} icon={Mic} colorClass="bg-red-600/30 hover:bg-red-600/50" fullWidth={false} feature={t.featureVoiceCommand} />
+            {/* ===== MAIN AREA ===== */}
+            <div className="flex-1 flex flex-col min-h-0">
+                {/* Topbar */}
+                <div className="glass-topbar hidden md:flex items-center justify-end gap-2 px-6 py-3">
+                    {!user && (
+                        <button onClick={() => setShowLoginModal(true)} className="glass-btn text-ifa-gold text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg flex items-center gap-2">
+                            <span>{t.btnLoginRegister}</span>
+                        </button>
+                    )}
+                    {userProfile?.role === 'admin' && (
+                        <button onClick={() => setView('admin_panel')} className="glass-btn text-red-400 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-lg flex items-center gap-1.5 bg-red-500/5">
+                            <Shield size={14} /> <span>{t.btnAdmin}</span>
+                        </button>
+                    )}
+                    <button onClick={() => setShowSettings(true)} className="glass-btn text-ifa-neutral p-2 rounded-lg"><Settings size={16} /></button>
+                    <div className="relative">
+                        <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="glass-btn text-ifa-neutral text-xs font-bold uppercase tracking-widest px-3 py-2 rounded-lg">{language}</button>
+                        {isLangMenuOpen && (
+                            <div className="absolute right-0 top-full mt-1 bg-[#0a0608]/95 backdrop-blur-xl border border-ifa-gold/30 rounded-xl shadow-2xl z-50 overflow-hidden min-w-[150px]">
+                                {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
+                                    <button key={l} onClick={() => handleChangeLanguage(l)} className={`w-full text-left px-4 py-2.5 text-xs font-bold uppercase tracking-wider hover:bg-ifa-gold/15 transition-colors ${l === language ? 'text-ifa-gold' : 'text-ifa-neutral'}`}>
+                                        {l === 'pt-BR' ? t.langPtBr : l === 'pt-PT' ? t.langPtPt : l === 'en' ? t.langEn : l === 'es' ? t.langEs : t.langYo}
+                                    </button>
+                                ))}
                             </div>
-                            <MenuBtn onClick={() => setView('esoteric_hub')} label={t.menuEsotericTools} icon={Sparkles} colorClass="bg-purple-500/20 hover:bg-purple-500/40" feature={t.featureEsotericTools} />
-                            <MenuBtn onClick={() => setView('ebori')} label={t.menuBori} icon={UserCheck} colorClass="bg-blue-500/20 hover:bg-blue-500/40" feature={t.featureBori} />
-                            <MenuBtn onClick={() => setView('reverse_odu')} label={t.menuReverseMath} icon={Database} colorClass="bg-teal-500/20 hover:bg-teal-500/40" feature={t.featureReverseMath} />
-                            <MenuBtn onClick={() => setView('ebo_sim')} label={t.menuEboSim} icon={Move} colorClass="bg-orange-500/20 hover:bg-orange-500/40" feature={t.featureEboSim} />
-                            <MenuBtn onClick={() => setView('sound_hub')} label={t.menuSacredSounds} icon={Music} colorClass="bg-violet-500/20 hover:bg-violet-500/40" feature={t.featureSacredSounds} />
-                            <MenuBtn onClick={() => setView('dream_journal')} label={t.menuDreamJournal} icon={Moon} colorClass="bg-indigo-500/20 hover:bg-indigo-500/40" />
-                        </div>
+                        )}
                     </div>
+                </div>
 
-                    {/* --- SEÇÃO 4: MAGIA PRÁTICA --- */}
-                    <div>
-                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-red-500">{t.sectionMagic}</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                            <MenuBtn onClick={() => setView('sango_wheel')} label={t.menuSangoWheel} icon={Scale} colorClass="bg-red-500/20 hover:bg-red-500/40" feature={t.featureSangoWheel} />
-                            <MenuBtn onClick={() => setView('oogun')} label={t.menuOogun} icon={FlaskConical} colorClass="bg-emerald-500/20 hover:bg-emerald-500/40" feature={t.featureOogun} />
-                            <MenuBtn onClick={() => setView('herb_id')} label={t.menuHerbID} icon={Leaf} colorClass="bg-green-500/20 hover:bg-green-500/40" feature={t.featureHerbID} />
-                            <MenuBtn onClick={() => setView('assentamentos')} label={t.menuAssentamentos} icon={Hammer} colorClass="bg-stone-500/20 hover:bg-stone-500/40" feature={t.featureAssentamentos} />
-                            <MenuBtn onClick={() => setView('geo_herbs')} label={t.menuHerbMap} icon={MapPin} colorClass="bg-green-500/20 hover:bg-green-500/40" feature={t.featureHerbMap} />
-                            <MenuBtn onClick={() => setView('ajogun')} label={t.menuAjogun} icon={Stethoscope} colorClass="bg-rose-500/20 hover:bg-rose-500/40" feature={t.featureAjogun} />
+                {/* Content */}
+                <div className="flex-1 p-4 md:p-8 overflow-y-auto scrollbar-hide">
+                    <div className="max-w-6xl mx-auto space-y-6 md:space-y-8">
+                        {/* Hero Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <GlassCard onClick={startNewSession} label={t.btnConsultation} icon={Users} variant="hero" />
+                            <GlassCard onClick={handleStudyStart} label={t.btnStudy} icon={GraduationCap} variant="green" />
                         </div>
-                    </div>
 
-                    {/* --- SEÇÃO 5: GESTÃO E SOCIAL --- */}
-                    <div>
-                        <h3 className="text-xs font-bold text-ifa-neutral uppercase tracking-widest mt-2 mb-3 pl-2 border-l-4 border-blue-500">{t.sectionManagement}</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                            <MenuBtn onClick={() => setView('inventory_hub')} label={t.menuInventory} icon={Package} colorClass="bg-orange-500/20 hover:bg-orange-500/40" feature={t.featureInventory} />
-                            <MenuBtn onClick={() => setView('agenda')} label={t.menuAgenda} icon={CalendarDays} colorClass="bg-blue-500/20 hover:bg-blue-500/40" />
-                            <MenuBtn onClick={() => setView('lineage_tree')} label={t.menuLineage} icon={GitBranch} colorClass="bg-cyan-500/20 hover:bg-cyan-500/40" feature={t.featureLineage} />
-                            <MenuBtn onClick={() => setView('analytics')} label={t.menuAnalytics} icon={BarChart3} colorClass="bg-gray-500/20 hover:bg-gray-500/40" feature={t.featureAnalytics} />
+                        {/* Medium Cards */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <GlassCard onClick={() => setView('virtual_room')} label={t.menuVirtualRoom} icon={Video} variant="blue" feature={t.featureVirtualRoom} />
+                            <GlassCard onClick={() => setView('oracle_hub')} label={t.menuOracleHub} icon={CircleDot} variant="terra" feature={t.featureAdvancedOracles} />
                         </div>
-                    </div>
 
-                    {/* FOOTER BUTTON */}
-                    <div className="pt-6 mt-6 border-t border-ifa-border/30">
-                        <MenuBtn onClick={() => setView('manual')} label={t.menuManual} icon={BookOpen} colorClass="bg-stone-500/20 hover:bg-stone-500/40" />
+                        {/* Conhecimento */}
+                        <div>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="h-px flex-1 bg-gradient-to-r from-ifa-gold/30 to-transparent"></div>
+                                <span className="section-label">{t.sectionKnowledge}</span>
+                                <div className="h-px flex-1 bg-gradient-to-l from-ifa-gold/30 to-transparent"></div>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <GlassCard onClick={() => setView('odu_library')} label={t.menuOduLibrary} icon={Book} />
+                                <GlassCard onClick={() => setView('treatise')} label={t.menuTreatise} icon={BookOpen} feature={t.featureTreatise} />
+                                <GlassCard onClick={() => setView('prayers')} label={t.menuPrayers} icon={Book} feature={t.featurePrayers} />
+                                <GlassCard onClick={() => setView('amutorunwa')} label={t.menuYorubaNames} icon={Baby} />
+                                <GlassCard onClick={() => setView('dictionary')} label={t.menuDictionary} icon={Book} />
+                                <GlassCard onClick={() => setView('story_mode')} label={t.menuRPG} icon={Gamepad2} feature={t.featureRPG} />
+                            </div>
+                        </div>
+
+                        {/* Esotérico */}
+                        <div>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="h-px flex-1 bg-gradient-to-r from-purple-500/30 to-transparent"></div>
+                                <span className="section-label">{t.sectionEsoteric}</span>
+                                <div className="h-px flex-1 bg-gradient-to-l from-purple-500/30 to-transparent"></div>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <button onClick={() => { setHomeSearch(''); handleProFeature(t.featureVoiceCommand, () => setView('voice_commander')); }} className="md:col-span-2 glass-card glass-gold rounded-2xl p-5 min-h-[80px] flex items-center justify-center gap-3 text-white hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
+                                    <Mic size={24} className="shrink-0 drop-shadow-md opacity-90" />
+                                    <span className="text-xs uppercase tracking-widest font-medium drop-shadow-md">{t.menuVoiceThunder}</span>
+                                </button>
+                                <GlassCard onClick={() => setView('esoteric_hub')} label={t.menuEsotericTools} icon={Sparkles} feature={t.featureEsotericTools} />
+                                <GlassCard onClick={() => setView('ebori')} label={t.menuBori} icon={UserCheck} feature={t.featureBori} />
+                                <GlassCard onClick={() => setView('reverse_odu')} label={t.menuReverseMath} icon={Database} feature={t.featureReverseMath} />
+                                <GlassCard onClick={() => setView('ebo_sim')} label={t.menuEboSim} icon={Move} feature={t.featureEboSim} />
+                                <GlassCard onClick={() => setView('sound_hub')} label={t.menuSacredSounds} icon={Music} feature={t.featureSacredSounds} />
+                                <GlassCard onClick={() => setView('dream_journal')} label={t.menuDreamJournal} icon={Moon} />
+                            </div>
+                        </div>
+
+                        {/* Magia */}
+                        <div>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="h-px flex-1 bg-gradient-to-r from-red-500/30 to-transparent"></div>
+                                <span className="section-label">{t.sectionMagic}</span>
+                                <div className="h-px flex-1 bg-gradient-to-l from-red-500/30 to-transparent"></div>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <GlassCard onClick={() => setView('sango_wheel')} label={t.menuSangoWheel} icon={Scale} feature={t.featureSangoWheel} />
+                                <GlassCard onClick={() => setView('oogun')} label={t.menuOogun} icon={FlaskConical} feature={t.featureOogun} />
+                                <GlassCard onClick={() => setView('herb_id')} label={t.menuHerbID} icon={Leaf} feature={t.featureHerbID} />
+                                <GlassCard onClick={() => setView('assentamentos')} label={t.menuAssentamentos} icon={Hammer} feature={t.featureAssentamentos} />
+                                <GlassCard onClick={() => setView('geo_herbs')} label={t.menuHerbMap} icon={MapPin} feature={t.featureHerbMap} />
+                                <GlassCard onClick={() => setView('ajogun')} label={t.menuAjogun} icon={Stethoscope} feature={t.featureAjogun} />
+                            </div>
+                        </div>
+
+                        {/* Gestão */}
+                        <div>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="h-px flex-1 bg-gradient-to-r from-blue-500/30 to-transparent"></div>
+                                <span className="section-label">{t.sectionManagement}</span>
+                                <div className="h-px flex-1 bg-gradient-to-l from-blue-500/30 to-transparent"></div>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <GlassCard onClick={() => setView('inventory_hub')} label={t.menuInventory} icon={Package} feature={t.featureInventory} />
+                                <GlassCard onClick={() => setView('agenda')} label={t.menuAgenda} icon={CalendarDays} />
+                                <GlassCard onClick={() => setView('lineage_tree')} label={t.menuLineage} icon={GitBranch} feature={t.featureLineage} />
+                                <GlassCard onClick={() => setView('analytics')} label={t.menuAnalytics} icon={BarChart3} feature={t.featureAnalytics} />
+                            </div>
+                        </div>
+
+                        {/* Footer button */}
+                        <div className="pt-4">
+                            <GlassCard onClick={() => setView('manual')} label={t.menuManual} icon={BookOpen} variant="terra" />
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
     );
 
