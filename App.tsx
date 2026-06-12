@@ -411,106 +411,62 @@ function App() {
         }
     }
 
-    const GlassCard = ({ onClick, label, icon: Icon, variant = 'mini', feature, className = '' }: any) => {
+    const GlassCard = ({ onClick, label, icon: Icon, variant = 'mini', feature, className = '', subtitle }: any) => {
         if (homeSearch && !label.toLowerCase().includes(homeSearch.toLowerCase())) return null;
-        const variantClass = variant === 'hero' ? 'glass-gold' : variant === 'green' ? 'glass-green' : variant === 'blue' ? 'glass-blue' : variant === 'terra' ? 'glass-terra' : 'glass-mini';
+        const variantMap: Record<string, string> = { hero: 'glass-gold', green: 'glass-green', blue: 'glass-blue', terra: 'glass-terra', purple: 'glass-purple' };
+        const vClass = variantMap[variant] || 'glass-mini';
+        const isMini = variant === 'mini';
+        const isHero = variant === 'hero' || variant === 'green';
+        const isMedium = variant === 'blue' || variant === 'terra' || variant === 'purple';
         const handleClick = () => { setHomeSearch(''); feature ? handleProFeature(feature, onClick) : onClick(); };
         return (
-            <button onClick={handleClick} className={`${variant === 'mini' ? 'glass-mini' : 'glass-card ' + variantClass} rounded-2xl flex flex-col items-center justify-center gap-3 ${variant === 'hero' ? 'p-8 md:p-12' : variant === 'mini' ? 'p-5 min-h-[100px]' : 'p-6 min-h-[80px]'} text-white cursor-pointer hover:-translate-y-0.5 transition-all duration-300 ${className}`}>
-                {Icon && <Icon size={variant === 'hero' ? 32 : variant === 'mini' ? 20 : 24} className="shrink-0 drop-shadow-md opacity-90" />}
-                <span className={`${variant === 'hero' ? 'font-serif text-lg md:text-2xl tracking-wider' : variant === 'mini' ? 'text-[10px] uppercase tracking-widest font-medium opacity-80' : 'text-xs uppercase tracking-widest font-medium'} drop-shadow-md`}>{label}</span>
+            <button onClick={handleClick} className={`${isMini ? 'glass-mini' : 'glass-card ' + vClass} rounded-2xl flex ${isHero ? 'flex-row items-center justify-start gap-4 px-5' : 'flex-col items-center justify-center gap-2'} ${isHero ? 'h-[90px]' : isMedium ? 'h-[60px] p-4' : 'p-[14px] min-h-[100px]'} text-white cursor-pointer hover:-translate-y-0.5 transition-all duration-[0.18s] ${className}`}>
+                {Icon && <Icon size={isHero ? 28 : isMini ? 20 : 22} className="shrink-0 drop-shadow-md opacity-90" />}
+                <div className={`flex flex-col ${isHero ? 'items-start' : 'items-center'}`}>
+                    <span className={`${isHero ? 'font-serif text-lg tracking-wider drop-shadow-md' : isMini ? 'text-[10px] uppercase tracking-widest font-medium opacity-80' : 'text-xs uppercase tracking-widest font-medium'} drop-shadow-md`}>{label}</span>
+                    {subtitle && <span className="text-[9px] tracking-[2px] uppercase opacity-50 mt-0.5">{subtitle}</span>}
+                </div>
             </button>
         );
     };
 
     const renderHome = () => (
-        <div className="min-h-screen flex flex-col md:flex-row relative z-[1]">
-            {/* ===== SIDEBAR ===== */}
-            <aside className="glass-sidebar w-full md:w-[260px] shrink-0 p-5 flex flex-col gap-4 md:h-screen md:sticky md:top-0 md:overflow-y-auto z-10 scrollbar-hide">
-                {/* Logo */}
-                <div className="flex items-center gap-3 md:flex-col md:items-start mb-2 mt-2">
-                    <img src="/logo.png" alt="Ifá Oluwo" className="w-12 h-12 md:w-16 md:h-16 object-contain drop-shadow-[0_0_20px_rgba(232,200,74,0.3)]" />
-                    <div>
-                        <h1 className="font-serif font-black text-ifa-gold tracking-widest uppercase leading-none text-lg md:text-xl" style={{textShadow: '0 0 30px rgba(232,200,74,0.3)'}}>IFÁ OLUWO</h1>
-                        <span className="text-[9px] tracking-[3px] text-ifa-neutral/60 uppercase mt-0.5 block">{t.homeSubtitle}</span>
+        <div className="min-h-screen flex flex-col relative z-[1]">
+            {/* ===== TOPBAR UNIFICADA ===== */}
+            <div className="glass-topbar flex items-center justify-between px-4 md:px-6 py-2.5 shrink-0">
+                {/* Left: Logo + Title */}
+                <div className="flex items-center gap-2.5 min-w-0">
+                    <img src="/logo.png" alt="Ifá Oluwo" className="w-8 h-8 md:w-9 md:h-9 object-contain drop-shadow-[0_0_20px_rgba(232,200,74,0.3)]" />
+                    <div className="leading-tight">
+                        <h1 className="font-serif font-black text-ifa-gold tracking-widest uppercase text-sm md:text-base" style={{textShadow: '0 0 30px rgba(232,200,74,0.3)'}}>IFÁ OLUWO</h1>
+                        <span className="text-[9px] tracking-[3px] text-ifa-neutral/50 uppercase block">{t.homeSubtitle}</span>
                     </div>
                 </div>
 
-                {/* Mobile top controls */}
-                <div className="flex md:hidden items-center gap-2">
+                {/* Center: Credibility badge - hidden on mobile */}
+                <div className="hidden md:flex items-center gap-2 text-[10px] text-ifa-gold/40 tracking-wider font-medium">
+                    <span>+50.000 sacerdotes</span>
+                    <span className="text-ifa-gold/20">·</span>
+                    <span>256 Odu catalogados</span>
+                </div>
+
+                {/* Right: Controls */}
+                <div className="flex items-center gap-1.5 md:gap-2">
                     {!user && (
-                        <button onClick={() => setShowLoginModal(true)} className="glass-btn text-ifa-gold text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                            <span>{t.btnLogin}</span>
-                        </button>
-                    )}
-                    <button onClick={() => setShowSettings(true)} className="glass-btn text-ifa-neutral px-2.5 py-1.5 rounded-lg"><Settings size={14} /></button>
-                    <div className="relative">
-                        <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="glass-btn text-ifa-neutral text-xs font-bold px-2.5 py-1.5 rounded-lg">{language}</button>
-                        {isLangMenuOpen && (
-                            <div className="absolute right-0 top-full mt-1 bg-[#0a0608]/95 backdrop-blur-xl border border-ifa-gold/30 rounded-xl shadow-2xl z-50 overflow-hidden min-w-[150px]">
-                                {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
-                                    <button key={l} onClick={() => handleChangeLanguage(l)} className={`w-full text-left px-4 py-2.5 text-xs font-bold uppercase tracking-wider hover:bg-ifa-gold/15 transition-colors ${l === language ? 'text-ifa-gold' : 'text-ifa-neutral'}`}>
-                                        {l === 'pt-BR' ? t.langPtBr : l === 'pt-PT' ? t.langPtPt : l === 'en' ? t.langEn : l === 'es' ? t.langEs : t.langYo}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Calendar */}
-                {!homeSearch && (
-                    <div className="glass-card rounded-xl overflow-hidden">
-                        <YorubaCalendarWidget onOpenIgbadu={() => handleProFeature('Igbadu Virtual', () => setView('igbadu'))} />
-                    </div>
-                )}
-
-                {/* Compass */}
-                {!homeSearch && (
-                    <div className="glass-green rounded-xl overflow-hidden glass-card">
-                        <IleIfeCompass />
-                    </div>
-                )}
-
-                {/* Search */}
-                <div className="relative">
-                    <input value={homeSearch} onChange={(e) => setHomeSearch(e.target.value)} placeholder={t.searchPlaceholder} className="glass-mini w-full rounded-xl py-2.5 pl-9 pr-3 text-xs text-ifa-text placeholder-ifa-neutral/40 outline-none focus:border-ifa-gold/30 transition-colors" style={{border: '0.5px solid rgba(255,255,255,0.06)'}} />
-                    <Search className="absolute left-3 top-2.5 text-ifa-neutral/40" size={14} />
-                    {homeSearch && <button onClick={() => setHomeSearch('')} className="absolute right-3 top-2.5 text-ifa-neutral/40 hover:text-white"><X size={12} /></button>}
-                </div>
-
-                {/* Visitor CTA */}
-                {!user && !homeSearch && (
-                    <div className="glass-card rounded-xl p-4 text-xs text-ifa-neutral/80 space-y-2">
-                        <span className="text-ifa-gold font-bold text-sm">{t.visitorTitle}</span>
-                        <p>{t.visitorFree.replace('{consults}', getAnonRemaining('consultation').toString()).replace('{studies}', getAnonRemaining('study').toString())}</p>
-                        <div className="flex gap-2 pt-1">
-                            <button onClick={() => setShowLoginModal(true)} className="glass-btn text-ifa-gold text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg">{t.visitorRegister}</button>
-                            <button onClick={() => { setBlockedFeature(''); setShowPaywall(true); }} className="glass-btn text-ifa-green text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg">{t.visitorSubscribe}</button>
-                        </div>
-                    </div>
-                )}
-            </aside>
-
-            {/* ===== MAIN AREA ===== */}
-            <div className="flex-1 flex flex-col min-h-0">
-                {/* Topbar */}
-                <div className="glass-topbar hidden md:flex items-center justify-end gap-2 px-6 py-3">
-                    {!user && (
-                        <button onClick={() => setShowLoginModal(true)} className="glass-btn text-ifa-gold text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg flex items-center gap-2">
+                        <button onClick={() => setShowLoginModal(true)} className="glass-btn text-ifa-gold text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 md:px-3.5 md:py-2 rounded-lg hidden md:flex items-center gap-1.5">
                             <span>{t.btnLoginRegister}</span>
                         </button>
                     )}
                     {userProfile?.role === 'admin' && (
-                        <button onClick={() => setView('admin_panel')} className="glass-btn text-red-400 text-xs font-bold uppercase tracking-wider px-3 py-2 rounded-lg flex items-center gap-1.5 bg-red-500/5">
-                            <Shield size={14} /> <span>{t.btnAdmin}</span>
+                        <button onClick={() => setView('admin_panel')} className="glass-btn text-red-400 text-[10px] font-bold uppercase tracking-wider px-2 py-1.5 md:px-3 md:py-2 rounded-lg flex items-center gap-1 bg-red-500/5">
+                            <Shield size={13} /> <span className="hidden md:inline">{t.btnAdmin}</span>
                         </button>
                     )}
-                    <button onClick={() => setShowSettings(true)} className="glass-btn text-ifa-neutral p-2 rounded-lg"><Settings size={16} /></button>
+                    <button onClick={() => setShowSettings(true)} className="glass-btn text-ifa-neutral p-1.5 md:p-2 rounded-lg"><Settings size={14} /></button>
                     <div className="relative">
-                        <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="glass-btn text-ifa-neutral text-xs font-bold uppercase tracking-widest px-3 py-2 rounded-lg">{language}</button>
+                        <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="glass-btn text-ifa-neutral text-[10px] font-bold uppercase tracking-widest px-2 py-1.5 md:px-3 md:py-2 rounded-lg">{language}</button>
                         {isLangMenuOpen && (
-                            <div className="absolute right-0 top-full mt-1 bg-[#0a0608]/95 backdrop-blur-xl border border-ifa-gold/30 rounded-xl shadow-2xl z-50 overflow-hidden min-w-[150px]">
+                            <div className="absolute right-0 top-full mt-1 bg-[#09060a]/95 backdrop-blur-xl border border-ifa-gold/30 rounded-xl shadow-2xl z-50 overflow-hidden min-w-[150px]">
                                 {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
                                     <button key={l} onClick={() => handleChangeLanguage(l)} className={`w-full text-left px-4 py-2.5 text-xs font-bold uppercase tracking-wider hover:bg-ifa-gold/15 transition-colors ${l === language ? 'text-ifa-gold' : 'text-ifa-neutral'}`}>
                                         {l === 'pt-BR' ? t.langPtBr : l === 'pt-PT' ? t.langPtPt : l === 'en' ? t.langEn : l === 'es' ? t.langEs : t.langYo}
@@ -520,100 +476,165 @@ function App() {
                         )}
                     </div>
                 </div>
+            </div>
 
-                {/* Content */}
-                <div className="flex-1 p-4 md:p-8 overflow-y-auto scrollbar-hide">
-                    <div className="max-w-6xl mx-auto space-y-6 md:space-y-8">
-                        {/* Hero Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <GlassCard onClick={startNewSession} label={t.btnConsultation} icon={Users} variant="hero" />
-                            <GlassCard onClick={handleStudyStart} label={t.btnStudy} icon={GraduationCap} variant="green" />
+            {/* ===== SIDEBAR + MAIN ===== */}
+            <div className="flex flex-1 flex-col md:flex-row min-h-0">
+                {/* Sidebar */}
+                <aside className="glass-sidebar w-full md:w-[265px] shrink-0 p-4 md:p-5 flex flex-col gap-3.5 md:gap-4 md:h-[calc(100vh-var(--sat,0px))] md:sticky md:top-0 md:overflow-y-auto z-10 scrollbar-hide">
+                    {/* Mobile controls (login/settings/lang) moved to topbar — only extra actions here */}
+                    <div className="flex md:hidden items-center gap-2">
+                        {!user && (
+                            <button onClick={() => setShowLoginModal(true)} className="glass-btn text-ifa-gold text-[10px] font-bold uppercase tracking-wider px-2.5 py-1.5 rounded-lg">{t.btnLogin}</button>
+                        )}
+                        <button onClick={() => setShowSettings(true)} className="glass-btn text-ifa-neutral px-2 py-1.5 rounded-lg"><Settings size={13} /></button>
+                        <div className="relative">
+                            <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} className="glass-btn text-ifa-neutral text-[10px] font-bold px-2 py-1.5 rounded-lg">{language}</button>
+                            {isLangMenuOpen && (
+                                <div className="absolute right-0 top-full mt-1 bg-[#09060a]/95 backdrop-blur-xl border border-ifa-gold/30 rounded-xl shadow-2xl z-50 overflow-hidden min-w-[150px]">
+                                    {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
+                                        <button key={l} onClick={() => handleChangeLanguage(l)} className={`w-full text-left px-4 py-2.5 text-xs font-bold uppercase tracking-wider hover:bg-ifa-gold/15 transition-colors ${l === language ? 'text-ifa-gold' : 'text-ifa-neutral'}`}>
+                                            {l === 'pt-BR' ? t.langPtBr : l === 'pt-PT' ? t.langPtPt : l === 'en' ? t.langEn : l === 'es' ? t.langEs : t.langYo}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
+                    </div>
 
-                        {/* Medium Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <GlassCard onClick={() => setView('virtual_room')} label={t.menuVirtualRoom} icon={Video} variant="blue" feature={t.featureVirtualRoom} />
-                            <GlassCard onClick={() => setView('oracle_hub')} label={t.menuOracleHub} icon={CircleDot} variant="terra" feature={t.featureAdvancedOracles} />
+                    {/* Calendar */}
+                    {!homeSearch && (
+                        <div className="glass-card rounded-xl overflow-hidden">
+                            <YorubaCalendarWidget onOpenIgbadu={() => handleProFeature('Igbadu Virtual', () => setView('igbadu'))} />
                         </div>
+                    )}
 
-                        {/* Conhecimento */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="h-px flex-1 bg-gradient-to-r from-ifa-gold/30 to-transparent"></div>
-                                <span className="section-label">{t.sectionKnowledge}</span>
-                                <div className="h-px flex-1 bg-gradient-to-l from-ifa-gold/30 to-transparent"></div>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                <GlassCard onClick={() => setView('odu_library')} label={t.menuOduLibrary} icon={Book} />
-                                <GlassCard onClick={() => setView('treatise')} label={t.menuTreatise} icon={BookOpen} feature={t.featureTreatise} />
-                                <GlassCard onClick={() => setView('prayers')} label={t.menuPrayers} icon={Book} feature={t.featurePrayers} />
-                                <GlassCard onClick={() => setView('amutorunwa')} label={t.menuYorubaNames} icon={Baby} />
-                                <GlassCard onClick={() => setView('dictionary')} label={t.menuDictionary} icon={Book} />
-                                <GlassCard onClick={() => setView('story_mode')} label={t.menuRPG} icon={Gamepad2} feature={t.featureRPG} />
-                            </div>
+                    {/* Compass */}
+                    {!homeSearch && (
+                        <div className="glass-green rounded-xl overflow-hidden glass-card">
+                            <IleIfeCompass />
                         </div>
+                    )}
 
-                        {/* Esotérico */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="h-px flex-1 bg-gradient-to-r from-purple-500/30 to-transparent"></div>
-                                <span className="section-label">{t.sectionEsoteric}</span>
-                                <div className="h-px flex-1 bg-gradient-to-l from-purple-500/30 to-transparent"></div>
+                    {/* Search */}
+                    <div className="relative">
+                        <input value={homeSearch} onChange={(e) => setHomeSearch(e.target.value)} placeholder={t.searchPlaceholder} className="glass-mini w-full rounded-xl py-2.5 pl-9 pr-3 text-xs text-ifa-text placeholder-ifa-neutral/40 outline-none" />
+                        <Search className="absolute left-3 top-2.5 text-ifa-neutral/40" size={14} />
+                        {homeSearch && <button onClick={() => setHomeSearch('')} className="absolute right-3 top-2.5 text-ifa-neutral/40 hover:text-white"><X size={12} /></button>}
+                    </div>
+
+                    {/* Visitor CTA */}
+                    {!user && !homeSearch && (
+                        <div className="glass-card rounded-xl p-3.5 text-xs text-ifa-neutral/80 space-y-2.5" style={{background: 'rgba(200,160,40,0.07)'}}>
+                            <div>
+                                <span className="text-ifa-gold font-bold text-sm">{t.visitorTitle}</span>
+                                <p className="mt-1 text-[11px] leading-relaxed">{t.visitorFree.replace('{consults}', getAnonRemaining('consultation').toString()).replace('{studies}', getAnonRemaining('study').toString())}</p>
                             </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                <button onClick={() => { setHomeSearch(''); handleProFeature(t.featureVoiceCommand, () => setView('voice_commander')); }} className="md:col-span-2 glass-card glass-gold rounded-2xl p-5 min-h-[80px] flex items-center justify-center gap-3 text-white hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">
-                                    <Mic size={24} className="shrink-0 drop-shadow-md opacity-90" />
-                                    <span className="text-xs uppercase tracking-widest font-medium drop-shadow-md">{t.menuVoiceThunder}</span>
-                                </button>
-                                <GlassCard onClick={() => setView('esoteric_hub')} label={t.menuEsotericTools} icon={Sparkles} feature={t.featureEsotericTools} />
-                                <GlassCard onClick={() => setView('ebori')} label={t.menuBori} icon={UserCheck} feature={t.featureBori} />
-                                <GlassCard onClick={() => setView('reverse_odu')} label={t.menuReverseMath} icon={Database} feature={t.featureReverseMath} />
-                                <GlassCard onClick={() => setView('ebo_sim')} label={t.menuEboSim} icon={Move} feature={t.featureEboSim} />
-                                <GlassCard onClick={() => setView('sound_hub')} label={t.menuSacredSounds} icon={Music} feature={t.featureSacredSounds} />
-                                <GlassCard onClick={() => setView('dream_journal')} label={t.menuDreamJournal} icon={Moon} />
-                            </div>
+                            <button onClick={() => { setBlockedFeature(''); setShowPaywall(true); }} className="w-full py-2 rounded-full text-center text-[10px] font-bold uppercase tracking-widest" style={{background: 'linear-gradient(135deg, rgba(180,130,20,0.85), rgba(220,170,30,0.7))', color: '#1a0f00', boxShadow: '0 4px 16px rgba(180,130,20,0.3)'}}>
+                                {t.visitorSubscribe} — ACESSO ILIMITADO
+                            </button>
+                            <button onClick={() => setShowLoginModal(true)} className="w-full text-center text-[10px] text-ifa-gold/70 uppercase tracking-wider hover:text-ifa-gold transition-colors">
+                                {t.visitorRegister}
+                            </button>
                         </div>
+                    )}
+                </aside>
 
-                        {/* Magia */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="h-px flex-1 bg-gradient-to-r from-red-500/30 to-transparent"></div>
-                                <span className="section-label">{t.sectionMagic}</span>
-                                <div className="h-px flex-1 bg-gradient-to-l from-red-500/30 to-transparent"></div>
+                {/* Main Area */}
+                <div className="flex-1 flex flex-col min-h-0">
+                    <div className="flex-1 p-4 md:p-8 overflow-y-auto scrollbar-hide">
+                        <div className="max-w-6xl mx-auto space-y-5 md:space-y-7">
+                            {/* Hero Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <GlassCard onClick={startNewSession} label={t.btnConsultation} icon={Users} variant="hero" subtitle="Modo Babalaô ativo" />
+                                <GlassCard onClick={handleStudyStart} label={t.btnStudy} icon={GraduationCap} variant="green" subtitle="Aprendizado guiado" />
                             </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                <GlassCard onClick={() => setView('sango_wheel')} label={t.menuSangoWheel} icon={Scale} feature={t.featureSangoWheel} />
-                                <GlassCard onClick={() => setView('oogun')} label={t.menuOogun} icon={FlaskConical} feature={t.featureOogun} />
-                                <GlassCard onClick={() => setView('herb_id')} label={t.menuHerbID} icon={Leaf} feature={t.featureHerbID} />
-                                <GlassCard onClick={() => setView('assentamentos')} label={t.menuAssentamentos} icon={Hammer} feature={t.featureAssentamentos} />
-                                <GlassCard onClick={() => setView('geo_herbs')} label={t.menuHerbMap} icon={MapPin} feature={t.featureHerbMap} />
-                                <GlassCard onClick={() => setView('ajogun')} label={t.menuAjogun} icon={Stethoscope} feature={t.featureAjogun} />
-                            </div>
-                        </div>
 
-                        {/* Gestão */}
-                        <div>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="h-px flex-1 bg-gradient-to-r from-blue-500/30 to-transparent"></div>
-                                <span className="section-label">{t.sectionManagement}</span>
-                                <div className="h-px flex-1 bg-gradient-to-l from-blue-500/30 to-transparent"></div>
+                            {/* Medium Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <GlassCard onClick={() => setView('virtual_room')} label={t.menuVirtualRoom} icon={Video} variant="blue" feature={t.featureVirtualRoom} />
+                                <GlassCard onClick={() => setView('oracle_hub')} label={t.menuOracleHub} icon={CircleDot} variant="terra" feature={t.featureAdvancedOracles} />
                             </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                <GlassCard onClick={() => setView('inventory_hub')} label={t.menuInventory} icon={Package} feature={t.featureInventory} />
-                                <GlassCard onClick={() => setView('agenda')} label={t.menuAgenda} icon={CalendarDays} />
-                                <GlassCard onClick={() => setView('lineage_tree')} label={t.menuLineage} icon={GitBranch} feature={t.featureLineage} />
-                                <GlassCard onClick={() => setView('analytics')} label={t.menuAnalytics} icon={BarChart3} feature={t.featureAnalytics} />
-                            </div>
-                        </div>
 
-                        {/* Footer button */}
-                        <div className="pt-4">
-                            <GlassCard onClick={() => setView('manual')} label={t.menuManual} icon={BookOpen} variant="terra" />
+                            {/* Conhecimento */}
+                            <div>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <span className="section-label">— {t.sectionKnowledge}</span>
+                                    <div className="h-px flex-1 bg-gradient-to-r from-ifa-gold/30 to-transparent"></div>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <GlassCard onClick={() => setView('odu_library')} label={t.menuOduLibrary} icon={Book} />
+                                    <GlassCard onClick={() => setView('treatise')} label={t.menuTreatise} icon={BookOpen} feature={t.featureTreatise} />
+                                    <GlassCard onClick={() => setView('prayers')} label={t.menuPrayers} icon={Book} feature={t.featurePrayers} />
+                                    <GlassCard onClick={() => setView('amutorunwa')} label={t.menuYorubaNames} icon={Baby} />
+                                    <GlassCard onClick={() => setView('dictionary')} label={t.menuDictionary} icon={Book} />
+                                    <GlassCard onClick={() => setView('story_mode')} label={t.menuRPG} icon={Gamepad2} feature={t.featureRPG} />
+                                </div>
+                            </div>
+
+                            {/* Esotérico */}
+                            <div>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <span className="section-label">— {t.sectionEsoteric}</span>
+                                    <div className="h-px flex-1 bg-gradient-to-r from-[rgba(120,40,100,0.35)] to-transparent"></div>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <button onClick={() => { setHomeSearch(''); handleProFeature(t.featureVoiceCommand, () => setView('voice_commander')); }} className="md:col-span-2 glass-card glass-gold rounded-2xl h-[60px] flex items-center justify-center gap-3 px-5 text-white hover:-translate-y-0.5 transition-all duration-[0.18s] cursor-pointer">
+                                        <Mic size={22} className="shrink-0 drop-shadow-md opacity-90" />
+                                        <span className="text-xs uppercase tracking-widest font-medium drop-shadow-md">{t.menuVoiceThunder}</span>
+                                    </button>
+                                    <GlassCard onClick={() => setView('esoteric_hub')} label={t.menuEsotericTools} icon={Sparkles} variant="purple" feature={t.featureEsotericTools} />
+                                    <GlassCard onClick={() => setView('ebori')} label={t.menuBori} icon={UserCheck} variant="purple" feature={t.featureBori} />
+                                    <GlassCard onClick={() => setView('reverse_odu')} label={t.menuReverseMath} icon={Database} variant="purple" feature={t.featureReverseMath} />
+                                    <GlassCard onClick={() => setView('ebo_sim')} label={t.menuEboSim} icon={Move} variant="purple" feature={t.featureEboSim} />
+                                    <GlassCard onClick={() => setView('sound_hub')} label={t.menuSacredSounds} icon={Music} variant="purple" feature={t.featureSacredSounds} />
+                                    <GlassCard onClick={() => setView('dream_journal')} label={t.menuDreamJournal} icon={Moon} variant="purple" />
+                                </div>
+                            </div>
+
+                            {/* Magia */}
+                            <div>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <span className="section-label">— {t.sectionMagic}</span>
+                                    <div className="h-px flex-1 bg-gradient-to-r from-red-500/30 to-transparent"></div>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <GlassCard onClick={() => setView('sango_wheel')} label={t.menuSangoWheel} icon={Scale} feature={t.featureSangoWheel} />
+                                    <GlassCard onClick={() => setView('oogun')} label={t.menuOogun} icon={FlaskConical} feature={t.featureOogun} />
+                                    <GlassCard onClick={() => setView('herb_id')} label={t.menuHerbID} icon={Leaf} feature={t.featureHerbID} />
+                                    <GlassCard onClick={() => setView('assentamentos')} label={t.menuAssentamentos} icon={Hammer} feature={t.featureAssentamentos} />
+                                    <GlassCard onClick={() => setView('geo_herbs')} label={t.menuHerbMap} icon={MapPin} feature={t.featureHerbMap} />
+                                    <GlassCard onClick={() => setView('ajogun')} label={t.menuAjogun} icon={Stethoscope} feature={t.featureAjogun} />
+                                </div>
+                            </div>
+
+                            {/* Gestão */}
+                            <div>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <span className="section-label">— {t.sectionManagement}</span>
+                                    <div className="h-px flex-1 bg-gradient-to-r from-blue-500/30 to-transparent"></div>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <GlassCard onClick={() => setView('inventory_hub')} label={t.menuInventory} icon={Package} feature={t.featureInventory} />
+                                    <GlassCard onClick={() => setView('agenda')} label={t.menuAgenda} icon={CalendarDays} />
+                                    <GlassCard onClick={() => setView('lineage_tree')} label={t.menuLineage} icon={GitBranch} feature={t.featureLineage} />
+                                    <GlassCard onClick={() => setView('analytics')} label={t.menuAnalytics} icon={BarChart3} feature={t.featureAnalytics} />
+                                </div>
+                            </div>
+
+                            {/* Footer button */}
+                            <div className="pt-2">
+                                <GlassCard onClick={() => setView('manual')} label={t.menuManual} icon={BookOpen} variant="terra" />
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
+            {/* FAB */}
+            <button onClick={() => setChatInitialQuery("")} className="fab-gold fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3 text-sm">
+                <span>💬</span> <span>Assistente</span>
+            </button>
         </div>
     );
 
