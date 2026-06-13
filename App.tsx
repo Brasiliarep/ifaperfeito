@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { OpeleState, SeedState, OduInfo, AIInterpretation, LoadingState, ClientData, ConsultationRecord, SelectionMap, Language, DivinationMethod, CowrieState, UserProfile, IreOsogboType } from './types';
 import OpeleSeed from './components/OpeleSeed';
 import OponIfaBoard from './components/OponIfaBoard';
@@ -281,13 +281,13 @@ function App() {
         });
     };
 
-    const toggleCowrie = (index: number) => {
+    const toggleCowrie = useCallback((index: number) => {
         setCowries(prev => {
             const newCowries = [...prev];
             newCowries[index] = newCowries[index] === 'open' ? 'closed' : 'open';
             return newCowries;
         });
-    };
+    }, []);
 
     const handleMethodSelection = (method: DivinationMethod) => {
         setPendingMethod(method);

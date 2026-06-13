@@ -31,6 +31,10 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
     const [throwing, setThrowing] = useState(false);
     const [scatterKey, setScatterKey] = useState(0);
     
+    const throwingRef = useRef(false);
+    const onToggleRef = useRef(onToggle);
+    onToggleRef.current = onToggle;
+    
     const fileRef = useRef<HTMLInputElement>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     
@@ -68,13 +72,14 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
     }, [cowries.length, scatterKey]);
 
     const handleCowrieToggle = (idx: number) => {
-      if (throwing) return;
+      if (throwingRef.current) return;
       somBuzio();
-      onToggle(idx);
+      onToggleRef.current(idx);
     };
 
-    const handleThrowAll = useCallback(() => {
-      if (throwing) return;
+    const handleThrowAll = () => {
+      if (throwingRef.current) return;
+      throwingRef.current = true;
       setThrowing(true);
 
       const initial = [...cowries];
@@ -85,7 +90,7 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
       for (let i = 0; i < 16; i++) {
         const delay = i * 45;
         setTimeout(() => {
-          if (newStates[i] !== initial[i]) onToggle(i);
+          if (newStates[i] !== initial[i]) onToggleRef.current(i);
           somBuzio(0);
         }, delay + 100);
       }
@@ -95,9 +100,10 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
       }, 50);
 
       setTimeout(() => {
+        throwingRef.current = false;
         setThrowing(false);
       }, 16 * 45 + 300);
-    }, [throwing, cowries, onToggle]);
+    };
 
     const openCount = cowries.filter(c => c === 'open').length;
 
