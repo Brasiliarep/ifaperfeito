@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useMemo, useCallback } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { SeedState } from '../types';
 import { Shell, Camera, Loader2, Shuffle, Compass, Wind, CheckCircle2 } from 'lucide-react';
 
@@ -78,6 +78,7 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
     };
 
     const handleThrowAll = () => {
+      console.log('[MerindilogunBoard] handleThrowAll (v2 useRef)');
       if (throwingRef.current) return;
       throwingRef.current = true;
       setThrowing(true);
@@ -139,6 +140,7 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     {DIRECTIONS.map(dir => (
                         <button
+                            type="button"
                             key={dir.id}
                             onClick={() => invokeDirection(dir.id)}
                             disabled={directionsInvoked.includes(dir.id)}
@@ -154,7 +156,8 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
                     ))}
                 </div>
 
-                <button 
+                <button
+                    type="button"
                     onClick={finishRitual}
                     disabled={!allInvoked}
                     className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2 ${
@@ -224,6 +227,7 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
 
                 <div className="flex gap-2">
                     <button
+                        type="button"
                         onClick={handleThrowAll}
                         disabled={throwing}
                         className="px-5 py-2.5 bg-ifa-gold text-black font-bold text-xs uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-lg disabled:opacity-50 flex items-center gap-2 border border-ifa-gold/50"
@@ -233,7 +237,8 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
                         {throwing ? 'Jogando...' : 'Jogar Búzios'}
                     </button>
                     
-                    <button 
+                    <button
+                        type="button"
                         onClick={() => fileRef.current?.click()}
                         className="p-2.5 bg-ifa-wood text-white rounded-xl hover:bg-ifa-gold hover:text-black transition-colors"
                         title="Ler Foto com IA"
