@@ -74,7 +74,7 @@ const YorubaCalendarWidget: React.FC<Props> = ({ onOpenIgbadu }) => {
     };
 
     return (
-        <div className="bg-[#1a1510] border border-[#5D4037] rounded-xl p-4 w-full max-w-md mx-auto mb-8 shadow-lg relative overflow-hidden group hover:border-[#D4AF37] transition-colors">
+        <div className="bg-[#1a1510] border border-[#5D4037] rounded-xl p-4 w-full shadow-lg relative group hover:border-[#D4AF37] transition-colors">
             <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none"></div>
             
             <div className="flex items-center justify-between mb-2">

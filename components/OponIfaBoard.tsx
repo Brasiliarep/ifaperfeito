@@ -177,14 +177,32 @@ const OponIfaBoard: React.FC<Props> = ({ opele, onToggle }) => {
         }
     };
 
+    const oponRef = useRef<HTMLDivElement>(null);
+
+    function particulaIyerosun(x: number, y: number) {
+      const container = oponRef.current;
+      if (!container) return;
+      for (let i = 0; i < 6; i++) {
+        const p = document.createElement('div');
+        p.style.cssText = `
+          position:absolute; width:3px; height:3px; border-radius:50%;
+          background:rgba(210,185,130,0.6); left:${x}px; top:${y}px;
+          pointer-events:none;
+          animation: particula 0.5s ease forwards;
+          --dx:${(Math.random() - 0.5) * 20}px;
+          --dy:${(Math.random() - 0.5) * 20}px;
+        `;
+        container.appendChild(p);
+        setTimeout(() => p.remove(), 500);
+      }
+    }
+
     // Helper to render the mark (I or II)
-    const RenderMark = ({ state }: { state: 'open' | 'closed' }) => (
-        <div className="flex flex-col items-center justify-center h-full w-full">
+    const RenderMark = ({ state, markKey }: { state: 'open' | 'closed'; markKey: string }) => (
+        <div className="marca-odu flex flex-col items-center justify-center h-full w-full" key={markKey}>
             {state === 'open' ? (
-                // Single Mark (I)
                 <div className="w-3 h-12 md:w-4 md:h-16 bg-[#D4AF37] rounded-full shadow-[0_0_10px_rgba(212,175,55,0.6)] border border-yellow-600"></div>
             ) : (
-                // Double Mark (II)
                 <div className="flex gap-2 md:gap-3">
                     <div className="w-3 h-12 md:w-4 md:h-16 bg-[#D4AF37] rounded-full shadow-[0_0_10px_rgba(212,175,55,0.6)] border border-yellow-600"></div>
                     <div className="w-3 h-12 md:w-4 md:h-16 bg-[#D4AF37] rounded-full shadow-[0_0_10px_rgba(212,175,55,0.6)] border border-yellow-600"></div>
@@ -196,7 +214,18 @@ const OponIfaBoard: React.FC<Props> = ({ opele, onToggle }) => {
     const handleToggle = (leg: 'right' | 'left', index: number) => {
         if (step !== 5) return; // Locked until ritual complete (step 5)
         playSound('rattle');
+        particulaIyerosun(180 + Math.random() * 40, 150 + Math.random() * 40);
         onToggle(leg, index);
+    };
+
+    // Track mark key for animation re-trigger
+    const markKeys = useRef<Record<string, number>>({});
+    const getMarkKey = (leg: string, idx: number, state: string) => {
+      const k = `${leg}-${idx}`;
+      const prev = markKeys.current[k];
+      const newKey = `${k}-${state}-${Date.now()}`;
+      markKeys.current[k] = Date.now();
+      return newKey;
     };
 
     // RENDER RITUAL OVERLAY
@@ -270,7 +299,7 @@ const OponIfaBoard: React.FC<Props> = ({ opele, onToggle }) => {
             </div>
 
             {/* THE OPON (Circular Tray) */}
-            <div id="opon-container" className="relative w-[340px] h-[340px] md:w-[400px] md:h-[400px] rounded-full bg-[#3E2723] border-[12px] border-[#2E150F] shadow-2xl flex items-center justify-center overflow-hidden">
+            <div ref={oponRef} id="opon-container" className="relative w-[340px] h-[340px] md:w-[400px] md:h-[400px] rounded-full bg-[#3E2723] border-[12px] border-[#2E150F] shadow-2xl flex items-center justify-center overflow-hidden">
                 
                 {/* Wood Texture Overlay */}
                 <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] rounded-full pointer-events-none"></div>
@@ -302,7 +331,7 @@ const OponIfaBoard: React.FC<Props> = ({ opele, onToggle }) => {
                                 onClick={() => handleToggle('right', idx)}
                                 className="w-14 h-12 md:w-16 md:h-14 flex items-center justify-center hover:scale-110 transition-transform active:scale-95 cursor-pointer"
                             >
-                                <RenderMark state={state} />
+                                <RenderMark state={state} markKey={`r-${idx}-${state}`} />
                             </button>
                         ))}
                     </div>
@@ -319,7 +348,7 @@ const OponIfaBoard: React.FC<Props> = ({ opele, onToggle }) => {
                                 onClick={() => handleToggle('left', idx)}
                                 className="w-14 h-12 md:w-16 md:h-14 flex items-center justify-center hover:scale-110 transition-transform active:scale-95 cursor-pointer"
                             >
-                                <RenderMark state={state} />
+                                <RenderMark state={state} markKey={`l-${idx}-${state}`} />
                             </button>
                         ))}
                     </div>

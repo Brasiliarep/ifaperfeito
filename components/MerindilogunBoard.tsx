@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useState, useMemo, useCallback } from 'react';
 import { SeedState } from '../types';
 import { Shell, Camera, Loader2, Shuffle, Compass, Wind, CheckCircle2 } from 'lucide-react';
 
@@ -8,9 +8,28 @@ interface Props {
     onToggle: (index: number) => void;
 }
 
+function somBuzio(delay: number = 0) {
+  setTimeout(() => {
+    try {
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(520 + Math.random() * 60, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(340, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.start(); osc.stop(ctx.currentTime + 0.2);
+    } catch {}
+  }, delay);
+}
+
 const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
     const [ritualComplete, setRitualComplete] = useState(false);
     const [directionsInvoked, setDirectionsInvoked] = useState<string[]>([]);
+    const [throwing, setThrowing] = useState(false);
+    const [scatterKey, setScatterKey] = useState(0);
     
     const fileRef = useRef<HTMLInputElement>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -25,7 +44,6 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
 
     const invokeDirection = (id: string) => {
         if (!directionsInvoked.includes(id)) {
-            // Haptic feedback
             if (navigator.vibrate) navigator.vibrate(20);
             setDirectionsInvoked([...directionsInvoked, id]);
         }
@@ -38,9 +56,8 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
     // --- BOARD LOGIC ---
     const scatteredPositions = useMemo(() => {
         return cowries.map((_, i) => {
-            // Random scatter within the tray
-            const angle = i * (360 / 16) + (Math.random() * 30);
-            const radius = 15 + Math.random() * 25; 
+            const angle = i * (360 / 16) + (Math.random() * 25);
+            const radius = 15 + Math.random() * 25;
             const rotation = Math.random() * 360;
             return {
                 top: `${50 + radius * Math.sin(angle * Math.PI / 180)}%`,
@@ -48,7 +65,39 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
                 transform: `translate(-50%, -50%) rotate(${rotation}deg)`
             };
         });
-    }, [cowries.length]); 
+    }, [cowries.length, scatterKey]);
+
+    const handleCowrieToggle = (idx: number) => {
+      if (throwing) return;
+      somBuzio();
+      onToggle(idx);
+    };
+
+    const handleThrowAll = useCallback(() => {
+      if (throwing) return;
+      setThrowing(true);
+
+      const initial = [...cowries];
+      const newStates: SeedState[] = Array.from({ length: 16 }, () =>
+        Math.random() < 0.5 ? 'open' : 'closed'
+      );
+
+      for (let i = 0; i < 16; i++) {
+        const delay = i * 45;
+        setTimeout(() => {
+          if (newStates[i] !== initial[i]) onToggle(i);
+          somBuzio(0);
+        }, delay + 100);
+      }
+
+      setTimeout(() => {
+        setScatterKey(k => k + 1);
+      }, 50);
+
+      setTimeout(() => {
+        setThrowing(false);
+      }, 16 * 45 + 300);
+    }, [throwing, cowries, onToggle]);
 
     const openCount = cowries.filter(c => c === 'open').length;
 
@@ -126,17 +175,18 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
                 {/* SCATTERED COWRIES */}
                 {cowries.map((state, idx) => (
                     <button
-                        key={`cowrie-${idx}`}
-                        onClick={() => onToggle(idx)}
+                        key={`cowrie-${idx}-${scatterKey}`}
+                        onClick={() => handleCowrieToggle(idx)}
                         className={`
-                            absolute w-9 h-12 md:w-11 md:h-14 rounded-[40%] shadow-md transition-all duration-200
-                            hover:scale-110 active:scale-95
+                            buzio ${state === 'open' ? 'aberto' : ''} ${throwing ? 'jogando' : ''}
+                            absolute w-9 h-12 md:w-11 md:h-14 rounded-[40%] shadow-md
                         `}
                         style={{
                             ...scatteredPositions[idx],
+                            '--i': idx,
                             boxShadow: '3px 3px 6px rgba(0,0,0,0.5)',
                             zIndex: 10
-                        }}
+                        } as any}
                     >
                         {state === 'open' ? (
                             <div className="w-full h-full relative overflow-hidden rounded-[40%] bg-gradient-to-br from-[#fff] to-[#e0d0b0] border border-[#d0b090]">
@@ -167,17 +217,19 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
                 </div>
 
                 <div className="flex gap-2">
-                    <button 
-                        className="p-2 text-ifa-neutral hover:text-white border border-white/10 rounded-lg transition-colors"
-                        title="Embaralhar / Relançar"
-                        onClick={() => window.location.reload()}
+                    <button
+                        onClick={handleThrowAll}
+                        disabled={throwing}
+                        className="px-5 py-2.5 bg-ifa-gold text-black font-bold text-xs uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-lg disabled:opacity-50 flex items-center gap-2 border border-ifa-gold/50"
+                        title="Jogar todos os 16 búzios"
                     >
-                        <Shuffle size={18} />
+                        <Shuffle size={16} className={throwing ? 'animate-spin' : ''} />
+                        {throwing ? 'Jogando...' : 'Jogar Búzios'}
                     </button>
                     
                     <button 
                         onClick={() => fileRef.current?.click()}
-                        className="p-2 bg-ifa-wood text-white rounded-lg hover:bg-ifa-gold hover:text-black transition-colors"
+                        className="p-2.5 bg-ifa-wood text-white rounded-xl hover:bg-ifa-gold hover:text-black transition-colors"
                         title="Ler Foto com IA"
                     >
                         {isAnalyzing ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}

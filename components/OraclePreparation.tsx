@@ -13,9 +13,25 @@ const IkinThrow: React.FC<{ onComplete: (state: OpeleState) => void }> = ({ onCo
     const [throws, setThrows] = useState<(1 | 2)[]>([]); // 1=closed(I), 2=open(II)
     const [throwing, setThrowing] = useState(false);
 
+    function somIkin() {
+      try {
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(200 + Math.random() * 80, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(60, ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+        osc.type = 'sine';
+        osc.start(); osc.stop(ctx.currentTime + 0.2);
+      } catch {}
+    }
+
     const doThrow = () => {
         if (throws.length >= 8 || throwing) return;
         setThrowing(true);
+        somIkin();
         setTimeout(() => {
             const remaining = Math.random() < 0.5 ? 1 : 2; // 1 nut remaining = 2 marks; 2 remaining = 1 mark
             setThrows(prev => {
@@ -55,12 +71,13 @@ const IkinThrow: React.FC<{ onComplete: (state: OpeleState) => void }> = ({ onCo
             {/* Throw grid 2×4 */}
             <div className="grid grid-cols-4 gap-2 w-full max-w-xs">
                 {Array.from({ length: 8 }, (_, i) => (
-                    <div key={i} className={`aspect-square rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition-all ${throws[i] !== undefined
+                    <div key={i} className={`ikin aspect-square rounded-xl border flex flex-col items-center justify-center gap-1 text-center transition-all ${throws[i] !== undefined
                         ? 'bg-ifa-gold/10 border-ifa-gold/50'
                         : i === throws.length
                             ? 'border-ifa-gold/40 bg-ifa-surface animate-pulse'
                             : 'border-ifa-border bg-ifa-base-dark'
-                        }`}>
+                        }`}
+                        style={{ '--dx': `${(Math.random() > 0.5 ? 1 : -1) * (20 + Math.random() * 30)}px`, '--dr': `${(Math.random() > 0.5 ? 1 : -1) * (5 + Math.random() * 10)}deg` } as any}>
                         <span className="text-[9px] text-ifa-neutral uppercase">{i < 4 ? `D${i + 1}` : `E${i - 3}`}</span>
                         {throws[i] !== undefined
                             ? <span className="text-[11px] font-mono font-bold text-ifa-gold">{throws[i] === 1 ? '||' : '|'}</span>
