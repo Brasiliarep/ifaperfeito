@@ -1,14 +1,68 @@
 
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { SeedState } from '../types';
-import { Shell, Camera, Loader2, Shuffle, Compass, Wind, CheckCircle2 } from 'lucide-react';
+import { Shell, Camera, Shuffle } from 'lucide-react';
 
 interface Props {
     cowries: SeedState[];
     onToggle: (index: number) => void;
 }
 
-function somBuzio(delay: number = 0) {
+const ODUS = [
+  { n: 0,  nome: 'Oyeku Meji',     energia: 'Iku presente — recomeço total, transformação profunda' },
+  { n: 1,  nome: 'Okofun',         energia: 'Silêncio sagrado — escuta o que não é dito' },
+  { n: 2,  nome: 'Eji Oko',        energia: 'Dualidade — dois caminhos se apresentam' },
+  { n: 3,  nome: 'Ogunda Meji',    energia: 'Ogun abre — força, determinação e vitória' },
+  { n: 4,  nome: 'Irosun Meji',    energia: 'Sangue e vida — prosperidade e realização' },
+  { n: 5,  nome: 'Oshé Meji',      energia: 'Oshun fala — amor, beleza e abundância chegam' },
+  { n: 6,  nome: 'Obara Meji',     energia: 'Xangô reina — poder, justiça e realeza' },
+  { n: 7,  nome: 'Odi Meji',       energia: 'Mistério — o que está oculto se revela' },
+  { n: 8,  nome: 'Eji Ogbe',       energia: 'Obatalá ilumina — pureza, paz e sabedoria' },
+  { n: 9,  nome: 'Osa Meji',       energia: 'Oyá sopra — transformação e mudança iminente' },
+  { n: 10, nome: 'Ofun Meji',      energia: 'Ancestrais falam — honrar as raízes traz força' },
+  { n: 11, nome: 'Owonrin Meji',   energia: 'Eshu ri — imprevisível, o destino se dobra' },
+  { n: 12, nome: 'Ejila Shebora',  energia: 'Oxalá abençoa — renovação e recomeço sagrado' },
+  { n: 13, nome: 'Metanla',        energia: 'Caça ao destino — persistência traz recompensa' },
+  { n: 14, nome: 'Merinla',        energia: 'Quatro ventos — equilíbrio e proteção' },
+  { n: 15, nome: 'Marunla',        energia: 'Águas profundas — emoções e intuição emergem' },
+  { n: 16, nome: 'Merindilogun',   energia: 'Olorum fala — mensagem suprema, ouça com reverência' },
+];
+
+const BuzioFechado: React.FC<{ id: string }> = ({ id }) => (
+  <svg viewBox="0 0 52 36">
+    <defs>
+      <radialGradient id={`gf-${id}`} cx="35%" cy="28%">
+        <stop offset="0%" stopColor="rgba(255,255,255,0.5)"/>
+        <stop offset="100%" stopColor="#a88850"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="26" cy="18" rx="24" ry="15" fill={`url(#gf-${id})`}/>
+    <ellipse cx="26" cy="18" rx="24" ry="15" fill="none" stroke="rgba(80,40,10,0.3)" strokeWidth="0.8"/>
+    <path d="M 16 18 Q 26 16 36 18" fill="none" stroke="rgba(100,60,20,0.3)" strokeWidth="0.8"/>
+    <ellipse cx="20" cy="13" rx="4" ry="2.5" fill="rgba(255,255,255,0.45)" transform="rotate(-15,20,13)"/>
+  </svg>
+);
+
+const BuzioAberto: React.FC<{ id: string }> = ({ id }) => (
+  <svg viewBox="0 0 52 36">
+    <defs>
+      <radialGradient id={`ga-${id}`} cx="35%" cy="28%">
+        <stop offset="0%" stopColor="rgba(255,255,255,0.65)"/>
+        <stop offset="100%" stopColor="#c8a878"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="26" cy="18" rx="24" ry="15" fill={`url(#ga-${id})`}/>
+    <ellipse cx="26" cy="18" rx="24" ry="15" fill="none" stroke="rgba(80,40,10,0.3)" strokeWidth="0.8"/>
+    <path d="M14 18 Q20 12 26 13 Q32 12 38 18 Q32 24 26 23 Q20 24 14 18Z" fill="#5a3010" opacity="0.85"/>
+    <ellipse cx="26" cy="18" rx="7" ry="4" fill="rgba(30,10,5,0.6)"/>
+    <path d="M15 18 Q26 14 37 18" fill="none" stroke="rgba(120,70,30,0.4)" strokeWidth="0.6"/>
+    <ellipse cx="20" cy="13" rx="4" ry="2.5" fill="rgba(255,255,255,0.55)" transform="rotate(-15,20,13)"/>
+  </svg>
+);
+
+// --- SOUND FUNCTIONS ---
+
+function somImpacto(delay: number) {
   setTimeout(() => {
     try {
       const ctx = new AudioContext();
@@ -16,110 +70,184 @@ function somBuzio(delay: number = 0) {
       const gain = ctx.createGain();
       osc.connect(gain); gain.connect(ctx.destination);
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(520 + Math.random() * 60, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(340, ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.frequency.setValueAtTime(140 + Math.random() * 60, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.10, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+      const noise = ctx.createOscillator();
+      const noiseGain = ctx.createGain();
+      noise.connect(noiseGain); noiseGain.connect(ctx.destination);
+      noise.type = 'sawtooth';
+      noise.frequency.setValueAtTime(600 + Math.random() * 300, ctx.currentTime);
+      noiseGain.gain.setValueAtTime(0.03, ctx.currentTime);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
       osc.start(); osc.stop(ctx.currentTime + 0.2);
+      noise.start(); noise.stop(ctx.currentTime + 0.07);
     } catch {}
   }, delay);
 }
 
+function somRevelacao() {
+  try {
+    const ctx = new AudioContext();
+    const freqs = [220, 277, 330, 415];
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.07);
+      gain.gain.setValueAtTime(0.07, ctx.currentTime + i * 0.07);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.07 + 0.7);
+      osc.start(ctx.currentTime + i * 0.07);
+      osc.stop(ctx.currentTime + i * 0.07 + 0.8);
+    });
+  } catch {}
+}
+
+function somVirada() {
+  try {
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(480, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(280, ctx.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+    osc.start(); osc.stop(ctx.currentTime + 0.25);
+  } catch {}
+}
+
+// --- COLLISION DETECTION ---
+
+interface Posicao { x: number; y: number; rot: number; }
+
+function gerarPosicoes(largura: number, altura: number): Posicao[] {
+  const pad = 38, bW = 52, bH = 36, minDist = 52;
+  const pos: Posicao[] = [];
+  let tentativas = 0;
+  while (pos.length < 16 && tentativas < 2000) {
+    tentativas++;
+    const x = pad + Math.random() * (largura - bW - pad * 2);
+    const y = pad + Math.random() * (altura - bH - pad * 2);
+    const rot = Math.random() * 60 - 30;
+    let valido = true;
+    for (const p of pos) {
+      const dx = x - p.x, dy = y - p.y;
+      if (Math.sqrt(dx * dx + dy * dy) < minDist) { valido = false; break; }
+    }
+    if (valido) pos.push({ x, y, rot });
+  }
+  return pos;
+}
+
+// --- MAIN COMPONENT ---
+
 const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
     const [ritualComplete, setRitualComplete] = useState(false);
     const [directionsInvoked, setDirectionsInvoked] = useState<string[]>([]);
-    const [throwing, setThrowing] = useState(false);
-    const [scatterKey, setScatterKey] = useState(0);
-    
+    const [throwPhase, setThrowPhase] = useState<'idle' | 'trembling' | 'falling' | 'revealed'>('idle');
+    const [positions, setPositions] = useState<Posicao[]>([]);
+    const [hasThrown, setHasThrown] = useState(false);
+
+    const tapeteRef = useRef<HTMLDivElement>(null);
     const throwingRef = useRef(false);
     const onToggleRef = useRef(onToggle);
     onToggleRef.current = onToggle;
-    
     const fileRef = useRef<HTMLInputElement>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
-    
-    // --- RITUAL LOGIC ---
+
+    const openCount = cowries.filter(c => c === 'open').length;
+    const odu = useMemo(() => ODUS[Math.min(openCount, 16)], [openCount]);
+
+    // --- MEASURE TAPETE ---
+    useEffect(() => {
+        const el = tapeteRef.current;
+        if (!el) return;
+        const update = () => {
+            const w = el.offsetWidth;
+            setPositions(gerarPosicoes(w, w * 0.66));
+        };
+        const ro = new ResizeObserver(update);
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
+
+    // --- DIRECTIONS RITUAL ---
     const DIRECTIONS = [
         { id: 'iwaju', label: 'Iwájú (Frente)', desc: 'Visão / Futuro' },
         { id: 'ehin', label: 'Ehin (Trás)', desc: 'Ancestrais / Passado' },
         { id: 'otun', label: 'Otún (Direita)', desc: 'Ação / Masculino' },
-        { id: 'osi', label: 'Òsì (Esquerda)', desc: 'Intuição / Feminino' }
+        { id: 'osi', label: 'Òsì (Esquerda)', desc: 'Intuição / Feminino' },
     ];
 
     const invokeDirection = (id: string) => {
         if (!directionsInvoked.includes(id)) {
             if (navigator.vibrate) navigator.vibrate(20);
-            setDirectionsInvoked([...directionsInvoked, id]);
+            setDirectionsInvoked(prev => [...prev, id]);
         }
     };
 
-    const finishRitual = () => {
-        setRitualComplete(true);
-    };
+    const finishRitual = () => setRitualComplete(true);
 
-    // --- BOARD LOGIC ---
-    const scatteredPositions = useMemo(() => {
-        return cowries.map((_, i) => {
-            const angle = i * (360 / 16) + (Math.random() * 25);
-            const radius = 15 + Math.random() * 25;
-            const rotation = Math.random() * 360;
-            return {
-                top: `${50 + radius * Math.sin(angle * Math.PI / 180)}%`,
-                left: `${50 + radius * Math.cos(angle * Math.PI / 180)}%`,
-                transform: `translate(-50%, -50%) rotate(${rotation}deg)`
-            };
-        });
-    }, [cowries.length, scatterKey]);
-
-    const handleCowrieToggle = (idx: number) => {
-      if (throwingRef.current) return;
-      somBuzio();
-      onToggleRef.current(idx);
-    };
-
+    // --- THROW HANDLER ---
     const handleThrowAll = () => {
-      console.log('[MerindilogunBoard] handleThrowAll (v2 useRef)');
-      if (throwingRef.current) return;
-      throwingRef.current = true;
-      setThrowing(true);
+        if (throwingRef.current) return;
+        throwingRef.current = true;
+        setThrowPhase('trembling');
 
-      const initial = [...cowries];
-      const newStates: SeedState[] = Array.from({ length: 16 }, () =>
-        Math.random() < 0.5 ? 'open' : 'closed'
-      );
-
-      for (let i = 0; i < 16; i++) {
-        const delay = i * 45;
         setTimeout(() => {
-          if (newStates[i] !== initial[i]) onToggleRef.current(i);
-          somBuzio(0);
-        }, delay + 100);
-      }
+            const tapete = tapeteRef.current;
+            if (!tapete) return;
+            const w = tapete.offsetWidth;
+            const h = w * 0.66;
+            const newPos = gerarPosicoes(w, h);
+            setPositions(newPos);
 
-      setTimeout(() => {
-        setScatterKey(k => k + 1);
-      }, 50);
+            const initial = [...cowries];
+            const targetStates: SeedState[] = Array.from({ length: 16 }, () =>
+                Math.random() < 0.5 ? 'open' : 'closed'
+            );
 
-      setTimeout(() => {
-        throwingRef.current = false;
-        setThrowing(false);
-      }, 16 * 45 + 300);
+            for (let i = 0; i < 16; i++) {
+                if (targetStates[i] !== initial[i]) onToggleRef.current(i);
+                somImpacto(i * 30);
+            }
+
+            setThrowPhase('falling');
+            setHasThrown(true);
+        }, 400);
+
+        setTimeout(() => {
+            setThrowPhase('revealed');
+            somRevelacao();
+        }, 400 + 550);
+
+        setTimeout(() => {
+            throwingRef.current = false;
+        }, 400 + 550 + 100);
     };
 
-    const openCount = cowries.filter(c => c === 'open').length;
+    // --- MANUAL TOGGLE ---
+    const handleCowrieClick = (idx: number) => {
+        if (throwingRef.current || throwPhase === 'falling' || throwPhase === 'trembling') return;
+        somVirada();
+        onToggleRef.current(idx);
+    };
 
+    // --- CAMERA ---
     const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if(e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
+        if (e.target.files && e.target.files[0]) {
             setIsAnalyzing(true);
-            reader.onload = async () => {
+            const reader = new FileReader();
+            reader.onload = () => {
                 setTimeout(() => {
                     setIsAnalyzing(false);
-                    alert(`A IA identificou a caída. Ajuste manualmente se necessário.`);
                 }, 1500);
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(e.target.files[0]);
         }
     };
 
@@ -129,14 +257,12 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
         return (
             <div className="w-full max-w-md mx-auto my-6 p-8 bg-ifa-base border border-ifa-gold rounded-2xl shadow-2xl relative overflow-hidden text-center flex flex-col justify-center min-h-[400px]">
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/woven.png')] opacity-10 pointer-events-none"></div>
-                
                 <h2 className="text-2xl font-serif text-ifa-gold mb-2 flex items-center justify-center gap-2">
-                    <Compass size={28}/> Saudação às Direções
+                    Saudação às Direções
                 </h2>
                 <p className="text-sm text-ifa-neutral mb-8 leading-relaxed">
                     Toque nos 4 pontos cardeais para abrir o portal do Mérìndílógún.
                 </p>
-
                 <div className="grid grid-cols-2 gap-4 mb-8">
                     {DIRECTIONS.map(dir => (
                         <button
@@ -145,113 +271,149 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
                             onClick={() => invokeDirection(dir.id)}
                             disabled={directionsInvoked.includes(dir.id)}
                             className={`p-4 rounded-xl border-2 transition-all flex flex-col items-center justify-center h-24 ${
-                                directionsInvoked.includes(dir.id) 
-                                ? 'bg-green-900/30 border-green-500 text-green-400 opacity-60' 
+                                directionsInvoked.includes(dir.id)
+                                ? 'bg-green-900/30 border-green-500 text-green-400 opacity-60'
                                 : 'bg-ifa-base-dark border-ifa-border text-ifa-text hover:border-ifa-gold hover:scale-105'
                             }`}
                         >
-                            {directionsInvoked.includes(dir.id) ? <CheckCircle2 size={32} /> : <Wind size={32} />}
+                            {directionsInvoked.includes(dir.id) ? <Shell size={32} /> : <Shell size={32} />}
                             <span className="text-xs font-bold uppercase mt-2">{dir.label}</span>
                         </button>
                     ))}
                 </div>
-
                 <button
                     type="button"
                     onClick={finishRitual}
                     disabled={!allInvoked}
                     className={`w-full py-4 rounded-xl font-bold uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2 ${
-                        allInvoked 
-                        ? 'bg-ifa-gold text-black hover:bg-white animate-pulse' 
+                        allInvoked
+                        ? 'bg-ifa-gold text-black hover:bg-white animate-pulse'
                         : 'bg-gray-800 text-gray-500 cursor-not-allowed'
                     }`}
                 >
-                    {allInvoked ? <><Wind size={20}/> Soprar Asé (Imule)</> : "Complete a Saudação"}
+                    {allInvoked ? 'Soprar Asé (Imule)' : 'Complete a Saudação'}
                 </button>
             </div>
-        )
+        );
     }
 
-    return (
-        <div className="w-full max-w-md mx-auto my-6 flex flex-col items-center animate-fade-in">
-            
-            {/* THE MAT (ENI) CONTAINER */}
-            <div className="relative w-[320px] h-[320px] md:w-[380px] md:h-[380px] bg-[#E3C099] rounded-xl shadow-2xl overflow-hidden border-8 border-[#8D6E63]">
-                {/* Woven Texture */}
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/woven.png')] opacity-60"></div>
-                <div className="absolute inset-0 bg-[radial-gradient(transparent_40%,rgba(62,39,35,0.4)_100%)] pointer-events-none"></div>
+    // --- MAIN VIEW ---
+    const tapeteClass = [
+        'tapete',
+        throwPhase === 'trembling' ? 'tremendo' : '',
+        throwPhase === 'revealed' ? 'revelado' : '',
+    ].filter(Boolean).join(' ');
 
-                {/* SCATTERED COWRIES */}
-                {cowries.map((state, idx) => (
-                    <button
-                        key={`cowrie-${idx}-${scatterKey}`}
-                        onClick={() => handleCowrieToggle(idx)}
-                        className={`
-                            buzio ${state === 'open' ? 'aberto' : ''} ${throwing ? 'jogando' : ''}
-                            absolute w-9 h-12 md:w-11 md:h-14 rounded-[40%] shadow-md
-                        `}
-                        style={{
-                            ...scatteredPositions[idx],
-                            '--i': idx,
-                            boxShadow: '3px 3px 6px rgba(0,0,0,0.5)',
-                            zIndex: 10
-                        } as any}
-                    >
-                        {state === 'open' ? (
-                            <div className="w-full h-full relative overflow-hidden rounded-[40%] bg-gradient-to-br from-[#fff] to-[#e0d0b0] border border-[#d0b090]">
-                                <div className="absolute top-1 bottom-1 left-1/2 w-1.5 -ml-[3px] bg-[#3E2723] rounded-full opacity-90 flex flex-col items-center justify-center gap-[1px] overflow-hidden">
-                                    {[...Array(7)].map((_, i) => <div key={i} className="w-full h-[1px] bg-white/80 rounded-full"></div>)}
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="w-full h-full rounded-[40%] bg-gradient-to-tr from-[#fff] via-[#f5deb3] to-[#c2b280] border border-[#b0a070]">
-                                <div className="absolute top-2 left-2 w-3 h-5 bg-white opacity-60 rounded-full blur-[2px] transform -rotate-12"></div>
-                            </div>
-                        )}
-                        <span className="sr-only">Búzio {idx + 1} ({state})</span>
-                    </button>
-                ))}
+    const shouldHideCowries = throwPhase === 'trembling';
+    const cowriesFalling = throwPhase === 'falling';
+
+    return (
+        <div className="merindilogun-page flex flex-col items-center px-4 py-6 w-full">
+            {/* Header */}
+            <div className="w-full max-w-md text-center mb-4">
+                <h1 className="font-serif text-2xl font-bold text-ifa-gold tracking-wider">Mérìndílógún</h1>
+                <p className="text-[10px] uppercase tracking-[3px] text-ifa-neutral/50 mt-0.5">Jogo dos Búzios</p>
             </div>
 
-            {/* CONTROLS BAR */}
-            <div className="mt-6 flex items-center justify-between w-full max-w-[350px] bg-[#2a2420] p-3 rounded-xl border border-[#5D4037] shadow-lg">
-                <div className="flex items-center gap-3">
-                    <div className="bg-ifa-gold p-2 rounded-full text-black">
-                        <Shell size={20} />
-                    </div>
-                    <div>
-                        <span className="text-white font-bold text-sm block">Mérìndílógún</span>
-                        <span className="text-ifa-gold text-xs">{openCount} Abertos</span>
+            {/* Tapete */}
+            <div className="w-full max-w-md relative">
+                <div ref={tapeteRef} className={tapeteClass}>
+                    <div className="absolute inset-0" style={{ zIndex: 1 }}>
+                        {positions.map((pos, i) => {
+                            const pctX = tapeteRef.current ? `${pos.x / (tapeteRef.current.offsetWidth || 448) * 100}%` : `${pos.x / 448 * 100}%`;
+                            const pctY = tapeteRef.current ? `${pos.y / (tapeteRef.current.offsetHeight || 296) * 100}%` : `${pos.y / 296 * 100}%`;
+                            return (
+                                <button
+                                    type="button"
+                                    key={`b-${i}`}
+                                    onClick={() => handleCowrieClick(i)}
+                                    disabled={throwPhase === 'trembling' || throwPhase === 'falling'}
+                                    className={[
+                                        'buzio',
+                                        cowriesFalling ? 'caindo' : '',
+                                        shouldHideCowries ? 'opacity-0' : '',
+                                    ].filter(Boolean).join(' ')}
+                                    style={{
+                                        left: pctX,
+                                        top: pctY,
+                                        '--rot': `${pos.rot}deg`,
+                                        opacity: shouldHideCowries ? 0 : undefined,
+                                        animationDelay: cowriesFalling ? undefined : undefined,
+                                    } as any}
+                                >
+                                    {cowries[i] === 'open'
+                                        ? <BuzioAberto id={`b${i}`} />
+                                        : <BuzioFechado id={`b${i}`} />
+                                    }
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
+            </div>
 
-                <div className="flex gap-2">
+            {/* Info Bar */}
+            <div className="w-full max-w-md mt-4 flex items-center justify-between bg-[rgba(255,255,255,0.04)] border border-ifa-gold/20 rounded-xl px-4 py-3">
+                <div className="flex items-center gap-3">
+                    <span className="text-ifa-gold"><Shell size={18} /></span>
+                    <div>
+                        <p className="text-white text-sm font-bold tracking-wide">Mérìndílógún</p>
+                        <p className="text-xs" style={{ color: openCount > 0 ? 'rgba(100,220,140,0.8)' : 'rgba(255,255,255,0.35)' }}>
+                            {openCount} Abertos
+                        </p>
+                    </div>
+                </div>
+                <div className="flex gap-2 items-center">
                     <button
                         type="button"
                         onClick={handleThrowAll}
-                        disabled={throwing}
-                        className="px-5 py-2.5 bg-ifa-gold text-black font-bold text-xs uppercase tracking-widest rounded-xl hover:brightness-110 transition-all shadow-lg disabled:opacity-50 flex items-center gap-2 border border-ifa-gold/50"
+                        disabled={throwingRef.current}
+                        className="p-2 rounded-lg text-ifa-neutral hover:text-ifa-gold hover:bg-ifa-gold/10 transition-all"
                         title="Jogar todos os 16 búzios"
                     >
-                        <Shuffle size={16} className={throwing ? 'animate-spin' : ''} />
-                        {throwing ? 'Jogando...' : 'Jogar Búzios'}
+                        <Shuffle size={18} className={throwPhase === 'trembling' || throwPhase === 'falling' ? 'animate-spin' : ''} />
                     </button>
-                    
                     <button
                         type="button"
                         onClick={() => fileRef.current?.click()}
-                        className="p-2.5 bg-ifa-wood text-white rounded-xl hover:bg-ifa-gold hover:text-black transition-colors"
+                        className="p-2 rounded-lg text-ifa-neutral hover:text-ifa-gold hover:bg-ifa-gold/10 transition-all"
                         title="Ler Foto com IA"
                     >
-                        {isAnalyzing ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+                        {isAnalyzing ? <div className="w-[18px] h-[18px] border-2 border-ifa-gold border-t-transparent rounded-full animate-spin" /> : <Camera size={18} />}
                     </button>
                 </div>
             </div>
-            
             <input type="file" ref={fileRef} accept="image/*" capture="environment" className="hidden" onChange={handleCameraCapture} />
-            
-            <p className="text-center text-[10px] text-ifa-neutral mt-3 uppercase tracking-widest opacity-70">
-                Oju Opon (Olhos do Tabuleiro) abertos.
+
+            {/* Odu Card */}
+            <div className={`odu-card w-full max-w-md ${!hasThrown ? 'vazio' : ''}`}>
+                {hasThrown ? (
+                    <>
+                        <p className="text-[10px] uppercase tracking-[3px] text-ifa-neutral/40 mb-1">Oju Opon (Olhos do Tabuleiro) Abertos.</p>
+                        <div className="odu-numero" key={openCount}>{openCount}</div>
+                        <div className="odu-nome">{odu.nome}</div>
+                        <div className="odu-energia">{odu.energia}</div>
+                    </>
+                ) : (
+                    <div className="odu-numero">Oju Opon (Olhos do Tabuleiro) Abertos.</div>
+                )}
+            </div>
+
+            {/* Jogar Button */}
+            <button
+                type="button"
+                onClick={handleThrowAll}
+                disabled={throwingRef.current}
+                className="btn-jogar mt-2 max-w-md"
+            >
+                {throwPhase === 'trembling' ? 'Tremendo...' :
+                 throwPhase === 'falling' ? 'Caem os Búzios...' :
+                 'Jogar os Búzios'}
+            </button>
+
+            {/* Hint */}
+            <p className="text-[9px] uppercase tracking-widest text-ifa-neutral/40 mt-3 text-center max-w-md">
+                TOQUE EM CADA BÚZIO PARA ABRIR OU FECHAR MANUALMENTE
             </p>
         </div>
     );

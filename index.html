@@ -350,36 +350,36 @@
           cursor: pointer;
         }
 
-        /* --- BÚZIO --- */
-        @keyframes buzio-abre {
-          0%   { transform: scale(0.85) rotateX(45deg); opacity: 0.4; }
-          50%  { transform: scale(1.05) rotateX(-8deg); }
-          100% { transform: scale(1) rotateX(0deg); opacity: 1; }
+        /* --- MERINDILOGUN — TAPETE + BUZIOS --- */
+        @keyframes treme-tapete {
+          0%,100% { transform: translateX(0) rotate(0); }
+          20%  { transform: translateX(-5px) rotate(-1deg); }
+          40%  { transform: translateX(5px) rotate(1deg); }
+          60%  { transform: translateX(-4px) rotate(-0.5deg); }
+          80%  { transform: translateX(4px) rotate(0.5deg); }
         }
-        @keyframes buzio-joga {
-          0%   { transform: translate(-50%, -50%) scale(0.3) rotateY(180deg) translateY(-60px); opacity: 0; }
-          40%  { opacity: 1; }
-          70%  { transform: translate(-50%, -50%) scale(1.06) rotateY(0deg) translateY(2px); }
-          100% { transform: translate(-50%, -50%) scale(1) rotateY(0deg) translateY(0); opacity: 1; }
+        @keyframes cai-buzio {
+          0%   { transform: translate(0, -120px) rotate(var(--rot,0deg)) scale(0.7); opacity: 0; }
+          55%  { transform: translate(0, 5px) rotate(calc(var(--rot,0deg) * 0.6)) scale(1.04); opacity: 1; }
+          75%  { transform: translate(0, -3px) rotate(var(--rot,0deg)); }
+          100% { transform: translate(0, 0) rotate(var(--rot,0deg)); opacity: 1; }
         }
-        .buzio {
-          transform-style: preserve-3d;
-          perspective: 200px;
-          cursor: pointer;
-          transition: filter 0.2s ease;
+        @keyframes glow-tapete {
+          0%,100% {
+            box-shadow:
+              inset 0 0 50px rgba(80,40,10,0.45),
+              0 6px 24px rgba(0,0,0,0.55);
+          }
+          50% {
+            box-shadow:
+              inset 0 0 50px rgba(80,40,10,0.45),
+              0 6px 24px rgba(0,0,0,0.55),
+              0 0 35px rgba(210,165,40,0.22);
+          }
         }
-        .buzio.aberto {
-          animation: buzio-abre 0.4s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
-          filter: drop-shadow(0 0 8px rgba(255,200,80,0.4));
-        }
-        .buzio.jogando {
-          animation: buzio-joga 0.5s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
-          animation-delay: calc(var(--i,0) * 0.045s);
-        }
-        .buzio:hover {
-          filter: brightness(1.2) drop-shadow(0 3px 10px rgba(210,165,40,0.35));
-          transform: translateY(-2px);
-          transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        @keyframes aparece-odu {
+          from { transform: scale(0.6) translateY(8px); opacity: 0; }
+          to   { transform: scale(1) translateY(0); opacity: 1; }
         }
 
         /* --- IKIN --- */
@@ -449,12 +449,154 @@
         }
       }
 
+      /* === MERINDILOGUN — CLASS RULES === */
+      .merindilogun-page {
+        background: #0c0810;
+        min-height: 100vh;
+        position: relative;
+      }
+      .merindilogun-page::before {
+        content: '';
+        position: absolute; inset: 0; pointer-events: none;
+        background:
+          radial-gradient(ellipse 60% 50% at 50% 100%,
+            rgba(180,100,200,0.10) 0%, transparent 70%),
+          radial-gradient(ellipse 40% 30% at 50% 0%,
+            rgba(210,165,40,0.08) 0%, transparent 60%);
+      }
+      .tapete {
+        position: relative;
+        width: 100%;
+        padding-bottom: 66%;
+        background: #c8a878;
+        border-radius: 14px;
+        border: 2px solid rgba(140,90,30,0.5);
+        box-shadow:
+          inset 0 0 50px rgba(80,40,10,0.45),
+          inset 0 0 20px rgba(60,30,5,0.3),
+          0 6px 24px rgba(0,0,0,0.55);
+        overflow: hidden;
+      }
+      .tapete::before {
+        content: '';
+        position: absolute; inset: 0;
+        background-image:
+          repeating-linear-gradient(0deg,
+            rgba(100,60,20,0.12) 0px, transparent 1px, transparent 8px),
+          repeating-linear-gradient(90deg,
+            rgba(100,60,20,0.12) 0px, transparent 1px, transparent 8px);
+        border-radius: 12px;
+        pointer-events: none;
+      }
+      .tapete.tremendo {
+        animation: treme-tapete 0.4s ease-in-out;
+      }
+      .tapete.revelado {
+        animation: glow-tapete 2.5s ease-in-out infinite;
+      }
+      .buzio {
+        position: absolute;
+        width: 52px; height: 36px;
+        cursor: pointer;
+        transition: filter 0.2s ease, transform 0.15s ease;
+        will-change: transform;
+        z-index: 2;
+      }
+      .buzio.caindo {
+        animation: cai-buzio 0.55s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+        pointer-events: none;
+      }
+      .buzio:not(.caindo):hover {
+        filter: brightness(1.18) drop-shadow(0 3px 10px rgba(210,165,40,0.5));
+        transform: rotate(var(--rot,0deg)) translateY(-2px) scale(1.06);
+      }
+      .buzio:not(.caindo):active {
+        transform: rotate(var(--rot,0deg)) scale(0.95);
+      }
+      .buzio svg {
+        width: 100%; height: 100%;
+        display: block;
+      }
+      .odu-card {
+        text-align: center;
+        padding: 16px 0;
+      }
+      .odu-card .odu-numero {
+        font-family: 'Cinzel', serif;
+        font-size: 48px;
+        font-weight: 700;
+        color: #e2b84a;
+        line-height: 1;
+        text-shadow: 0 0 30px rgba(210,165,40,0.25);
+        animation: aparece-odu 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+      }
+      .odu-card .odu-nome {
+        font-family: 'Cinzel', serif;
+        font-size: 18px;
+        font-weight: 600;
+        color: #f0e6d0;
+        margin-top: 4px;
+      }
+      .odu-card .odu-energia {
+        font-family: 'Cormorant Garamond', serif;
+        font-style: italic;
+        font-size: 14px;
+        color: rgba(210,165,40,0.65);
+        margin-top: 2px;
+      }
+      .odu-card.vazio .odu-numero {
+        font-size: 14px;
+        color: rgba(255,255,255,0.3);
+        font-family: 'Inter', sans-serif;
+        font-weight: 400;
+        text-shadow: none;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+      .btn-jogar {
+        width: 100%;
+        background: linear-gradient(135deg,
+          rgba(150,100,8,0.88), rgba(195,148,18,0.78));
+        border: 1px solid rgba(210,165,40,0.5);
+        border-radius: 50px;
+        padding: 14px 0;
+        font-family: 'Cinzel', serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1a0e00;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        cursor: pointer;
+        box-shadow:
+          0 4px 20px rgba(150,100,8,0.35),
+          inset 0 1px 0 rgba(255,220,80,0.2);
+        transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1),
+                    box-shadow 0.2s ease;
+      }
+      .btn-jogar:hover:not(:disabled) {
+        transform: translateY(-3px) scale(1.01);
+        box-shadow:
+          0 8px 28px rgba(150,100,8,0.5),
+          inset 0 1px 0 rgba(255,220,80,0.3);
+      }
+      .btn-jogar:active:not(:disabled) {
+        transform: translateY(-1px) scale(0.99);
+      }
+      .btn-jogar:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
       /* Mobile hover reduction */
       @media (hover: none) {
         .nav-card:hover { transform: none !important; }
         .hero-btn:hover { transform: none !important; }
-        .buzio:hover { transform: none !important; }
+        .buzio:not(.caindo):hover {
+          filter: none !important;
+          transform: rotate(var(--rot,0deg)) !important;
+        }
         .ikin:hover { transform: none !important; }
+        .btn-jogar:hover { transform: none !important; }
       }
 
       /* Legacy styles preserved */
