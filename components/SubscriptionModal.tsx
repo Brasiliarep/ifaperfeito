@@ -24,7 +24,7 @@ declare global {
     interface Window { paypal: any; }
 }
 
-const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, featureName }) => {
+const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, featureName, subscribing, subscribeError, onDismissError }) => {
     const [isBrazil, setIsBrazil] = useState(true);
     const [sdkReady, setSdkReady] = useState(false);
     const onSubscribeRef = useRef(onSubscribe);
