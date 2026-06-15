@@ -10,6 +10,7 @@ interface AuthContextType {
     userProfile: UserProfile | null;
     loading: boolean;
     updateUsageCounters: (type: 'consultation' | 'study') => Promise<void>;
+    refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
     userProfile: null,
     loading: true,
     updateUsageCounters: async () => {},
+    refreshProfile: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -25,6 +27,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [user, setUser] = useState<User | null>(null);
     const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+
+    const refreshProfile = async () => {
+        if (!user) return;
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const profile = docSnap.data() as UserProfile;
+            firestoreCache.set('profile_' + user.uid, profile);
+            setUserProfile(profile);
+        }
+    };
 
     const updateUsageCounters = async (type: 'consultation' | 'study') => {
         if (!user || !userProfile) return;
@@ -126,7 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, userProfile, loading, updateUsageCounters }}>
+        <AuthContext.Provider value={{ user, userProfile, loading, updateUsageCounters, refreshProfile }}>
             {children}
         </AuthContext.Provider>
     );

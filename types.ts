@@ -28,6 +28,7 @@ export interface UserProfile {
     validUntil?: string;
     name: string;
     role?: 'admin' | 'user';
+    paypalSubscriptionId?: string;
     consultationCount?: number;
     studyCount?: number;
     termsAcceptedAt?: string;

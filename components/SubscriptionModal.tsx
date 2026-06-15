@@ -4,8 +4,11 @@ import { Crown, CheckCircle2, Star, Shield, Lock, X, Globe, GraduationCap, Spark
 interface Props {
     isOpen: boolean;
     onClose: () => void;
-    onSubscribe: () => void;
+    onSubscribe: (subscriptionId: string, planKey: string) => void;
     featureName?: string;
+    subscribing?: boolean;
+    subscribeError?: string;
+    onDismissError?: () => void;
 }
 
 const PLAN_IDS = {
@@ -91,7 +94,7 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
                 window.paypal.Buttons({
                     createSubscription: (_data: any, actions: any) =>
                         actions.subscription.create({ plan_id: planId }),
-                    onApprove: () => onSubscribeRef.current(),
+                    onApprove: (data: any) => onSubscribeRef.current(data.subscriptionID, key),
                     style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
                 }).render(`#paypal-button-${key}`);
             });
@@ -245,6 +248,27 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
                         <Lock size={12} /> {isBrazil ? 'Pagamento 100% seguro processado pelo PayPal' : '100% secure payment processed by PayPal'}
                     </div>
                 </div>
+
+                {subscribeError && (
+                    <div className="px-8 pb-6">
+                        <div className="bg-red-950/60 border border-red-500/40 rounded-xl p-4 text-center">
+                            <p className="text-red-300 text-sm mb-2">{subscribeError}</p>
+                            {onDismissError && (
+                                <button onClick={onDismissError} className="text-xs text-ifa-neutral underline hover:text-white">
+                                    {isBrazil ? 'Tentar novamente' : 'Try again'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {subscribing && (
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center z-20">
+                        <div className="w-10 h-10 border-2 border-ifa-gold border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p className="text-ifa-gold font-serif text-lg">{isBrazil ? 'Ativando sua assinatura...' : 'Activating your subscription...'}</p>
+                        <p className="text-ifa-neutral text-xs mt-1">{isBrazil ? 'Aguarde enquanto confirmamos seu pagamento' : 'Please wait while we confirm your payment'}</p>
+                    </div>
+                )}
             </div>
         </div>
     );

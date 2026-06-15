@@ -89,7 +89,7 @@ type AppView = 'home' | 'history' | 'register' | 'input' | 'result' | 'print' | 
 import LoginScreen from './components/LoginScreen';
 
 function App() {
-    const { user, userProfile, loading: authLoading, updateUsageCounters } = useAuth();
+    const { user, userProfile, loading: authLoading, updateUsageCounters, refreshProfile } = useAuth();
     const [isLocked, setIsLocked] = useState(false);
     const [isKeyMissing, setIsKeyMissing] = useState(false);
     const [view, setView] = useState<AppView>('home');
@@ -133,6 +133,8 @@ function App() {
 
     const [showPaywall, setShowPaywall] = useState(false);
     const [blockedFeature, setBlockedFeature] = useState('');
+    const [subscribing, setSubscribing] = useState(false);
+    const [subscribeError, setSubscribeError] = useState('');
 
     const viewRef = useRef<AppView>('home');
 
@@ -252,7 +254,25 @@ function App() {
             action();
         }
     };
-    const handleSubscribe = () => { setShowPaywall(false); };
+    const handleSubscribe = async (subscriptionId: string, planKey: string) => {
+        setSubscribing(true);
+        setSubscribeError('');
+        try {
+            const res = await fetch('/api/activate-subscription', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ subscriptionId, uid: user?.uid, planKey }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Falha ao ativar assinatura');
+            await refreshProfile();
+            setShowPaywall(false);
+        } catch (err: any) {
+            setSubscribeError(err.message || 'Erro ao ativar assinatura. Contate o suporte.');
+        } finally {
+            setSubscribing(false);
+        }
+    };
 
     const handleChangeLanguage = (lang: Language) => {
       setLanguage(lang);
@@ -771,7 +791,7 @@ function App() {
                     </div>
                 </div>
             )}
-            <SubscriptionModal isOpen={showPaywall} onClose={() => setShowPaywall(false)} onSubscribe={handleSubscribe} featureName={blockedFeature} />
+            <SubscriptionModal isOpen={showPaywall} onClose={() => { if (!subscribing) { setShowPaywall(false); setSubscribeError(''); } }} onSubscribe={handleSubscribe} featureName={blockedFeature} subscribing={subscribing} subscribeError={subscribeError} onDismissError={() => setSubscribeError('')} />
             <LegalModal type={legalModalType} onClose={() => setLegalModalType(null)} />
             <SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
