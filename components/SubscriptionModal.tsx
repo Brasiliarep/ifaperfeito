@@ -168,9 +168,20 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
                                 <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-0.5" /> {isBrazil ? 'Modo Estudo Individual' : 'Individual Study Mode'}</li>
                                 <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-0.5" /> {isBrazil ? 'Dicionário Yorubá' : 'Yoruba Dictionary'}</li>
                                 <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-0.5" /> {isBrazil ? 'Nomes Yorubá' : 'Yoruba Names'}</li>
+                                <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-0.5" /> {isBrazil ? 'Calendário Litúrgico' : 'Liturgical Calendar'}</li>
+                                <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-0.5" /> {isBrazil ? 'Diário de Sonhos' : 'Dream Journal'}</li>
                             </ul>
 
-                            <div className="mt-auto text-[10px] text-amber-500/70 italic mb-3">{isBrazil ? 'Ideal para iniciantes' : 'Best for beginners'}</div>
+                            <div className="bg-amber-950/30 border border-amber-500/20 rounded-lg p-3 mb-3">
+                                <p className="text-[10px] text-amber-400/80 font-bold uppercase tracking-wider mb-1">{isBrazil ? '✕ Não inclui' : '✕ Does not include'}</p>
+                                <p className="text-[10px] text-amber-500/60 leading-relaxed">
+                                    {isBrazil
+                                        ? 'Magias, Ebós, Assentamentos, Ferramentas Esotéricas, Gestão de Templo, Voz do Trovão, Matemática Reversa, Atendimento a Consulente'
+                                        : 'Spells, Ebós, Assentamentos, Esoteric Tools, Temple Management, Thunder Voice, Reverse Math, Client Consultation'}
+                                </p>
+                            </div>
+
+                            <div className="mt-auto text-[10px] text-amber-500/70 italic mb-3">{isBrazil ? 'Ideal para iniciantes e estudiosos' : 'Best for beginners and scholars'}</div>
 
                             <div id="paypal-button-estudante" className="min-h-[40px] w-full"></div>
                         </div>
