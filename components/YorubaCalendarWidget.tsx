@@ -74,47 +74,49 @@ const YorubaCalendarWidget: React.FC<Props> = ({ onOpenIgbadu }) => {
     };
 
     return (
-        <div className="bg-[#1a1510] border border-[#5D4037] rounded-xl p-4 w-full shadow-lg relative group hover:border-[#D4AF37] transition-colors">
+        <div className="bg-[#1a1510] border border-[#5D4037] rounded-xl w-full shadow-lg relative group hover:border-[#D4AF37] transition-colors overflow-hidden">
             <div className="absolute inset-0 opacity-5 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] pointer-events-none"></div>
             
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2 text-[#a8a29e] text-xs uppercase tracking-widest">
-                    <Calendar size={14} />
+            <div className="flex items-center justify-between px-4 pt-4 pb-1">
+                <div className="flex items-center gap-1.5 text-[#a8a29e] text-[10px] uppercase tracking-widest">
+                    <Calendar size={12} />
                     <span>Calendário Litúrgico</span>
                 </div>
-                <div className="text-[#a8a29e] text-xs flex items-center gap-2">
-                    <div className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded-full" title="Fase da Lua Aproximada">
-                        {moonPhase.icon} <span className="uppercase text-[10px]">{moonPhase.name}</span>
+                <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded-full" title="Fase da Lua Aproximada">
+                        {moonPhase.icon} <span className="uppercase text-[9px] text-[#a8a29e]">{moonPhase.name}</span>
                     </div>
-                    {date.toLocaleDateString()}
+                    <span className="text-[10px] text-[#a8a29e]">{date.toLocaleDateString()}</span>
                 </div>
             </div>
 
-            <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                    <h3 className={`text-xl font-serif font-bold ${info.color} mb-1 drop-shadow-md truncate`}>
-                        {info.name}
-                    </h3>
-                    <p className="text-[#e5e5e5] text-sm italic opacity-80">"{info.greeting}"</p>
-                    <p className="text-xs text-ifa-gold flex items-center gap-1 mt-1"><ShoppingBag size={10}/> {marketDay}</p>
-                </div>
-                <div className="flex flex-col items-end gap-2 shrink-0">
-                    <div className="flex gap-1 justify-end flex-wrap max-w-[120px]">
+            <div className="px-4 py-2">
+                <div className="flex items-end justify-between gap-2">
+                    <div className="min-w-0">
+                        <h3 className={`text-base font-serif font-bold ${info.color} drop-shadow-md leading-tight`}>
+                            {info.name}
+                        </h3>
+                        <p className="text-[#e5e5e5] text-xs italic opacity-80 mt-0.5">"{info.greeting}"</p>
+                    </div>
+                    <div className="flex gap-1 justify-end flex-wrap shrink-0" style={{ maxWidth: 110 }}>
                         {info.orishas.map(o => (
-                            <span key={o} className="bg-[#5D4037]/50 px-2 py-0.5 rounded text-[10px] text-[#F5F5DC] border border-[#5D4037]">
+                            <span key={o} className="bg-[#5D4037]/50 px-1.5 py-0.5 rounded text-[9px] text-[#F5F5DC] border border-[#5D4037] leading-none">
                                 {o}
                             </span>
                         ))}
                     </div>
-                    
-                    <div className="flex gap-2">
+                </div>
+                
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+                    <p className="text-[10px] text-ifa-gold flex items-center gap-1"><ShoppingBag size={8}/> {marketDay}</p>
+                    <div className="flex gap-1.5">
                         {onOpenIgbadu && (
-                            <button onClick={onOpenIgbadu} className="text-[10px] flex items-center gap-1 text-ifa-base bg-ifa-gold border border-ifa-gold px-2 py-1 rounded hover:bg-white transition-colors" title="Abrir Igbadu">
-                                <Hexagon size={10} /> Igbadu
+                            <button onClick={onOpenIgbadu} className="text-[9px] flex items-center gap-1 text-ifa-base bg-ifa-gold border border-ifa-gold px-1.5 py-0.5 rounded hover:bg-white transition-colors" title="Abrir Igbadu">
+                                <Hexagon size={7} /> Igbadu
                             </button>
                         )}
-                        <button onClick={addToCalendar} className="text-[10px] flex items-center gap-1 text-ifa-gold border border-ifa-gold/30 px-2 py-1 rounded hover:bg-ifa-gold hover:text-black transition-colors" title="Sincronizar Ojo Awo">
-                            <Download size={10} /> Sync
+                        <button onClick={addToCalendar} className="text-[9px] flex items-center gap-1 text-ifa-gold border border-ifa-gold/30 px-1.5 py-0.5 rounded hover:bg-ifa-gold hover:text-black transition-colors" title="Sincronizar Ojo Awo">
+                            <Download size={7} /> Sync
                         </button>
                     </div>
                 </div>
