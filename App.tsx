@@ -241,7 +241,7 @@ function App() {
         action();
     };
 
-    const isPro = (plan?: string) => plan === 'pro_monthly' || plan === 'pro_annual';
+    const isPro = (plan?: string) => plan !== 'free' && plan !== 'student_monthly' && plan !== undefined;
 
     const handleProFeature = (featureName: string, action: () => void) => {
         if (!user) { setShowLoginModal(true); return; }
