@@ -90,31 +90,31 @@ const YorubaCalendarWidget: React.FC<Props> = ({ onOpenIgbadu }) => {
                 </div>
             </div>
 
-            <div className="flex items-center justify-between">
-                <div>
-                    <h3 className={`text-2xl font-serif font-bold ${info.color} mb-1 drop-shadow-md`}>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                    <h3 className={`text-lg md:text-xl font-serif font-bold ${info.color} mb-0.5 drop-shadow-md truncate`}>
                         {info.name}
                     </h3>
-                    <p className="text-[#e5e5e5] text-sm italic opacity-80">"{info.greeting}"</p>
-                    <p className="text-xs text-ifa-gold flex items-center gap-1 mt-1"><ShoppingBag size={10}/> {marketDay}</p>
+                    <p className="text-[#e5e5e5] text-xs italic opacity-80 truncate">"{info.greeting}"</p>
+                    <p className="text-[10px] text-ifa-gold flex items-center gap-1 mt-0.5"><ShoppingBag size={8}/> <span className="truncate">{marketDay}</span></p>
                 </div>
-                <div className="flex flex-col items-end gap-2">
-                    <div className="flex gap-1 justify-end flex-wrap max-w-[120px]">
+                <div className="flex flex-col items-start md:items-end gap-1.5 shrink-0">
+                    <div className="flex gap-1 flex-wrap">
                         {info.orishas.map(o => (
-                            <span key={o} className="bg-[#5D4037]/50 px-2 py-0.5 rounded text-[10px] text-[#F5F5DC] border border-[#5D4037]">
+                            <span key={o} className="bg-[#5D4037]/50 px-1.5 py-0.5 rounded text-[9px] text-[#F5F5DC] border border-[#5D4037]">
                                 {o}
                             </span>
                         ))}
                     </div>
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-1.5">
                         {onOpenIgbadu && (
-                            <button onClick={onOpenIgbadu} className="text-[10px] flex items-center gap-1 text-ifa-base bg-ifa-gold border border-ifa-gold px-2 py-1 rounded hover:bg-white transition-colors" title="Abrir Igbadu">
-                                <Hexagon size={10} /> Igbadu
+                            <button onClick={onOpenIgbadu} className="text-[9px] flex items-center gap-1 text-ifa-base bg-ifa-gold border border-ifa-gold px-1.5 py-0.5 rounded hover:bg-white transition-colors" title="Abrir Igbadu">
+                                <Hexagon size={8} /> Igbadu
                             </button>
                         )}
-                        <button onClick={addToCalendar} className="text-[10px] flex items-center gap-1 text-ifa-gold border border-ifa-gold/30 px-2 py-1 rounded hover:bg-ifa-gold hover:text-black transition-colors" title="Sincronizar Ojo Awo">
-                            <Download size={10} /> Sync
+                        <button onClick={addToCalendar} className="text-[9px] flex items-center gap-1 text-ifa-gold border border-ifa-gold/30 px-1.5 py-0.5 rounded hover:bg-ifa-gold hover:text-black transition-colors" title="Sincronizar Ojo Awo">
+                            <Download size={8} /> Sync
                         </button>
                     </div>
                 </div>

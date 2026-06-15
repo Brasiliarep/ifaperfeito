@@ -556,7 +556,7 @@ function App() {
 
                     {/* Calendar */}
                     {!homeSearch && (
-                        <div className="glass-card-no-clip rounded-xl">
+                        <div className="glass-card-no-clip rounded-xl overflow-hidden">
                             <YorubaCalendarWidget onOpenIgbadu={() => handleProFeature('Igbadu Virtual', () => setView('igbadu'))} />
                         </div>
                     )}
