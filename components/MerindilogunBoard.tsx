@@ -158,6 +158,7 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
     onToggleRef.current = onToggle;
     const fileRef = useRef<HTMLInputElement>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const initialThrowDoneRef = useRef(false);
 
     const openCount = cowries.filter(c => c === 'open').length;
     const odu = useMemo(() => ODUS[Math.min(openCount, 16)], [openCount]);
@@ -174,6 +175,14 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
         ro.observe(el);
         return () => ro.disconnect();
     }, []);
+
+    // --- AUTO-FALL ON MOUNT (after ritual and positions ready) ---
+    useEffect(() => {
+        if (!ritualComplete || positions.length < 16 || initialThrowDoneRef.current) return;
+        initialThrowDoneRef.current = true;
+        const timer = setTimeout(relancarBuzios, 350);
+        return () => clearTimeout(timer);
+    }, [ritualComplete, positions]);
 
     // --- DIRECTIONS RITUAL ---
     const DIRECTIONS = [
@@ -192,8 +201,8 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
 
     const finishRitual = () => setRitualComplete(true);
 
-    // --- THROW HANDLER ---
-    const handleThrowAll = () => {
+    // --- CORE THROW LOGIC (no event, called by both click and auto-fall) ---
+    function relancarBuzios() {
         if (throwingRef.current) return;
         throwingRef.current = true;
         setThrowPhase('trembling');
@@ -228,6 +237,13 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
         setTimeout(() => {
             throwingRef.current = false;
         }, 400 + 550 + 100);
+    }
+
+    // --- THROW HANDLER (prevents navigation) ---
+    const handleThrowAll = (e?: React.MouseEvent) => {
+        e?.preventDefault();
+        e?.stopPropagation();
+        relancarBuzios();
     };
 
     // --- MANUAL TOGGLE ---
@@ -235,6 +251,7 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
         if (throwingRef.current || throwPhase === 'falling' || throwPhase === 'trembling') return;
         somVirada();
         onToggleRef.current(idx);
+        setHasThrown(true);
     };
 
     // --- CAMERA ---

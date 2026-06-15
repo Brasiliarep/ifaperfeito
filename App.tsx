@@ -846,14 +846,18 @@ function App() {
                         <div className="animate-fade-in w-full flex flex-col items-center">
                             <button onClick={() => setDivinationMethod(null)} className="mb-4 text-xs font-bold uppercase text-ifa-neutral hover:text-ifa-gold flex items-center gap-2"><ArrowLeft size={14} /> {t.oracleChangeMethod}</button>
                             {renderBoard()}
-                            <div className="card-selecionado text-center mb-8 bg-ifa-surface p-4 rounded-lg border border-ifa-border/30 w-full max-w-md mt-4">
-                                <p className="text-ifa-neutral text-xs uppercase mb-1">{t.oduDetected}</p>
-                                <h2 className="text-3xl font-serif text-ifa-text font-bold">{currentOdu.name}</h2>
-                            </div>
+                            {divinationMethod !== 'merindilogun' && (
+                                <div className="card-selecionado text-center mb-8 bg-ifa-surface p-4 rounded-lg border border-ifa-border/30 w-full max-w-md mt-4">
+                                    <p className="text-ifa-neutral text-xs uppercase mb-1">{t.oduDetected}</p>
+                                    <h2 className="text-3xl font-serif text-ifa-text font-bold">{currentOdu.name}</h2>
+                                </div>
+                            )}
                             <div className="space-y-4 w-full max-w-md">
-                                <button onClick={() => handleInterpret()} disabled={loading.isLoading} className="w-full py-4 bg-ifa-gold text-ifa-base font-bold text-lg uppercase tracking-widest hover:opacity-90 transition-all rounded-lg shadow-lg flex items-center justify-center gap-3 disabled:opacity-50 whitespace-normal text-center relative overflow-hidden group">
-                                    {loading.isLoading ? <><Loader2 className="animate-spin" /> {loading.message}</> : t.interpret}
-                                </button>
+                                {(divinationMethod !== 'merindilogun' || cowries.filter(c => c === 'open').length > 0) && (
+                                    <button onClick={() => handleInterpret()} disabled={loading.isLoading} className="w-full py-4 bg-ifa-gold text-ifa-base font-bold text-lg uppercase tracking-widest hover:opacity-90 transition-all rounded-lg shadow-lg flex items-center justify-center gap-3 disabled:opacity-50 whitespace-normal text-center relative overflow-hidden group">
+                                        {loading.isLoading ? <><Loader2 className="animate-spin" /> {loading.message}</> : t.interpret}
+                                    </button>
+                                )}
                             </div>
                         </div>
                     )}
