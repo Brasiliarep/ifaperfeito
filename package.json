@@ -16,6 +16,7 @@
     "firebase": "^12.14.0",
     "jszip": "^3.10.1",
     "lucide-react": "^0.344.0",
+    "jose": "^5.9.6",
     "pdf-parse": "^2.4.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
