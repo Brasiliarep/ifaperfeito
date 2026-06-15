@@ -20,4 +20,5 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: 9452745eae25ee258adc2486bee48776
           command: pages deploy dist --project-name=ifaaluwo --branch=master
