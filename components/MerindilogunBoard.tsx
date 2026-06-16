@@ -151,6 +151,7 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
     const [throwPhase, setThrowPhase] = useState<'idle' | 'trembling' | 'falling' | 'revealed'>('idle');
     const [positions, setPositions] = useState<Posicao[]>([]);
     const [hasThrown, setHasThrown] = useState(false);
+    const [throwing, setThrowing] = useState(false);
 
     const tapeteRef = useRef<HTMLDivElement>(null);
     const throwingRef = useRef(false);
@@ -205,7 +206,9 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
     function relancarBuzios() {
         if (throwingRef.current) return;
         throwingRef.current = true;
+        setThrowing(true);
         setThrowPhase('trembling');
+        setHasThrown(false);
 
         setTimeout(() => {
             const tapete = tapeteRef.current;
@@ -236,6 +239,7 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
 
         setTimeout(() => {
             throwingRef.current = false;
+            setThrowing(false);
         }, 400 + 550 + 100);
     }
 
@@ -384,7 +388,7 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
                     <button
                         type="button"
                         onClick={handleThrowAll}
-                        disabled={throwingRef.current}
+                        disabled={throwing}
                         className="p-2 rounded-lg text-ifa-neutral hover:text-ifa-gold hover:bg-ifa-gold/10 transition-all"
                         title="Jogar todos os 16 búzios"
                     >
@@ -412,7 +416,7 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
                         <div className="odu-energia">{odu.energia}</div>
                     </>
                 ) : (
-                    <div className="odu-numero">Oju Opon (Olhos do Tabuleiro) Abertos.</div>
+                    <div className="odu-numero text-ifa-neutral/40">Aguardando os Búzios...</div>
                 )}
             </div>
 
@@ -420,11 +424,12 @@ const MerindilogunBoard: React.FC<Props> = ({ cowries, onToggle }) => {
             <button
                 type="button"
                 onClick={handleThrowAll}
-                disabled={throwingRef.current}
+                disabled={throwing}
                 className="btn-jogar mt-2 max-w-md"
             >
                 {throwPhase === 'trembling' ? 'Tremendo...' :
                  throwPhase === 'falling' ? 'Caem os Búzios...' :
+                 hasThrown ? 'Jogar Novamente' :
                  'Jogar os Búzios'}
             </button>
 
