@@ -125,10 +125,13 @@ function somVirada() {
 interface Posicao { x: number; y: number; rot: number; }
 
 function gerarPosicoes(largura: number, altura: number): Posicao[] {
-  const pad = 38, bW = 52, bH = 36, minDist = 52;
+  const scale = Math.min(largura / 448, 1);
+  const pad = Math.round(Math.max(20, 38 * scale));
+  const bW = 52, bH = 36;
+  const minDist = Math.max(34, Math.round(52 * scale));
   const pos: Posicao[] = [];
   let tentativas = 0;
-  while (pos.length < 16 && tentativas < 2000) {
+  while (pos.length < 16 && tentativas < 5000) {
     tentativas++;
     const x = pad + Math.random() * (largura - bW - pad * 2);
     const y = pad + Math.random() * (altura - bH - pad * 2);
@@ -139,6 +142,21 @@ function gerarPosicoes(largura: number, altura: number): Posicao[] {
       if (Math.sqrt(dx * dx + dy * dy) < minDist) { valido = false; break; }
     }
     if (valido) pos.push({ x, y, rot });
+  }
+  // Fallback: if still not 16, force-place remaining using grid
+  if (pos.length < 16) {
+    const cols = 4;
+    const rows = 4;
+    const cellW = (largura - pad * 2) / cols;
+    const cellH = (altura - pad * 2) / rows;
+    for (let i = 0; i < 16 && pos.length < 16; i++) {
+      const r = Math.floor(i / cols);
+      const c = i % cols;
+      const fx = pad + c * cellW + cellW * 0.5 - bW / 2;
+      const fy = pad + r * cellH + cellH * 0.5 - bH / 2;
+      const already = pos.some(p => Math.sqrt((p.x - fx) ** 2 + (p.y - fy) ** 2) < minDist);
+      if (!already) pos.push({ x: fx, y: fy, rot: Math.random() * 30 - 15 });
+    }
   }
   return pos;
 }
