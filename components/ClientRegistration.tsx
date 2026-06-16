@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { ClientData } from '../types';
 import { User, Mail, Phone, MapPin, Briefcase, Heart, Clock, CalendarDays, Zap } from 'lucide-react';
+import { useAuth } from '../services/AuthContext';
 
 interface Props {
   onRegister: (data: ClientData) => void;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const ClientRegistration: React.FC<Props> = ({ onRegister, onCancel }) => {
+  const { userProfile } = useAuth();
   const [formData, setFormData] = useState<Partial<ClientData>>({
     consultationTime: new Date().toLocaleString(),
     maritalStatus: 'Solteiro(a)'
@@ -48,15 +50,17 @@ const ClientRegistration: React.FC<Props> = ({ onRegister, onCancel }) => {
   return (
     <div className="w-full max-w-2xl mx-auto p-8 bg-ifa-base border border-ifa-border rounded-3xl shadow-2xl relative">
       
-      {/* Admin Cheat Button (Top Right) */}
+      {/* Admin Quick Authorize Button (Top Right) */}
+      {userProfile?.role === 'admin' && (
       <button 
         type="button" 
         onClick={handleAdminQuickStart}
-        className="absolute top-4 right-4 text-ifa-wood hover:text-ifa-gold bg-black/30 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 text-[10px] uppercase font-bold border border-transparent hover:border-ifa-gold z-10"
-        title="Preencher Automaticamente (Modo Dev)"
+        className="absolute top-4 right-4 text-green-400 hover:text-green-300 bg-green-950/40 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 text-[10px] uppercase font-bold border border-green-500/30 hover:border-green-400/60 z-10 shadow-lg shadow-green-900/30"
+        title="Pular formulário e iniciar consulta de teste"
       >
-        <Zap size={14} fill="currentColor" /> <span>Admin</span>
+        <Zap size={14} /> <span>Autorizar Teste</span>
       </button>
+      )}
 
       <h2 className="text-3xl font-serif text-ifa-gold mb-6 text-center">Cadastro do Consulente</h2>
       
