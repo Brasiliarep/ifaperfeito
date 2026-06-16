@@ -4,6 +4,7 @@ import { OpeleState, SeedState, OduInfo, AIInterpretation, LoadingState, ClientD
 import OpeleSeed from './components/OpeleSeed';
 import OponIfaBoard from './components/OponIfaBoard';
 import MerindilogunBoard from './components/MerindilogunBoard';
+import IkinRitual from './components/IkinRitual';
 import { calculateOdu, NAME_TO_VALUE, valueToLeg, getLegValue, SIGN_NAMES, calculateMerindilogunOdu } from './utils/oduLogic';
 import { fetchInterpretation, analyzeOpeleImage, hasValidKey, setManualKey } from './services/geminiService';
 import { saveConsultation } from './services/storageService';
@@ -94,6 +95,7 @@ function App() {
     const [isKeyMissing, setIsKeyMissing] = useState(false);
     const [view, setView] = useState<AppView>('home');
     const [opele, setOpele] = useState<OpeleState>(INITIAL_OPELE);
+    const [ikinKey, setIkinKey] = useState(0);
     const [cowries, setCowries] = useState<CowrieState>(INITIAL_COWRIES);
     const [divinationMethod, setDivinationMethod] = useState<DivinationMethod | null>(null);
     const [client, setClient] = useState<ClientData | null>(null);
@@ -325,7 +327,10 @@ function App() {
         if (divinationMethod === 'merindilogun') {
             return (<div className="w-full flex justify-center py-4"><MerindilogunBoard cowries={cowries} onToggle={toggleCowrie} /></div>);
         }
-        if (divinationMethod === 'opon' || divinationMethod === 'ikin') {
+        if (divinationMethod === 'ikin') {
+            return (<div className="w-full flex justify-center py-4"><IkinRitual key={ikinKey} opele={opele} onToggle={toggleSeed} onReset={() => { setOpele(INITIAL_OPELE); setIkinKey(k => k + 1); }} oduName={currentOdu?.name} /></div>);
+        }
+        if (divinationMethod === 'opon') {
             return (<div className="w-full flex justify-center py-4"><OponIfaBoard opele={opele} onToggle={toggleSeed} /></div>);
         }
         return (
