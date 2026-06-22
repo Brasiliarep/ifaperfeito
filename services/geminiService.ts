@@ -196,7 +196,7 @@ const makeFallback = (oduName: string): AIInterpretation => {
 };
 
 // ─── INTERPRETAÇÃO PRINCIPAL ───────────────────────────────────────────────────
-export const fetchInterpretation = async (odu: OduInfo, lang: string, iboResult?: { type: string; subType: string; description: string }): Promise<AIInterpretation> => {
+export const fetchInterpretation = async (odu: OduInfo, lang: string, iboResult?: { type: string; subType: string; description: string }, isStudent?: boolean): Promise<AIInterpretation> => {
   const fallback = makeFallback(odu.name);
   if (!getLocalKey()) {
     console.warn("fetchInterpretation: sem chave Groq.");
@@ -207,10 +207,11 @@ export const fetchInterpretation = async (odu: OduInfo, lang: string, iboResult?
     ? `\n🎯 IBÓ REVELADO (use este resultado para orientar TODO o conteúdo): ${iboResult.type} — ${iboResult.subType}: "${iboResult.description}"\n→ O campo "ireOrOsogbo" do JSON DEVE ser "${iboResult.type === 'IRE' ? 'Irê' : 'Osogbo'}". Toda a leitura deve refletir este caminho.\n`
     : '';
 
-  const userPrompt = `Odu consultado: "${odu.name}". IDIOMA: Português do Brasil (PT-BR).${iboContext}
+  const studentRules = isStudent
+    ? `\n⚠️ ATENÇÃO: O USUÁRIO É UM ESTUDANTE. É PROIBIDO GERAR QUALQUER RECEITA DE EBÓ, MAGIA, AKOSE OU BANHO. RETORNE AS ESTRUTURAS DE EBÓS E BANHOS EXATAMENTE VAZIAS OU COM TEXTOS COMO "NÃO DISPONÍVEL NO MODO ESTUDANTE". FOQUE APENAS NO ITAN E NOS CONSELHOS FILOSÓFICOS.\n`
+    : `\n⚠️ ANTI-CLONE: Ebós de Amor/Dinheiro/Saúde com mesmos ingredientes = inválido.\nREGRAS: Todo ingrediente = "Iorubá (Português)". Completo = 16+ ingredientes, 8 passos numerados (Preparo, Invocação, Gige, Eje, Penas, Mistura, Sopro+Ofó, Despacho).\n`;
 
-⚠️ ANTI-CLONE: Ebós de Amor/Dinheiro/Saúde com mesmos ingredientes = inválido.
-REGRAS: Todo ingrediente = "Iorubá (Português)". Completo = 16+ ingredientes, 8 passos numerados (Preparo, Invocação, Gige, Eje, Penas, Mistura, Sopro+Ofó, Despacho).
+  const userPrompt = `Odu consultado: "${odu.name}". IDIOMA: Português do Brasil (PT-BR).${iboContext}${studentRules}
 Retorne APENAS este JSON:
 
 {

@@ -23,6 +23,7 @@ interface Props {
     onEndSession: (selections: SelectionMap, notes: string) => void;
     language: Language;
     onOpenMandala: () => void;
+    isStudent?: boolean;
 }
 
 type TabType = 'spirituality' | 'oriki' | 'orishas' | 'ori' | 'ebos' | 'baths' | 'love' | 'finance' | 'health' | 'dangers' | 'diet' | 'clothing' | 'obstacles' | 'ancestry' | 'personality' | 'decisions';
@@ -53,7 +54,7 @@ const SpecificProblemInput = ({ onGenerate, isLoading, t }: { onGenerate: (text:
     );
 };
 
-const InterpretationView: React.FC<Props> = ({ data, oduInfo, initialSelections, onReset, onEndSession, language, onOpenMandala }) => {
+const InterpretationView: React.FC<Props> = ({ data, oduInfo, initialSelections, onReset, onEndSession, language, onOpenMandala, isStudent }) => {
     const [activeTab, setActiveTab] = useState<TabType>('spirituality');
     const t = getTranslation(language);
 
@@ -334,7 +335,10 @@ const InterpretationView: React.FC<Props> = ({ data, oduInfo, initialSelections,
         { id: 'ancestry', label: t.tabAncestry, icon: <Users size={14} /> },
         { id: 'personality', label: t.tabPersonality, icon: <Brain size={14} /> },
         { id: 'decisions', label: t.tabDecisions, icon: <Activity size={14} /> },
-    ];
+    ].filter(tab => {
+        if (isStudent && (tab.id === 'ebos' || tab.id === 'baths')) return false;
+        return true;
+    });
 
     return (
         <div className="animate-fade-in w-full max-w-6xl mx-auto p-4 md:p-8 bg-ifa-base text-ifa-text pb-24">
@@ -443,16 +447,24 @@ const InterpretationView: React.FC<Props> = ({ data, oduInfo, initialSelections,
                             {activeTab === 'love' && (
                                 <div>
                                     <p className="mb-4">{data.love.analysis || "Para o amor, é necessário paciência."}</p>
-                                    <EboSelector category={t.tabLove} basic={data.love.ebos.basic} medium={data.love.ebos.medium} complete={data.love.ebos.complete} currentSelection={selections.love} onSelect={(t: any) => updateSelection('love', t)} oduName={data.oduName} />
-                                    {renderCustomRemedies()}
+                                    {!isStudent && (
+                                        <>
+                                            <EboSelector category={t.tabLove} basic={data.love.ebos.basic} medium={data.love.ebos.medium} complete={data.love.ebos.complete} currentSelection={selections.love} onSelect={(t: any) => updateSelection('love', t)} oduName={data.oduName} />
+                                            {renderCustomRemedies()}
+                                        </>
+                                    )}
                                 </div>
                             )}
 
                             {activeTab === 'finance' && (
                                 <div>
                                     <p className="mb-4">{data.finance.analysis || "Tenha cautela com gastos."}</p>
-                                    <EboSelector category={t.tabFinance} basic={data.finance.ebos.basic} medium={data.finance.ebos.medium} complete={data.finance.ebos.complete} currentSelection={selections.finance} onSelect={(t: any) => updateSelection('finance', t)} oduName={data.oduName} />
-                                    {renderCustomRemedies()}
+                                    {!isStudent && (
+                                        <>
+                                            <EboSelector category={t.tabFinance} basic={data.finance.ebos.basic} medium={data.finance.ebos.medium} complete={data.finance.ebos.complete} currentSelection={selections.finance} onSelect={(t: any) => updateSelection('finance', t)} oduName={data.oduName} />
+                                            {renderCustomRemedies()}
+                                        </>
+                                    )}
                                 </div>
                             )}
 
@@ -462,8 +474,12 @@ const InterpretationView: React.FC<Props> = ({ data, oduInfo, initialSelections,
                                     <div className="mb-4 flex flex-wrap gap-2">
                                         {data.health.risks && data.health.risks.map(r => <span key={r} className="bg-red-900/30 text-red-200 px-3 py-1 rounded-full text-xs font-bold border border-red-800">{r}</span>)}
                                     </div>
-                                    <EboSelector category={t.tabHealth} basic={data.health.ebos.basic} medium={data.health.ebos.medium} complete={data.health.ebos.complete} currentSelection={selections.health} onSelect={(t: any) => updateSelection('health', t)} oduName={data.oduName} />
-                                    {renderCustomRemedies()}
+                                    {!isStudent && (
+                                        <>
+                                            <EboSelector category={t.tabHealth} basic={data.health.ebos.basic} medium={data.health.ebos.medium} complete={data.health.ebos.complete} currentSelection={selections.health} onSelect={(t: any) => updateSelection('health', t)} oduName={data.oduName} />
+                                            {renderCustomRemedies()}
+                                        </>
+                                    )}
                                 </div>
                             )}
 
@@ -627,22 +643,26 @@ const InterpretationView: React.FC<Props> = ({ data, oduInfo, initialSelections,
                         <button onClick={onOpenMandala} className="text-xs text-ifa-gold underline hover:text-white">
                             Visualizar / Imprimir
                         </button>
-                        <div className="flex items-center gap-2 bg-ifa-base-dark p-2 rounded border border-ifa-border">
-                            <span className="text-xs font-bold text-green-400">R$</span>
-                            <input
-                                type="number"
-                                value={selections.mandala?.price || ''}
-                                onChange={(e) => updateMandalaSettings(selections.mandala?.selected || false, parseFloat(e.target.value))}
-                                placeholder="Preço"
-                                className="w-16 bg-transparent text-white text-sm outline-none text-right"
-                            />
-                        </div>
-                        <button
-                            onClick={() => updateMandalaSettings(!selections.mandala?.selected, selections.mandala?.price || 50)}
-                            className={`px-4 py-2 rounded text-xs font-bold uppercase transition-colors ${selections.mandala?.selected ? 'bg-green-600 text-white' : 'bg-ifa-base border border-ifa-border text-ifa-neutral hover:border-ifa-gold'}`}
-                        >
-                            {selections.mandala?.selected ? 'Incluído' : 'Adicionar'}
-                        </button>
+                        {!isStudent && (
+                            <>
+                                <div className="flex items-center gap-2 bg-ifa-base-dark p-2 rounded border border-ifa-border">
+                                    <span className="text-xs font-bold text-green-400">R$</span>
+                                    <input
+                                        type="number"
+                                        value={selections.mandala?.price || ''}
+                                        onChange={(e) => updateMandalaSettings(selections.mandala?.selected || false, parseFloat(e.target.value))}
+                                        placeholder="Preço"
+                                        className="w-16 bg-transparent text-white text-sm outline-none text-right"
+                                    />
+                                </div>
+                                <button
+                                    onClick={() => updateMandalaSettings(!selections.mandala?.selected, selections.mandala?.price || 50)}
+                                    className={`px-4 py-2 rounded text-xs font-bold uppercase transition-colors ${selections.mandala?.selected ? 'bg-green-600 text-white' : 'bg-ifa-base border border-ifa-border text-ifa-neutral hover:border-ifa-gold'}`}
+                                >
+                                    {selections.mandala?.selected ? 'Incluído' : 'Adicionar'}
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
 

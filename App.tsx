@@ -256,6 +256,16 @@ function App() {
             action();
         }
     };
+
+    const handleStudentOrProFeature = (featureName: string, action: () => void) => {
+        if (!user) { setShowLoginModal(true); return; }
+        if (!isPro(userProfile?.plan) && userProfile?.plan !== 'student_monthly') {
+            setBlockedFeature(featureName);
+            setShowPaywall(true);
+        } else {
+            action();
+        }
+    };
     const handleSubscribe = async (subscriptionId: string, planKey: string) => {
         setSubscribing(true);
         setSubscribeError('');
@@ -378,7 +388,7 @@ function App() {
     const handleInterpret = async (oduToInterpret = currentOdu) => {
         setLoading({ isLoading: true, message: t.interpreting });
         try {
-            const result = await fetchInterpretation(oduToInterpret, language, iboResult ?? undefined);
+            const result = await fetchInterpretation(oduToInterpret, language, iboResult ?? undefined, userProfile?.plan === 'student_monthly');
             setInterpretation(result);
             if (!user) {
                 if (client?.id === 'study') incrementAnonUsage('study');
@@ -633,7 +643,9 @@ function App() {
                             {/* Medium */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <GlassCard onClick={() => setView('virtual_room')} label={t.menuVirtualRoom} icon={Video} variant="blue" feature={t.featureVirtualRoom} />
-                                <GlassCard onClick={() => setView('oracle_hub')} label={t.menuOracleHub} icon={CircleDot} variant="terra" feature={t.featureAdvancedOracles} />
+                                <div onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => setView('oracle_hub'))}>
+                                    <GlassCard onClick={() => {}} label={t.menuOracleHub} icon={CircleDot} variant="terra" />
+                                </div>
                             </div>
 
                             {/* Conhecimento */}
@@ -870,7 +882,7 @@ function App() {
                 </div>
             )}
 
-            {view === 'result' && interpretation && <div className="min-h-screen py-12"><InterpretationView data={interpretation} oduInfo={currentOdu} initialSelections={activeRecord?.selections} language={language} onReset={() => { setInterpretation(null); setOpele(INITIAL_OPELE); setCowries(INITIAL_COWRIES); setDivinationMethod(null); setView('input'); }} onEndSession={handleEndSession} onOpenMandala={() => setView('mandala')} /></div>}
+            {view === 'result' && interpretation && <div className="min-h-screen py-12"><InterpretationView data={interpretation} oduInfo={currentOdu} initialSelections={activeRecord?.selections} language={language} isStudent={userProfile?.plan === 'student_monthly'} onReset={() => { setInterpretation(null); setOpele(INITIAL_OPELE); setCowries(INITIAL_COWRIES); setDivinationMethod(null); setView('input'); }} onEndSession={handleEndSession} onOpenMandala={() => setView('mandala')} /></div>}
             {view === 'print' && activeRecord && <PrintLayout record={activeRecord} onBack={() => setView('home')} onReturnToSession={interpretation ? () => setView('result') : undefined} />}
 
             {showQuickStudyModal && (
