@@ -243,6 +243,22 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
                                 <li className="flex items-start gap-2 text-white font-medium"><Shield size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Todas as ferramentas liberadas' : 'All tools unlocked'}</li>
                             </ul>
 
+                            {/* Bloco exclusivo Sacerdote — ferramentas que o Estudante NÃO tem */}
+                            <div className="bg-ifa-gold/10 border border-ifa-gold/40 rounded-lg p-2.5 mb-3">
+                                <p className="text-[9px] text-ifa-gold font-black uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                                    <Crown size={9} className="shrink-0" />
+                                    {isBrazil ? '✦ Exclusivo Sacerdote — não incluso no Estudante' : '✦ Priest Exclusive — not in Student plan'}
+                                </p>
+                                <ul className="space-y-1">
+                                    <li className="flex items-center gap-1.5 text-[9px] text-ifa-gold/90 font-semibold"><Sparkles size={8} className="shrink-0 text-ifa-gold" /> {isBrazil ? 'Bori — Ritual Interativo de Ori' : 'Bori — Interactive Ori Ritual'}</li>
+                                    <li className="flex items-center gap-1.5 text-[9px] text-ifa-gold/90 font-semibold"><Sparkles size={8} className="shrink-0 text-ifa-gold" /> {isBrazil ? 'Material Reverso — encontre Ebós pelos ingredientes' : 'Material Reverso — find Ebós by ingredients'}</li>
+                                    <li className="flex items-center gap-1.5 text-[9px] text-ifa-gold/90 font-semibold"><Sparkles size={8} className="shrink-0 text-ifa-gold" /> {isBrazil ? 'Assentamentos — guia completo de assentamento' : 'Assentamentos — complete settlement guide'}</li>
+                                    <li className="flex items-center gap-1.5 text-[9px] text-ifa-gold/90 font-semibold"><Sparkles size={8} className="shrink-0 text-ifa-gold" /> {isBrazil ? 'Diagnóstico Ajogun — leitura das forças negativas' : 'Ajogun Diagnosis — negative forces reading'}</li>
+                                    <li className="flex items-center gap-1.5 text-[9px] text-ifa-gold/90 font-semibold"><Sparkles size={8} className="shrink-0 text-ifa-gold" /> {isBrazil ? 'Sala Virtual — atendimento ao consulente online' : 'Virtual Room — online client consultation'}</li>
+                                </ul>
+                            </div>
+
+
                             <div id="paypal-button-mensal" className="min-h-[36px] w-full"></div>
                         </div>
 
