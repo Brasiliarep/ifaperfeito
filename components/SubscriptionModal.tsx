@@ -58,6 +58,10 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
         if (isOpen) {
             buttonsRendered.current = false;
             currentCurrency.current = '';
+        } else {
+            // Limpa o estado quando o modal fecha para garantir que re-renderize ao abrir
+            buttonsRendered.current = false;
+            currentCurrency.current = '';
         }
     }, [isOpen, isBrazil]);
 
@@ -102,31 +106,51 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
             { key: 'anual', planId: isBrazil ? PLAN_IDS.anual_brl : PLAN_IDS.anual_usd },
         ];
 
-        const timer = setTimeout(() => {
+        let attempts = 0;
+        const maxAttempts = 10;
+
+        const renderButtons = () => {
+            attempts++;
             if (!window.paypal) {
-                // SDK not ready yet — reset flag so the effect can retry
-                console.warn('[PayPal] window.paypal ainda não disponível, aguardando...');
-                buttonsRendered.current = false;
-                currentCurrency.current = '';
+                if (attempts < maxAttempts) {
+                    setTimeout(renderButtons, 500);
+                } else {
+                    console.error('[PayPal] window.paypal não carregou a tempo.');
+                    buttonsRendered.current = false;
+                }
                 return;
             }
+
+            let allRendered = true;
             plans.forEach(({ key, planId }) => {
                 const container = document.getElementById(`paypal-button-${key}`);
-                if (!container || container.hasChildNodes()) return;
+                if (!container) {
+                    allRendered = false;
+                    return;
+                }
+                // Limpa o container para evitar erros se o PayPal já renderizou nele antes
+                container.innerHTML = '';
                 try {
                     window.paypal.Buttons({
                         createSubscription: (_data: any, actions: any) =>
                             actions.subscription.create({ plan_id: planId }),
                         onApprove: (data: any) => onSubscribeRef.current(data.subscriptionID, key),
                         style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
-                    }).render(`#paypal-button-${key}`);
+                    }).render(container); // Passa o elemento DOM diretamente
                 } catch (err) {
                     console.error(`[PayPal] Erro ao renderizar botão ${key}:`, err);
                 }
             });
-        }, 500);
 
-        return () => clearTimeout(timer);
+            // Se algum container não estava pronto, tenta novamente (até o limite)
+            if (!allRendered && attempts < maxAttempts) {
+                setTimeout(renderButtons, 500);
+            }
+        };
+
+        // Inicia a tentativa de renderização
+        renderButtons();
+
     }, [sdkReady, isOpen, isBrazil]);
 
     if (!isOpen) return null;
