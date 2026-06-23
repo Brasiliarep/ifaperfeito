@@ -47,7 +47,8 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
     const buttonsRendered = useRef(false);
     const currentCurrency = useRef('');
 
-    const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+    // Fallback para o Client ID conhecido caso a secret do GitHub Actions não esteja configurada
+    const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID || 'ATL01C45AXIlTU-WGEkhK84Y5h2LaKy9dZmPClzhKJmEt2Egp3Udx3QoLVV_Rnpb6XbhdULxrCfwlV1s';
 
     if (typeof window !== 'undefined' && !clientId) {
         console.warn('[SubscriptionModal] VITE_PAYPAL_CLIENT_ID não definida. Os botões PayPal não serão renderizados.');
