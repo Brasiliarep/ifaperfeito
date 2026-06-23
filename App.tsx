@@ -281,10 +281,14 @@ function App() {
         setSubscribing(true);
         setSubscribeError('');
         try {
+            const currentUid = user?.uid;
+            if (!currentUid) {
+                throw new Error('Usuário não autenticado. Faça login novamente.');
+            }
             const res = await fetch('/api/activate-subscription', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ subscriptionId, uid: user?.uid, planKey }),
+                body: JSON.stringify({ subscriptionId, uid: currentUid, planKey }),
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Falha ao ativar assinatura');

@@ -34,6 +34,10 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
 
     const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
+    if (typeof window !== 'undefined' && !clientId) {
+        console.warn('[SubscriptionModal] VITE_PAYPAL_CLIENT_ID não definida. Os botões PayPal não serão renderizados.');
+    }
+
     useEffect(() => {
         const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const lang = navigator.language || '';
