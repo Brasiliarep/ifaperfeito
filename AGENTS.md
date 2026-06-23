@@ -22,5 +22,6 @@ Set these in Cloudflare Pages Dashboard (`ifaaluwo`):
 | `VITE_PAYPAL_CLIENT_ID` | `PAYPAL_CLIENT_ID` | `ATL01C45AXIlTU-WGEkhK84Y5h2LaKy9dZmPClzhKJmEt2Egp3Udx3QoLVV_Rnpb6XbhdULxrCfwlV1s` |
 | — | `PAYPAL_SECRET` | `EA-AoTZ01tFRQIvZVnpgLKySUTkIMUKqLPz4ZulA7dQ4GNoYKsoMtxO_jS5cNMVG-SG81spKY0DjP0XB` |
 | — | `FIREBASE_SERVICE_ACCOUNT` | JSON inteiro (minificado em 1 linha) da service account |
+| — | `GROQ_API_KEY` | Chave gsk_... gerada no console.groq.com |
 
 **IMPORTANTE**: Após setar as secrets, fazer novo deploy para ativar a Pages Function (`functions/api/activate-subscription.js`). Build command: `npm run build`, Output: `dist`.

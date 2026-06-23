@@ -13,7 +13,7 @@ const groqBreaker = new CircuitBreaker({
 // Em produção: chave fica server-side na Netlify Function (/api/groq-proxy)
 // Em dev local: fallback para VITE_API_KEY no .env
 const GROQ_DIRECT = "https://api.groq.com";
-const GROQ_PROXY = "/.netlify/functions/groq-proxy";
+const GROQ_PROXY = "/api/groq-proxy";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 
 let _apiKey = "";
@@ -46,7 +46,7 @@ const getLocalKey = (): string => {
     if (k.startsWith("gsk_")) { _apiKey = k; return _apiKey; }
     if (k.length > 0) localStorage.removeItem("ifa_manual_key");
   } catch (_) { }
-  return "";
+  return "proxy_mode";
 };
 
 export const hasValidKey = (): boolean => true;
@@ -100,7 +100,7 @@ const callGroq = async (
 
       // 2) Fallback: chamada direta (dev local com VITE_API_KEY)
       const key = getLocalKey();
-      if (!key) throw new Error("Chave API não configurada.");
+      if (!key || key === "proxy_mode") throw new Error("Chave API não configurada.");
 
       const res = await fetch(`${GROQ_DIRECT}/openai/v1/chat/completions`, {
         method: "POST",
