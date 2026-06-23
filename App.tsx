@@ -251,12 +251,43 @@ function App() {
         return () => window.removeEventListener('open-legal', handleLegalEvent);
     }, []);
 
+    // ── isPro: true somente para planos pro_monthly e pro_annual ──
+    const isPro = (plan?: string) => plan !== 'free' && plan !== 'student_monthly' && plan !== undefined;
+
+    // ── GUARD: bloqueia acesso funcional às views exclusivas de Sacerdote (pro_monthly / pro_annual) ──
+    // Estudantes e usuários free são redirecionados ao home + paywall, independente de como chegaram aqui.
+    useEffect(() => {
+        if (authLoading) return; // Aguarda confirmação de auth antes de agir
+        const PRO_ONLY_LABELS: Partial<Record<AppView, string>> = {
+            ebori:          'Bori',
+            reverse_odu:    'Material Reverso',
+            assentamentos:  'Assentamentos',
+            ajogun:         'Diagnóstico Ajogun',
+            virtual_room:   'Sala Virtual',
+        };
+        const featureLabel = PRO_ONLY_LABELS[view];
+        if (!featureLabel) return; // View não é restrita
+
+        if (!user) {
+            // Não autenticado: vai para login
+            setView('home');
+            setShowLoginModal(true);
+            return;
+        }
+        if (!isPro(userProfile?.plan)) {
+            // Autenticado mas plano free ou estudante: abre paywall
+            setView('home');
+            setBlockedFeature(featureLabel);
+            setShowPaywall(true);
+        }
+    }, [view, user, userProfile?.plan, authLoading]); // eslint-disable-line react-hooks/exhaustive-deps
+
     const requireAuth = (action: () => void) => {
         if (!user) { setShowLoginModal(true); return; }
         action();
     };
 
-    const isPro = (plan?: string) => plan !== 'free' && plan !== 'student_monthly' && plan !== undefined;
+
 
     const handleProFeature = (featureName: string, action: () => void) => {
         if (!user) { setShowLoginModal(true); return; }
