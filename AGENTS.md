@@ -11,6 +11,12 @@ Set these in Cloudflare Pages Dashboard (`ifaaluwo`):
 
 **IMPORTANTE:** O frontend (Vite) precisa de `VITE_` no prefixo. O backend (Pages Function) lê sem prefixo. São DUAS entradas separadas com o **mesmo valor** para o PayPal Client ID.
 
+**ATENÇÃO:** Como o deploy usa GitHub Actions (não o build nativo do Cloudflare), as variáveis `VITE_*` precisam ser passadas no workflow. Adicione também no **GitHub → Settings → Secrets and variables → Actions**:
+| Secret | Value |
+|---|----|
+| `VITE_PAYPAL_CLIENT_ID` | `ATL01C45AXIlTU...` (valor do Client ID) |
+| `VITE_FIREBASE_API_KEY` | `AIzaSyDHW0PpLoUAVaFQrkLt5hSAMQ-ZVOZlK40` |
+
 | Variable (Frontend — Vite) | Variable (Backend — Pages Function) | Value |
 |---|---|---|
 | `VITE_PAYPAL_CLIENT_ID` | `PAYPAL_CLIENT_ID` | `ATL01C45AXIlTU-WGEkhK84Y5h2LaKy9dZmPClzhKJmEt2Egp3Udx3QoLVV_Rnpb6XbhdULxrCfwlV1s` |
