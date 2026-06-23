@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { Crown, CheckCircle2, Star, Shield, Lock, X, Globe, GraduationCap, Sparkles } from 'lucide-react';
 
 interface Props {
@@ -25,7 +25,22 @@ declare global {
 }
 
 const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, featureName, subscribing, subscribeError, onDismissError }) => {
-    const [isBrazil, setIsBrazil] = useState(true);
+    // Computed synchronously — stable from first render, no async race conditions
+    const isBrazil = useMemo(() => {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const lang = navigator.language || '';
+        return (
+            tz.startsWith('America/Sao_Paulo') ||
+            tz.startsWith('America/Fortaleza') ||
+            tz.startsWith('America/Recife') ||
+            tz.startsWith('America/Belem') ||
+            tz.startsWith('America/Manaus') ||
+            tz.startsWith('America/Porto_Velho') ||
+            tz.startsWith('America/Cuiaba') ||
+            lang.startsWith('pt-BR')
+        );
+    }, []);
+
     const [sdkReady, setSdkReady] = useState(false);
     const onSubscribeRef = useRef(onSubscribe);
     onSubscribeRef.current = onSubscribe;
@@ -38,20 +53,6 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
         console.warn('[SubscriptionModal] VITE_PAYPAL_CLIENT_ID não definida. Os botões PayPal não serão renderizados.');
     }
 
-    useEffect(() => {
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const lang = navigator.language || '';
-        setIsBrazil(
-            tz.startsWith('America/Sao_Paulo') ||
-            tz.startsWith('America/Fortaleza') ||
-            tz.startsWith('America/Recife') ||
-            tz.startsWith('America/Belem') ||
-            tz.startsWith('America/Manaus') ||
-            tz.startsWith('America/Porto_Velho') ||
-            tz.startsWith('America/Cuiaba') ||
-            lang.startsWith('pt-BR')
-        );
-    }, []);
 
     useEffect(() => {
         if (isOpen) {
@@ -62,22 +63,30 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
 
     useEffect(() => {
         if (!isOpen || !clientId || sdkReady) return;
-        if (document.querySelector('script[src*="paypal.com/sdk/js"]')) {
-            setSdkReady(true);
+
+        const existingScript = document.querySelector('script[src*="paypal.com/sdk/js"]') as HTMLScriptElement | null;
+
+        if (existingScript) {
+            // Script tag already in DOM — check if SDK is actually ready
+            if (window.paypal) {
+                setSdkReady(true);
+            } else {
+                // Still loading; attach a listener and wait
+                const onLoad = () => setSdkReady(true);
+                existingScript.addEventListener('load', onLoad);
+                return () => existingScript.removeEventListener('load', onLoad);
+            }
             return;
         }
+
         const script = document.createElement('script');
-        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&vault=true&intent=subscription&locale=${isBrazil ? 'pt_BR' : 'en_US'}&enable-funding=card`;
+        const currency = isBrazil ? 'BRL' : 'USD';
+        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&vault=true&intent=subscription&currency=${currency}&locale=${isBrazil ? 'pt_BR' : 'en_US'}&enable-funding=card`;
         script.async = true;
         script.crossOrigin = 'anonymous';
-        const existing = document.querySelector('script[src*="paypal.com/sdk/js"]');
-        if (existing) {
-            setSdkReady(true);
-        } else {
-            script.onload = () => setSdkReady(true);
-            document.body.appendChild(script);
-        }
-        return () => {};
+        script.onload = () => setSdkReady(true);
+        script.onerror = () => console.error('[PayPal] Falha ao carregar o SDK do PayPal');
+        document.body.appendChild(script);
     }, [isOpen, clientId, sdkReady, isBrazil]);
 
     useEffect(() => {
@@ -94,16 +103,26 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
         ];
 
         const timer = setTimeout(() => {
-            if (!window.paypal) return;
+            if (!window.paypal) {
+                // SDK not ready yet — reset flag so the effect can retry
+                console.warn('[PayPal] window.paypal ainda não disponível, aguardando...');
+                buttonsRendered.current = false;
+                currentCurrency.current = '';
+                return;
+            }
             plans.forEach(({ key, planId }) => {
                 const container = document.getElementById(`paypal-button-${key}`);
                 if (!container || container.hasChildNodes()) return;
-                window.paypal.Buttons({
-                    createSubscription: (_data: any, actions: any) =>
-                        actions.subscription.create({ plan_id: planId }),
-                    onApprove: (data: any) => onSubscribeRef.current(data.subscriptionID, key),
-                    style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
-                }).render(`#paypal-button-${key}`);
+                try {
+                    window.paypal.Buttons({
+                        createSubscription: (_data: any, actions: any) =>
+                            actions.subscription.create({ plan_id: planId }),
+                        onApprove: (data: any) => onSubscribeRef.current(data.subscriptionID, key),
+                        style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
+                    }).render(`#paypal-button-${key}`);
+                } catch (err) {
+                    console.error(`[PayPal] Erro ao renderizar botão ${key}:`, err);
+                }
             });
         }, 500);
 
