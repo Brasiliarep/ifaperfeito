@@ -54,8 +54,11 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
     }, []);
 
     useEffect(() => {
-        buttonsRendered.current = false;
-    }, [isBrazil]);
+        if (isOpen) {
+            buttonsRendered.current = false;
+            currentCurrency.current = '';
+        }
+    }, [isOpen, isBrazil]);
 
     useEffect(() => {
         if (!isOpen || !clientId || sdkReady) return;
@@ -64,7 +67,7 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
             return;
         }
         const script = document.createElement('script');
-        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&vault=true&intent=subscription&locale=${isBrazil ? 'pt_BR' : 'en_US'}`;
+        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&vault=true&intent=subscription&locale=${isBrazil ? 'pt_BR' : 'en_US'}&enable-funding=card`;
         script.async = true;
         script.crossOrigin = 'anonymous';
         const existing = document.querySelector('script[src*="paypal.com/sdk/js"]');
