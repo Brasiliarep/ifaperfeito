@@ -657,7 +657,7 @@ function App() {
 
                             {/* Medium */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <GlassCard onClick={() => setView('virtual_room')} label={t.menuVirtualRoom} icon={Video} variant="blue" feature={t.featureVirtualRoom} />
+                                    <GlassCard onClick={() => setView('virtual_room')} label={t.menuVirtualRoom} icon={Video} variant="blue" feature={t.featureVirtualRoom} proOnly />
                                 <div onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => setView('oracle_hub'))}>
                                     <GlassCard onClick={() => {}} label={t.menuOracleHub} icon={CircleDot} variant="terra" />
                                 </div>
@@ -692,8 +692,8 @@ function App() {
                                         <span className="text-xs uppercase tracking-widest font-medium drop-shadow-md">{t.menuVoiceThunder}</span>
                                     </button>
                                     <GlassCard onClick={() => setView('esoteric_hub')} label={t.menuEsotericTools} icon={Sparkles} variant="purple" feature={t.featureEsotericTools} theme="purple" />
-                                    <GlassCard onClick={() => setView('ebori')} label={t.menuBori} icon={UserCheck} variant="purple" feature={t.featureBori} theme="green" />
-                                    <GlassCard onClick={() => setView('reverse_odu')} label={t.menuReverseMath} icon={Database} variant="purple" feature={t.featureReverseMath} theme="red" />
+                                    <GlassCard onClick={() => setView('ebori')} label={t.menuBori} icon={UserCheck} variant="purple" feature={t.featureBori} theme="green" proOnly />
+                                    <GlassCard onClick={() => setView('reverse_odu')} label={t.menuReverseMath} icon={Database} variant="purple" feature={t.featureReverseMath} theme="red" proOnly />
                                     <GlassCard onClick={() => setView('ebo_sim')} label={t.menuEboSim} icon={Move} variant="purple" feature={t.featureEboSim} theme="green" proOnly />
                                     <GlassCard onClick={() => setView('sound_hub')} label={t.menuSacredSounds} icon={Music} variant="purple" feature={t.featureSacredSounds} theme="acqua" />
                                     <GlassCard onClick={() => setView('dream_journal')} label={t.menuDreamJournal} icon={Moon} variant="purple" />
@@ -710,9 +710,9 @@ function App() {
                                     <GlassCard onClick={() => setView('sango_wheel')} label={t.menuSangoWheel} icon={Scale} feature={t.featureSangoWheel} theme="orange" />
                                     <GlassCard onClick={() => setView('oogun')} label={t.menuOogun} icon={FlaskConical} feature={t.featureOogun} theme="green" proOnly />
                                     <GlassCard onClick={() => setView('herb_id')} label={t.menuHerbID} icon={Leaf} feature={t.featureHerbID} theme="lime" />
-                                    <GlassCard onClick={() => setView('assentamentos')} label={t.menuAssentamentos} icon={Hammer} feature={t.featureAssentamentos} theme="gold" />
+                                    <GlassCard onClick={() => setView('assentamentos')} label={t.menuAssentamentos} icon={Hammer} feature={t.featureAssentamentos} theme="gold" proOnly />
                                     <GlassCard onClick={() => setView('geo_herbs')} label={t.menuHerbMap} icon={MapPin} feature={t.featureHerbMap} />
-                                    <GlassCard onClick={() => setView('ajogun')} label={t.menuAjogun} icon={Stethoscope} feature={t.featureAjogun} theme="red" />
+                                    <GlassCard onClick={() => setView('ajogun')} label={t.menuAjogun} icon={Stethoscope} feature={t.featureAjogun} theme="red" proOnly />
                                 </div>
                             </div>
 
