@@ -90,6 +90,17 @@ type AppView = 'home' | 'history' | 'register' | 'input' | 'result' | 'print' | 
 import LoginScreen from './components/LoginScreen';
 
 function App() {
+    useEffect(() => {
+      if (location.hostname.includes('localhost')) {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+        }
+        if ('caches' in window) {
+          caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
+        }
+      }
+    }, []);
+
     const { user, userProfile, loading: authLoading, updateUsageCounters, refreshProfile } = useAuth();
     const [isLocked, setIsLocked] = useState(false);
     const [isKeyMissing, setIsKeyMissing] = useState(false);
@@ -475,7 +486,7 @@ function App() {
         sapphire: { color: '#4a8ad4', rgb: '74,138,212' },
     };
 
-    const GlassCard = ({ onClick, label, icon: Icon, variant = 'mini', feature, className = '', subtitle, theme }: any) => {
+    const GlassCard = ({ onClick, label, icon: Icon, variant = 'mini', feature, className = '', subtitle, theme, proOnly }: any) => {
         if (homeSearch && !label.toLowerCase().includes(homeSearch.toLowerCase())) return null;
         const variantMap: Record<string, string> = { hero: 'glass-hero-gold', green: 'glass-hero-green', blue: 'glass-blue', terra: 'glass-terra', purple: 'glass-purple' };
         const vClass = variantMap[variant] || 'glass-mini';
@@ -483,7 +494,7 @@ function App() {
         const isMedium = variant === 'blue' || variant === 'terra' || variant === 'purple';
         const isNavCard = !isHero && !isMedium;
         const themeColor = theme ? THEME_MAP[theme] : null;
-        const handleClick = () => { setHomeSearch(''); feature ? handleProFeature(feature, onClick) : onClick(); };
+        const handleClick = () => { setHomeSearch(''); feature ? (proOnly ? handleProFeature(feature, onClick) : handleStudentOrProFeature(feature, onClick)) : onClick(); };
         const iconSize = isHero ? 20 : isMedium ? 18 : 17;
         const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
             if (!isHero) return;
@@ -592,7 +603,7 @@ function App() {
                     {/* Calendar */}
                     {!homeSearch && (
                         <div className="glass-card-no-clip rounded-xl">
-                            <YorubaCalendarWidget onOpenIgbadu={() => handleProFeature('Igbadu Virtual', () => setView('igbadu'))} />
+                            <YorubaCalendarWidget onOpenIgbadu={() => handleStudentOrProFeature('Igbadu Virtual', () => setView('igbadu'))} />
                         </div>
                     )}
 
@@ -679,7 +690,7 @@ function App() {
                                     <GlassCard onClick={() => setView('esoteric_hub')} label={t.menuEsotericTools} icon={Sparkles} variant="purple" feature={t.featureEsotericTools} theme="purple" />
                                     <GlassCard onClick={() => setView('ebori')} label={t.menuBori} icon={UserCheck} variant="purple" feature={t.featureBori} theme="green" />
                                     <GlassCard onClick={() => setView('reverse_odu')} label={t.menuReverseMath} icon={Database} variant="purple" feature={t.featureReverseMath} theme="red" />
-                                    <GlassCard onClick={() => setView('ebo_sim')} label={t.menuEboSim} icon={Move} variant="purple" feature={t.featureEboSim} theme="green" />
+                                    <GlassCard onClick={() => setView('ebo_sim')} label={t.menuEboSim} icon={Move} variant="purple" feature={t.featureEboSim} theme="green" proOnly />
                                     <GlassCard onClick={() => setView('sound_hub')} label={t.menuSacredSounds} icon={Music} variant="purple" feature={t.featureSacredSounds} theme="acqua" />
                                     <GlassCard onClick={() => setView('dream_journal')} label={t.menuDreamJournal} icon={Moon} variant="purple" />
                                 </div>
@@ -693,7 +704,7 @@ function App() {
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3.5">
                                     <GlassCard onClick={() => setView('sango_wheel')} label={t.menuSangoWheel} icon={Scale} feature={t.featureSangoWheel} theme="orange" />
-                                    <GlassCard onClick={() => setView('oogun')} label={t.menuOogun} icon={FlaskConical} feature={t.featureOogun} theme="green" />
+                                    <GlassCard onClick={() => setView('oogun')} label={t.menuOogun} icon={FlaskConical} feature={t.featureOogun} theme="green" proOnly />
                                     <GlassCard onClick={() => setView('herb_id')} label={t.menuHerbID} icon={Leaf} feature={t.featureHerbID} theme="lime" />
                                     <GlassCard onClick={() => setView('assentamentos')} label={t.menuAssentamentos} icon={Hammer} feature={t.featureAssentamentos} theme="gold" />
                                     <GlassCard onClick={() => setView('geo_herbs')} label={t.menuHerbMap} icon={MapPin} feature={t.featureHerbMap} />
@@ -708,7 +719,7 @@ function App() {
                                     <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, rgba(50,100,220,0.25), transparent)' }}></div>
                                 </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3.5">
-                                    <GlassCard onClick={() => setView('inventory_hub')} label={t.menuInventory} icon={Package} feature={t.featureInventory} theme="gold" />
+                                    <GlassCard onClick={() => setView('inventory_hub')} label={t.menuInventory} icon={Package} feature={t.featureInventory} theme="gold" proOnly />
                                     <GlassCard onClick={() => setView('agenda')} label={t.menuAgenda} icon={CalendarDays} theme="sapphire" />
                                     <GlassCard onClick={() => setView('lineage_tree')} label={t.menuLineage} icon={GitBranch} feature={t.featureLineage} />
                                     <GlassCard onClick={() => setView('analytics')} label={t.menuAnalytics} icon={BarChart3} feature={t.featureAnalytics} />

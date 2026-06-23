@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ifa-guia-v5';
+const CACHE_NAME = 'ifa-guia-mqq14745';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -30,43 +30,38 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Only handle GET requests from our origin
+  if (request.method !== 'GET' || !url.origin.startsWith(self.location.origin)) {
     return;
   }
 
   // For navigation requests (HTML), use Network First, falling back to Cache
-  if (event.request.mode === 'navigate') {
+  if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
-        .catch(() => {
-          return caches.match('/index.html');
-        })
+      fetch(request)
+        .catch(() => caches.match('/index.html'))
     );
     return;
   }
 
   // For other requests (JS, CSS, Images), use Stale-While-Revalidate
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        // Update cache with new version
+    caches.match(request).then((cachedResponse) => {
+      const fetchPromise = fetch(request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, responseToCache);
-            });
+          const cloned = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, cloned));
         }
         return networkResponse;
       }).catch(() => {
-        // Network failed — return cached response if available, otherwise offline fallback
         return cachedResponse || new Response('Offline', { status: 503 });
       });
-      // Return cached response immediately if available, otherwise wait for network
       return cachedResponse || fetchPromise;
     }).catch(() => {
-      // Fallback if cache API itself fails
-      return fetch(event.request);
+      return fetch(request).catch(() => new Response('Offline', { status: 503 }));
     })
   );
 });

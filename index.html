@@ -698,9 +698,14 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./service-worker.js?v=5')
-            .then(registration => console.log('SW registered'))
-            .catch(err => console.log('SW failed', err));
+          if (location.hostname.includes('localhost')) {
+            navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+            caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
+          } else {
+            navigator.serviceWorker.register('./service-worker.js?v=mqq14745')
+              .then(registration => console.log('SW registered'))
+              .catch(err => console.log('SW failed', err));
+          }
         });
       }
     </script>

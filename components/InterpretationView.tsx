@@ -318,7 +318,7 @@ const InterpretationView: React.FC<Props> = ({ data, oduInfo, initialSelections,
         );
     };
 
-    const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
+    const allTabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
         { id: 'spirituality', label: t.tabSpirituality, icon: <Sparkles size={14} /> },
         { id: 'oriki', label: t.tabOriki, icon: <Book size={14} /> },
         { id: 'orishas', label: t.tabOrishas, icon: <Crown size={14} /> },
@@ -335,10 +335,10 @@ const InterpretationView: React.FC<Props> = ({ data, oduInfo, initialSelections,
         { id: 'ancestry', label: t.tabAncestry, icon: <Users size={14} /> },
         { id: 'personality', label: t.tabPersonality, icon: <Brain size={14} /> },
         { id: 'decisions', label: t.tabDecisions, icon: <Activity size={14} /> },
-    ].filter(tab => {
-        if (isStudent && (tab.id === 'ebos' || tab.id === 'baths')) return false;
-        return true;
-    });
+    ];
+    const tabs = isStudent
+        ? allTabs.filter(tab => tab.id !== 'ebos' && tab.id !== 'baths')
+        : allTabs;
 
     return (
         <div className="animate-fade-in w-full max-w-6xl mx-auto p-4 md:p-8 bg-ifa-base text-ifa-text pb-24">

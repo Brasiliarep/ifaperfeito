@@ -121,24 +121,24 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
                     <X size={24} />
                 </button>
 
-                <div className="p-8 md:p-12 text-center relative">
+                <div className="p-6 md:p-8 text-center relative">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-ifa-gold via-yellow-300 to-ifa-gold"></div>
 
-                    <div className="flex justify-center mb-4">
-                        <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-1 text-xs text-ifa-neutral">
-                            <Globe size={12} />
+                    <div className="flex justify-center mb-3">
+                        <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-0.5 text-[10px] text-ifa-neutral">
+                            <Globe size={10} />
                             <span>{isBrazil ? 'Preços em Real Brasileiro' : 'Prices in US Dollars'}</span>
                         </div>
                     </div>
 
-                    <div className="mx-auto w-16 h-16 bg-ifa-gold/20 rounded-full flex items-center justify-center mb-6 text-ifa-gold ring-1 ring-ifa-gold/50 shadow-[0_0_30px_rgba(212,175,55,0.4)]">
-                        {featureName ? <Lock size={32} /> : <Crown size={32} />}
+                    <div className="mx-auto w-12 h-12 bg-ifa-gold/20 rounded-full flex items-center justify-center mb-3 text-ifa-gold ring-1 ring-ifa-gold/50 shadow-[0_0_30px_rgba(212,175,55,0.4)]">
+                        {featureName ? <Lock size={22} /> : <Crown size={22} />}
                     </div>
 
-                    <h2 className="text-3xl md:text-4xl font-serif text-ifa-gold font-bold uppercase tracking-widest mb-4">
+                    <h2 className="text-xl md:text-2xl font-serif text-ifa-gold font-bold uppercase tracking-widest mb-2">
                         {featureName ? (isBrazil ? 'Recurso Premium' : 'Premium Feature') : (isBrazil ? 'Eleve seu Sacerdócio' : 'Elevate Your Priesthood')}
                     </h2>
-                    <p className="text-ifa-neutral text-lg max-w-3xl mx-auto mb-10">
+                    <p className="text-ifa-neutral text-sm max-w-3xl mx-auto mb-6">
                         {featureName
                             ? (isBrazil ? `A função "${featureName}" é exclusiva para assinantes. Escolha seu plano:`
                                 : `The "${featureName}" feature is exclusive to subscribers. Choose your plan:`)
@@ -147,116 +147,122 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
                                 : 'Get full access to the Sacred Codex with plans that fit your budget.')}
                     </p>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
 
                         {/* PLANO ESTUDANTE */}
-                        <div className="bg-black/50 border border-ifa-border rounded-xl p-6 relative flex flex-col group hover:border-amber-500/40 transition-colors">
-                            <div className="flex items-center gap-2 mb-3">
-                                <GraduationCap size={20} className="text-amber-400" />
-                                <h3 className="text-lg text-white font-bold uppercase tracking-wider">
+                        <div className="bg-gradient-to-b from-[#1e1a14] to-black border border-amber-500/30 rounded-xl p-4 relative flex flex-col group hover:border-amber-400/60 transition-colors">
+                            <div className="flex items-center gap-2 mb-1">
+                                <GraduationCap size={18} className="text-ifa-gold" />
+                                <h3 className="text-base text-white font-bold uppercase tracking-wider">
                                     {isBrazil ? 'Estudante' : 'Student'}
                                 </h3>
                             </div>
-                            <div className="flex items-baseline gap-1 mb-6">
-                                <span className="text-sm text-ifa-neutral">{currency}</span>
-                                <span className="text-4xl font-black text-white">{estudante_price}</span>
-                                <span className="text-sm text-ifa-neutral">/{isBrazil ? 'mês' : 'mo'}</span>
+                            <div className="flex items-baseline gap-1 mb-3">
+                                <span className="text-[11px] text-ifa-neutral">{currency}</span>
+                                <span className="text-3xl font-black text-ifa-gold">{estudante_price}</span>
+                                <span className="text-[11px] text-ifa-neutral">/{isBrazil ? 'mês' : 'mo'}</span>
                             </div>
 
-                            <ul className="space-y-3 mb-8 flex-1 text-sm">
-                                <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-0.5" /> {isBrazil ? 'Biblioteca 256 Odùs completa' : 'Complete 256 Odù Library'}</li>
-                                <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-0.5" /> {isBrazil ? 'Modo Estudo Individual' : 'Individual Study Mode'}</li>
-                                <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-0.5" /> {isBrazil ? 'Dicionário Yorubá' : 'Yoruba Dictionary'}</li>
-                                <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-0.5" /> {isBrazil ? 'Nomes Yorubá' : 'Yoruba Names'}</li>
-                                <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-0.5" /> {isBrazil ? 'Calendário Litúrgico' : 'Liturgical Calendar'}</li>
-                                <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-amber-400 shrink-0 mt-0.5" /> {isBrazil ? 'Diário de Sonhos' : 'Dream Journal'}</li>
+                            <ul className="space-y-1 mb-3 flex-1 text-xs">
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Jogue Ifá, Opon Ifá, Merindilogun e Ikin' : 'Play Ifá, Opon Ifá, Merindilogun & Ikin'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Jogos Interativos (RPG / Story Mode)' : 'Interactive Games (RPG / Story Mode)'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Leia Itãs completos de cada Odu' : 'Read complete Itãs for each Odu'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Estude o Odu com profundidade' : 'Study the Odu in depth'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Biblioteca 256 Odùs completa' : 'Complete 256 Odù Library'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Enciclopédia de Ervas (ID + Mapa)' : 'Herb Encyclopedia (ID + Map)'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Ferramentas Esotéricas e Bori' : 'Esoteric Tools & Bori'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Tratados, Preces e Matemática Reversa' : 'Treatises, Prayers & Reverse Math'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Igbadu Virtual, Sala Virtual e Sons Sagrados' : 'Virtual Igbadu, Virtual Room & Sacred Sounds'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Roda de Sango, Assentamentos e Diagnóstico Ajogun' : 'Sango Wheel, Assentamentos & Ajogun Diagnosis'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Dicionário Yorubá e Calendário Litúrgico' : 'Yoruba Dictionary & Liturgical Calendar'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Diário de Sonhos e Árvore Genealógica' : 'Dream Journal & Lineage Tree'}</li>
                             </ul>
 
-                            <div className="bg-amber-950/30 border border-amber-500/20 rounded-lg p-3 mb-3">
-                                <p className="text-[10px] text-amber-400/80 font-bold uppercase tracking-wider mb-1">{isBrazil ? '✕ Não inclui' : '✕ Does not include'}</p>
-                                <p className="text-[10px] text-amber-500/60 leading-relaxed">
+                            <div className="bg-amber-950/30 border border-amber-500/20 rounded-lg p-2 mb-1">
+                                <p className="text-[9px] text-amber-300/80 font-bold uppercase tracking-wider mb-0.5">{isBrazil ? '✕ Não inclui' : '✕ Does not include'}</p>
+                                <p className="text-[9px] text-amber-400/70 leading-relaxed">
                                     {isBrazil
-                                        ? 'Magias, Ebós, Assentamentos, Ferramentas Esotéricas, Gestão de Templo, Voz do Trovão, Matemática Reversa, Atendimento a Consulente'
-                                        : 'Spells, Ebós, Assentamentos, Esoteric Tools, Temple Management, Thunder Voice, Reverse Math, Client Consultation'}
+                                        ? 'Atendimento a Consulente, Magias, Ebós, Voz do Trovão, Gestão de Templo'
+                                        : 'Client Consultation, Spells, Ebós, Thunder Voice, Temple Management'}
                                 </p>
                             </div>
 
-                            <div className="mt-auto text-[10px] text-amber-500/70 italic mb-3">{isBrazil ? 'Ideal para iniciantes e estudiosos' : 'Best for beginners and scholars'}</div>
+                            <div className="mt-auto text-[9px] text-ifa-gold/70 italic mb-2">{isBrazil ? 'Ideal para quem busca conhecimento sem limites' : 'Perfect for those seeking unlimited knowledge'}</div>
 
-                            <div id="paypal-button-estudante" className="min-h-[40px] w-full"></div>
+                            <div id="paypal-button-estudante" className="min-h-[36px] w-full"></div>
                         </div>
 
                         {/* PLANO MENSAL */}
-                        <div className="bg-gradient-to-b from-[#2a2211] to-black border-2 border-ifa-gold rounded-xl p-6 relative flex flex-col shadow-[0_0_30px_rgba(212,175,55,0.15)] transform md:-translate-y-2">
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-ifa-gold text-black text-xs font-black uppercase tracking-widest px-4 py-1 rounded-full flex items-center gap-1 shadow-lg whitespace-nowrap">
-                                <Star size={12} /> {isBrazil ? 'Promocional' : 'Promotional'}
+                        <div className="bg-gradient-to-b from-[#2a2211] to-black border-2 border-ifa-gold rounded-xl p-4 relative flex flex-col shadow-[0_0_30px_rgba(212,175,55,0.15)] transform md:-translate-y-2">
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-ifa-gold text-black text-[10px] font-black uppercase tracking-widest px-3 py-0.5 rounded-full flex items-center gap-1 shadow-lg whitespace-nowrap">
+                                <Star size={10} /> {isBrazil ? 'Promocional' : 'Promotional'}
                             </div>
 
-                            <h3 className="text-lg text-ifa-gold font-bold uppercase tracking-wider mb-3 mt-2">
+                            <h3 className="text-base text-ifa-gold font-bold uppercase tracking-wider mb-2 mt-2">
                                 {isBrazil ? 'Plano Mensal' : 'Monthly Plan'}
                             </h3>
-                            <div className="flex items-baseline gap-1 mb-2">
-                                <span className="text-sm text-ifa-neutral">{currency}</span>
-                                <span className="text-4xl font-black text-ifa-gold">{mensal_price}</span>
-                                <span className="text-sm text-ifa-neutral">/{isBrazil ? 'mês' : 'mo'}</span>
+                            <div className="flex items-baseline gap-1 mb-1">
+                                <span className="text-[11px] text-ifa-neutral">{currency}</span>
+                                <span className="text-3xl font-black text-ifa-gold">{mensal_price}</span>
+                                <span className="text-[11px] text-ifa-neutral">/{isBrazil ? 'mês' : 'mo'}</span>
                             </div>
-                            <p className="text-xs text-green-400 mb-6 font-bold tracking-wide leading-relaxed">{isBrazil ? 'Promoção válida até 30 de setembro de 2026, voltando a R$ 99,90' : 'Promotion valid until September 30, 2026, returning to $79,90'}</p>
+                            <p className="text-[10px] text-green-400 mb-3 font-bold tracking-wide leading-relaxed">{isBrazil ? 'Promoção válida até 30/09/2026, voltando a R$ 99,90' : 'Promo until Sep 30/2026, returning to $79.90'}</p>
 
-                            <ul className="space-y-3 mb-8 flex-1 text-sm">
-                                <li className="flex items-start gap-3 text-white font-medium"><Star size={16} className="text-ifa-gold shrink-0 mt-0.5 fill-ifa-gold" /> {isBrazil ? 'Interpretação ilimitada' : 'Unlimited interpretation'}</li>
-                                <li className="flex items-start gap-3 text-white font-medium"><Star size={16} className="text-ifa-gold shrink-0 mt-0.5 fill-ifa-gold" /> {isBrazil ? 'Simulador de Ebó e Magias' : 'Ebó & Magic Simulator'}</li>
-                                <li className="flex items-start gap-3 text-white font-medium"><Star size={16} className="text-ifa-gold shrink-0 mt-0.5 fill-ifa-gold" /> {isBrazil ? 'Amuletos e Ferramentas Esotéricas' : 'Amulets & Esoteric Tools'}</li>
-                                <li className="flex items-start gap-3 text-white font-medium"><Star size={16} className="text-ifa-gold shrink-0 mt-0.5 fill-ifa-gold" /> {isBrazil ? 'Sala de Atendimento Virtual' : 'Virtual Consultation Room'}</li>
-                                <li className="flex items-start gap-3 text-white font-medium"><Star size={16} className="text-ifa-gold shrink-0 mt-0.5 fill-ifa-gold" /> {isBrazil ? 'PDF sem marca d\'água' : 'Clean PDF (No watermark)'}</li>
-                                <li className="flex items-start gap-3 text-white font-medium"><Shield size={16} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Todas as ferramentas liberadas' : 'All tools unlocked'}</li>
+                            <ul className="space-y-1.5 mb-3 flex-1 text-xs">
+                                <li className="flex items-start gap-2 text-white font-medium"><Star size={12} className="text-ifa-gold shrink-0 mt-0.5 fill-ifa-gold" /> {isBrazil ? 'Interpretação ilimitada' : 'Unlimited interpretation'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><Star size={12} className="text-ifa-gold shrink-0 mt-0.5 fill-ifa-gold" /> {isBrazil ? 'Simulador de Ebó e Magias' : 'Ebó & Magic Simulator'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><Star size={12} className="text-ifa-gold shrink-0 mt-0.5 fill-ifa-gold" /> {isBrazil ? 'Amuletos e Ferramentas Esotéricas' : 'Amulets & Esoteric Tools'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><Star size={12} className="text-ifa-gold shrink-0 mt-0.5 fill-ifa-gold" /> {isBrazil ? 'Sala de Atendimento Virtual' : 'Virtual Consultation Room'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><Star size={12} className="text-ifa-gold shrink-0 mt-0.5 fill-ifa-gold" /> {isBrazil ? 'PDF sem marca d\'água' : 'Clean PDF (No watermark)'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><Shield size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Todas as ferramentas liberadas' : 'All tools unlocked'}</li>
                             </ul>
 
-                            <div id="paypal-button-mensal" className="min-h-[40px] w-full"></div>
+                            <div id="paypal-button-mensal" className="min-h-[36px] w-full"></div>
                         </div>
 
                         {/* PLANO ANUAL */}
-                        <div className="bg-gradient-to-b from-[#1a2211] to-black border-2 border-emerald-500/60 rounded-xl p-6 relative flex flex-col shadow-[0_0_40px_rgba(16,185,129,0.15)] group hover:border-emerald-400/80 transition-all">
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-green-600 text-black text-xs font-black uppercase tracking-widest px-5 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg shadow-emerald-500/30 whitespace-nowrap animate-pulse">
-                                <Star size={12} className="fill-black" /> {isBrazil ? 'SUPER DESCONTO' : 'BIG SAVINGS'} <Star size={12} className="fill-black" />
+                        <div className="bg-gradient-to-b from-[#1a2211] to-black border-2 border-emerald-500/60 rounded-xl p-4 relative flex flex-col shadow-[0_0_40px_rgba(16,185,129,0.15)] group hover:border-emerald-400/80 transition-all">
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-green-600 text-black text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full flex items-center gap-1.5 shadow-lg shadow-emerald-500/30 whitespace-nowrap animate-pulse">
+                                <Star size={10} className="fill-black" /> {isBrazil ? 'SUPER DESCONTO' : 'BIG SAVINGS'} <Star size={10} className="fill-black" />
                             </div>
 
-                            <div className="flex items-center gap-2 mb-1 mt-3">
-                                <Crown size={20} className="text-emerald-400" />
-                                <h3 className="text-lg text-white font-bold uppercase tracking-wider">
+                            <div className="flex items-center gap-2 mb-1 mt-2">
+                                <Crown size={18} className="text-emerald-400" />
+                                <h3 className="text-base text-white font-bold uppercase tracking-wider">
                                     {isBrazil ? 'VIP Anual' : 'Annual VIP'}
                                 </h3>
                             </div>
 
-                            <div className="flex items-baseline gap-2 mb-1">
-                                <span className="text-sm text-ifa-neutral">{currency}</span>
-                                <span className="text-4xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]">{anual_price.split(',')[0]}<span className="text-3xl">,{anual_price.split(',')[1]}</span></span>
-                                <span className="text-sm text-ifa-neutral">/{isBrazil ? 'ano' : 'yr'}</span>
+                            <div className="flex items-baseline gap-2 mb-0.5">
+                                <span className="text-[11px] text-ifa-neutral">{currency}</span>
+                                <span className="text-3xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]">{anual_price.split(',')[0]}<span className="text-2xl">,{anual_price.split(',')[1]}</span></span>
+                                <span className="text-[11px] text-ifa-neutral">/{isBrazil ? 'ano' : 'yr'}</span>
                             </div>
 
-                            <div className="flex items-center gap-3 mb-5">
-                                <span className="text-sm text-ifa-neutral line-through opacity-50">{isBrazil ? 'R$ 958,80' : '$718,80'}</span>
-                                <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-xs font-black px-2.5 py-0.5 rounded-full tracking-wider">40% OFF</span>
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="text-[11px] text-ifa-neutral line-through opacity-50">{isBrazil ? 'R$ 958,80' : '$718,80'}</span>
+                                <span className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-black px-2 py-0.5 rounded-full tracking-wider">40% OFF</span>
                             </div>
 
-                            <p className="text-emerald-400/80 text-sm font-bold tracking-wide mb-5 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-4 py-2.5 text-center">
-                                {isBrazil ? '✨ Equivale a apenas R$ 47,94 por mês!' : '✨ Equivalent to only $35,94/month!'}
+                            <p className="text-emerald-400/80 text-[11px] font-bold tracking-wide mb-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-1.5 text-center">
+                                {isBrazil ? 'Equivale a R$ 47,94/mês' : 'Only $35,94/month!'}
                             </p>
 
-                            <ul className="space-y-3 mb-8 flex-1 text-sm">
-                                <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Tudo do Plano Mensal' : 'Everything in Monthly'}</li>
-                                <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? '40% de desconto' : '40% discount'}</li>
-                                <li className="flex items-start gap-3 text-ifa-neutral"><CheckCircle2 size={16} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Suporte prioritário' : 'Priority support'}</li>
+                            <ul className="space-y-1.5 mb-3 flex-1 text-xs">
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Tudo do Plano Mensal' : 'Everything in Monthly'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? '40% de desconto' : '40% discount'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Suporte prioritário' : 'Priority support'}</li>
                             </ul>
 
-                            <div className="mt-auto text-[10px] text-ifa-gold/70 italic mb-3">{isBrazil ? 'Melhor custo-benefício' : 'Best value'}</div>
+                            <div className="mt-auto text-[9px] text-ifa-gold/70 italic mb-2">{isBrazil ? 'Melhor custo-benefício' : 'Best value'}</div>
 
-                            <div id="paypal-button-anual" className="min-h-[40px] w-full"></div>
+                            <div id="paypal-button-anual" className="min-h-[36px] w-full"></div>
                         </div>
 
                     </div>
 
-                    <div className="mt-8 text-center text-xs text-ifa-neutral flex items-center justify-center gap-2">
-                        <Lock size={12} /> {isBrazil ? 'Pagamento 100% seguro processado pelo PayPal' : '100% secure payment processed by PayPal'}
+                    <div className="mt-6 text-center text-[10px] text-ifa-neutral flex items-center justify-center gap-2">
+                        <Lock size={10} /> {isBrazil ? 'Pagamento 100% seguro processado pelo PayPal' : '100% secure payment processed by PayPal'}
                     </div>
                 </div>
 
