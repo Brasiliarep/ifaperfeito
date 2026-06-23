@@ -196,10 +196,10 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
                                 <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Estude o Odu com profundidade' : 'Study the Odu in depth'}</li>
                                 <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Biblioteca 256 Odùs completa' : 'Complete 256 Odù Library'}</li>
                                 <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Enciclopédia de Ervas (ID + Mapa)' : 'Herb Encyclopedia (ID + Map)'}</li>
-                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Ferramentas Esotéricas e Bori' : 'Esoteric Tools & Bori'}</li>
-                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Tratados, Preces e Matemática Reversa' : 'Treatises, Prayers & Reverse Math'}</li>
-                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Igbadu Virtual, Sala Virtual e Sons Sagrados' : 'Virtual Igbadu, Virtual Room & Sacred Sounds'}</li>
-                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Roda de Sango, Assentamentos e Diagnóstico Ajogun' : 'Sango Wheel, Assentamentos & Ajogun Diagnosis'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Ferramentas Esotéricas' : 'Esoteric Tools'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Tratados e Preces' : 'Treatises & Prayers'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Igbadu Virtual e Sons Sagrados' : 'Virtual Igbadu & Sacred Sounds'}</li>
+                                <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Roda de Sango' : 'Sango Wheel'}</li>
                                 <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Dicionário Yorubá e Calendário Litúrgico' : 'Yoruba Dictionary & Liturgical Calendar'}</li>
                                 <li className="flex items-start gap-2 text-white font-medium"><CheckCircle2 size={12} className="text-ifa-gold shrink-0 mt-0.5" /> {isBrazil ? 'Diário de Sonhos e Árvore Genealógica' : 'Dream Journal & Lineage Tree'}</li>
                             </ul>
@@ -208,8 +208,8 @@ const SubscriptionModal: React.FC<Props> = ({ isOpen, onClose, onSubscribe, feat
                                 <p className="text-[9px] text-amber-300/80 font-bold uppercase tracking-wider mb-0.5">{isBrazil ? '✕ Não inclui' : '✕ Does not include'}</p>
                                 <p className="text-[9px] text-amber-400/70 leading-relaxed">
                                     {isBrazil
-                                        ? 'Atendimento a Consulente, Magias, Ebós, Voz do Trovão, Gestão de Templo'
-                                        : 'Client Consultation, Spells, Ebós, Thunder Voice, Temple Management'}
+                                        ? 'Atendimento a Consulente, Magias, Ebós, Voz do Trovão, Gestão de Templo, Assentamentos, Material Reverso, Bori, Diagnóstico Ajogun, Sala Virtual'
+                                        : 'Client Consultation, Spells, Ebós, Thunder Voice, Temple Management, Assentamentos, Material Reverso, Bori, Ajogun Diagnosis, Virtual Room'}
                                 </p>
                             </div>
 
