@@ -779,6 +779,8 @@ function App() {
     const renderHome = () => {
         const lastOduName = heroStats.lastOdu !== '—' ? heroStats.lastOdu : 'OGBE MEJI';
         const nav = (v: AppView) => setView(v);
+        const userName = (userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Babaláwo';
+        const initials = userName.slice(0, 2).toUpperCase();
 
         return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#090e14' }}>
