@@ -1,0 +1,239 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  workspaces WorkspaceUser[]
+  campaigns  Campaign[]
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users  WorkspaceUser[]
+  brands Brand[]
+}
+
+model WorkspaceUser {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        String   @default("owner")
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+}
+
+model Brand {
+  id          String   @id @default(cuid())
+  workspaceId String
+  name        String
+  slug        String   @unique
+  site        String?
+  description String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  brain     BrandBrain?
+  products  Product[]
+  campaigns Campaign[]
+
+  @@index([workspaceId])
+}
+
+model BrandBrain {
+  id        String   @id @default(cuid())
+  brandId   String   @unique
+  identity  Json
+  voice     Json
+  visual    Json
+  rules     Json
+  knowledge Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  brandId     String
+  name        String
+  description String?
+  audience    String?
+  arguments   Json?
+  objections  Json?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+}
+
+model Campaign {
+  id        String   @id @default(cuid())
+  brandId   String
+  userId    String
+  name      String
+  objective String
+  theme     String
+  mode      String   @default("creator")
+  status    String   @default("draft")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  brand Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs  CreativeJob[]
+  orchestratorRuns OrchestratorRun[]
+
+  @@index([brandId])
+  @@index([userId])
+}
+
+model CreativeJob {
+  id         String   @id @default(cuid())
+  campaignId String?
+  brandId    String
+  type       String
+  objective  String
+  theme      String
+  briefing   Json?
+  status     String   @default("queued")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  campaign Campaign?        @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  outputs  CreativeOutput[]
+  orchestratorRuns OrchestratorRun[]
+
+  @@index([campaignId])
+  @@index([brandId])
+}
+
+model CreativeOutput {
+  id        String   @id @default(cuid())
+  jobId     String
+  format    String
+  content   Json
+  status    String   @default("draft")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  job       CreativeJob       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  versions CreativeVersion[]
+  approvals Approval[]
+  orchestratorRuns OrchestratorRun[]
+
+  @@index([jobId])
+}
+
+model OrchestratorRun {
+  id         String    @id @default(cuid())
+  campaignId String
+  brandId    String
+  jobId      String?
+  outputId   String?
+  status     String
+  steps      Json
+  decisions  Json
+  error      String?
+  startedAt  DateTime
+  finishedAt DateTime?
+  durationMs Int?
+  createdAt  DateTime  @default(now())
+
+  campaign Campaign        @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  job      CreativeJob?    @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  output   CreativeOutput? @relation(fields: [outputId], references: [id], onDelete: SetNull)
+
+  @@index([campaignId])
+  @@index([brandId])
+  @@index([jobId])
+  @@index([outputId])
+  @@index([status])
+}
+
+model CreativeVersion {
+  id        String   @id @default(cuid())
+  outputId  String
+  version   Int
+  content   Json
+  notes     String?
+  createdAt DateTime @default(now())
+
+  output CreativeOutput @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@unique([outputId, version])
+}
+
+model Approval {
+  id        String   @id @default(cuid())
+  outputId  String
+  userId    String
+  status    String
+  comment   String?
+  createdAt DateTime @default(now())
+
+  output CreativeOutput @relation(fields: [outputId], references: [id], onDelete: Cascade)
+
+  @@index([outputId])
+  @@index([userId])
+}
+
+model CreativeMemoryEvent {
+  id        String   @id @default(cuid())
+  brandId   String
+  outputId  String?
+  eventType String
+  payload   Json
+  createdAt DateTime @default(now())
+
+  @@index([brandId])
+  @@index([outputId])
+}
+
+model PromptGeneration {
+  id        String   @id @default(cuid())
+  brandId   String
+  purpose   String
+  input     Json
+  prompt    String
+  createdAt DateTime @default(now())
+
+  @@index([brandId])
+}
+
+model Asset {
+  id        String   @id @default(cuid())
+  brandId   String
+  type      String
+  url       String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([brandId])
+}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">IfaOluwo</string>
+    <string name="title_activity_main">IfaOluwo</string>
+    <string name="package_name">com.ifaoluwo.app</string>
+    <string name="custom_url_scheme">com.ifaoluwo.app</string>
+</resources>

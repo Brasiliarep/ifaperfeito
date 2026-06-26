@@ -1110,6 +1110,171 @@
           100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
       }
 
+      /* === P1: NEW PRINT-1 EXACT STYLES === */
+      .p1-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 3fr);
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      @media(max-width: 1024px) {
+        .p1-layout { grid-template-columns: 1fr; }
+      }
+      
+      .p1-card {
+        background: #0A0A0A;
+        border: 1px solid rgba(196,158,48,0.12);
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+        transition: all 250ms ease;
+      }
+      .p1-card:hover { border-color: rgba(196,158,48,0.3); }
+      
+      .p1-odu-large {
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: radial-gradient(circle at 80% 50%, rgba(196,158,48,0.08) 0%, #0A0A0A 50%);
+        height: 100%;
+        min-height: 380px;
+      }
+      .p1-odu-large h2 {
+        font-family: 'Cinzel', serif;
+        font-size: 48px;
+        color: #E8DCC2;
+        letter-spacing: 2px;
+        margin: 0 0 16px 0;
+        font-weight: 600;
+        text-shadow: 0 0 20px rgba(196,158,48,0.15);
+      }
+      .p1-odu-large p {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 20px;
+        color: rgba(255,255,255,0.65);
+        max-width: 65%;
+        line-height: 1.4;
+      }
+      .p1-odu-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 32px;
+      }
+      .p1-pill {
+        background: rgba(196,158,48,0.04);
+        border: 1px solid rgba(196,158,48,0.15);
+        border-radius: 8px;
+        padding: 8px 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .p1-pill-label { font-size: 10px; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1px;}
+      .p1-pill-value { font-size: 12px; color: #E8DCC2; font-weight: 500;}
+      .p1-pill-value.green { color: #4ade80; }
+      
+      .p1-stat-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .p1-stat-card {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 160px;
+      }
+      .p1-stat-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #C49E30; display: flex; align-items: center; gap: 8px;}
+      .p1-stat-card .value { font-size: 48px; font-family: 'Cinzel', serif; color: #C49E30; line-height: 1; margin-top: 12px;}
+      .p1-stat-card .desc { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.2; margin-top: 8px;}
+      .p1-stat-card .action { font-size: 10px; color: #C49E30; text-transform: uppercase; letter-spacing: 1.5px; margin-top: auto; display: inline-flex; align-items: center; gap: 4px; }
+      
+      .p1-quote-card {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: linear-gradient(90deg, #0A0A0A 0%, rgba(196,158,48,0.05) 100%);
+        height: 120px;
+        margin-bottom: 16px;
+      }
+      .p1-quote-text {
+        font-family: 'Cormorant Garamond', serif;
+        font-style: italic;
+        font-size: 20px;
+        color: rgba(255,255,255,0.8);
+        line-height: 1.4;
+      }
+      
+      .p1-voice-card {
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      
+      .p1-section-title {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: rgba(196,158,48,0.8);
+        margin: 32px 0 16px 0;
+      }
+      
+      .p1-cards-tall-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 16px;
+      }
+      
+      .p1-card-tall {
+        background: #0A0A0A;
+        border: 1px solid rgba(196,158,48,0.12);
+        border-radius: 12px;
+        padding: 28px 16px 20px 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        transition: all 250ms ease;
+        height: 240px;
+        position: relative;
+      }
+      .p1-card-tall:hover {
+        border-color: rgba(196,158,48,0.4);
+        background: rgba(196,158,48,0.02);
+      }
+      .p1-card-tall .icon-wrapper {
+        width: 48px; height: 48px;
+        border-radius: 50%;
+        border: 1px solid rgba(196,158,48,0.3);
+        display: flex; align-items: center; justify-content: center;
+        color: #C49E30; margin-bottom: 24px;
+      }
+      .p1-card-tall.active {
+        border-color: rgba(196,158,48,0.8);
+        background: linear-gradient(180deg, rgba(196,158,48,0.08) 0%, transparent 100%);
+        box-shadow: 0 0 20px rgba(196,158,48,0.1);
+      }
+      .p1-card-tall h3 { font-size: 11px; font-weight: 600; color: #E8DCC2; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; line-height: 1.4;}
+      .p1-card-tall p { font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.4; }
+      .p1-card-tall .arrow { position: absolute; bottom: 20px; color: #C49E30; opacity: 0.5; }
+      .p1-card-tall:hover .arrow { opacity: 1; transform: translateY(2px); }
+
+      .p1-sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 24px 20px;
+      }
+      .p1-sidebar-brand .logo-text h1 { font-family: 'Cinzel', serif; font-size: 18px; color: #E8DCC2; letter-spacing: 2px; font-weight: 700; line-height: 1.2;}
+      .p1-sidebar-brand .logo-text span { font-size: 8px; color: #C49E30; text-transform: uppercase; letter-spacing: 2px; }
+
       /* --- PRINT STYLES CORRECTION --- */
       @media print {
         body * {
@@ -1165,7 +1330,7 @@
             navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
             caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
           } else {
-            navigator.serviceWorker.register('./service-worker.js?v=mqv5xv0a')
+            navigator.serviceWorker.register('./service-worker.js?v=mqvg6yaw')
               .then(registration => console.log('SW registered'))
               .catch(err => console.log('SW failed', err));
           }

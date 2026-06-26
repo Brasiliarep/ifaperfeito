@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VYTTAI STUDIO AI</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">SF GROUP</p>
+          <h1>VYTTAI STUDIO AI</h1>
+          <p class="subtitle">Seu departamento de marketing inteligente.</p>
+        </div>
+        <div class="status-pill" id="apiStatus">Conectando</div>
+      </section>
+
+      <section class="panel create-panel">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Criar campanha</p>
+            <h2>Briefing rapido</h2>
+          </div>
+          <button id="runButton" class="primary-button">Gerar campanha</button>
+        </div>
+
+        <form id="campaignForm" class="form-grid">
+          <label>
+            Marca
+            <select id="brandSelect" required></select>
+          </label>
+          <label>
+            Modo
+            <select id="modeSelect">
+              <option value="creator">Criador</option>
+              <option value="marketing_director">Diretor de Marketing</option>
+            </select>
+          </label>
+          <label>
+            Nome da campanha
+            <input id="campaignName" required value="Campanha inicial VYTTAI" />
+          </label>
+          <label>
+            Objetivo
+            <input id="objective" required value="captar assinantes" />
+          </label>
+          <label class="wide">
+            Tema
+            <input id="theme" required value="O que e Odu?" />
+          </label>
+        </form>
+      </section>
+
+      <section class="grid-layout">
+        <section class="panel">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Output v1.1</p>
+              <h2>Slides render-ready</h2>
+            </div>
+            <span id="outputStatus" class="soft-pill">Aguardando</span>
+          </div>
+          <div id="strategyBox" class="strategy-box empty-state">Gere uma campanha para ver a estrategia.</div>
+          <div id="traceBox" class="trace-box empty-state">O trace do Orchestrator aparece aqui.</div>
+          <div id="slidesGrid" class="slides-grid"></div>
+          <div id="captionBox" class="caption-box empty-state">Legenda e CTA aparecem aqui.</div>
+        </section>
+
+        <aside class="panel side-panel">
+          <div>
+            <p class="eyebrow">Aprovar</p>
+            <h2>Feedback humano</h2>
+          </div>
+          <label>
+            Nota
+            <input id="qualityScore" type="number" min="0" max="10" value="9" />
+          </label>
+          <label>
+            Feedback
+            <textarea id="feedback" rows="4">Gostei da estrutura e do tom.</textarea>
+          </label>
+          <div class="button-row">
+            <button id="approveButton" class="primary-button" disabled>Aprovar</button>
+            <button id="changesButton" class="secondary-button" disabled>Pedir ajuste</button>
+            <button id="rejectButton" class="danger-button" disabled>Rejeitar</button>
+          </div>
+
+          <hr />
+
+          <div class="section-header compact">
+            <div>
+              <p class="eyebrow">Memoria</p>
+              <h2>Marca ativa</h2>
+            </div>
+            <button id="refreshMemoryButton" class="icon-button">Atualizar</button>
+          </div>
+          <div id="memoryList" class="memory-list empty-state">Selecione uma marca.</div>
+
+          <hr />
+
+          <div>
+            <p class="eyebrow">Insights</p>
+            <h2>Marca ativa</h2>
+          </div>
+          <div id="insightsBox" class="insights-box empty-state">Os sinais da marca aparecem aqui.</div>
+        </aside>
+      </section>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

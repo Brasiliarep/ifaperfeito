@@ -587,490 +587,255 @@ function App() {
         const isPlanVip = isPro(userProfile?.plan);
 
         return (
-            <>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0 12px' }}>
                 {/* Logo */}
-                <div className="px-5 py-5 border-b" style={{ borderColor: 'rgba(196,158,48,0.08)' }}>
-                    <div className="flex items-center gap-3">
-                        <div style={{
-                            width: 36, height: 36, borderRadius: 10,
-                            background: 'rgba(196,158,48,0.12)',
-                            border: '1px solid rgba(196,158,48,0.28)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            flexShrink: 0,
-                        }}>
-                            <svg width="18" height="20" viewBox="0 0 24 28" fill="none">
-                                <path d="M12 2C8 2 4 6 4 10c0 4 2 7 4 9l4 7 4-7c2-2 4-5 4-9 0-4-4-8-8-8z" fill="#C49E30" opacity="0.85"/>
-                                <circle cx="12" cy="9" r="3.5" fill="#E2B84A" opacity="0.9"/>
-                            </svg>
-                        </div>
-                        <div>
-                            <div style={{ fontFamily: 'Cinzel, serif', fontSize: 14, fontWeight: 700, color: '#C49E30', letterSpacing: '2px' }}>IFÁ OLUWO</div>
-                            <div style={{ fontSize: 7.5, letterSpacing: '2.5px', color: 'rgba(196,158,48,0.35)', textTransform: 'uppercase' }}>Codex Sacerdotal</div>
-                        </div>
+                <div className="p1-sidebar-brand" style={{ padding: '32px 12px 24px' }}>
+                    <div style={{ color: '#E8DCC2' }}>
+                        <CircleDot size={32} />
+                    </div>
+                    <div className="logo-text">
+                        <h1>IFÁ OLUWO</h1>
+                        <span>CÓDEX SACERDOTAL</span>
                     </div>
                 </div>
 
-                {/* Primary nav */}
-                <div className="pt-3">
+                {/* Nav Links */}
+                <div style={{ flex: 1, overflowY: 'auto' }} className="scrollbar-hide">
                     <button className={`ds-sidebar-item ${view === 'home' ? 'active' : ''}`} onClick={() => nav('home')}>
-                        <LayoutGrid size={15} /><span>Início</span>
+                        <Home size={16} /> <span>Início</span>
                     </button>
-                    <button className={`ds-sidebar-item ${view === 'register' || view === 'input' || view === 'result' ? 'active' : ''}`} onClick={() => { nav('home'); startNewSession(); onNav?.(); }}>
-                        <Users size={15} />
-                        <span>Atendimento</span>
-                        {heroStats.pendingCount > 0 && <span className="ds-sidebar-badge">{heroStats.pendingCount}</span>}
+                    
+                    <button className="ds-sidebar-item mt-2" onClick={startNewSession}>
+                        <Users size={16} /> 
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                            <span>Atendimento ao Consulente</span>
+                        </div>
+                        <div className="ds-sidebar-badge">{heroStats.pendingCount || 1}</div>
                     </button>
-                    <button className={`ds-sidebar-item ${view === 'history' ? 'active' : ''}`} onClick={() => nav('history')}>
-                        <History size={15} /><span>Histórico</span>
+
+                    <button className={`ds-sidebar-item ${view === 'oracle_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
+                        <CircleDot size={16} /> <span>Divinação</span>
+                    </button>
+
+                    <button className="ds-sidebar-item" onClick={() => handleStudentOrProFeature(t.featureTreatise, () => nav('treatise'))}>
+                        <GraduationCap size={16} /> <span>Estudos</span>
+                    </button>
+
+                    <button className={`ds-sidebar-item ${view === 'odu_library' ? 'active' : ''}`} onClick={() => nav('odu_library')}>
+                        <Book size={16} />
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                            <span>Biblioteca</span>
+                            <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>256 Odu</span>
+                        </div>
+                    </button>
+
+                    <button className={`ds-sidebar-item ${view === 'ebori' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureBori, () => nav('ebori'))}>
+                        <UserCheck size={16} /> <span>Rituais & Ebó</span>
+                    </button>
+
+                    <button className={`ds-sidebar-item ${view === 'oogun' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureOogun, () => nav('oogun'))}>
+                        <FlaskConical size={16} /> <span>Magia (Oogun)</span>
+                    </button>
+
+                    <button className={`ds-sidebar-item ${view === 'agenda' ? 'active' : ''}`} onClick={() => nav('agenda')}>
+                        <CalendarDays size={16} /> <span>Calendário Litúrgico</span>
+                    </button>
+
+                    <button className="ds-sidebar-item" onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
+                        <Sparkles size={16} /> <span>Oráculos Sagrados</span>
+                    </button>
+
+                    <button className={`ds-sidebar-item ${view === 'esoteric_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureEsotericTools, () => nav('esoteric_hub'))}>
+                        <Stars size={16} /> <span>Ferramentas Esotéricas</span>
+                    </button>
+
+                    <button className={`ds-sidebar-item ${view === 'inventory_hub' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureInventory, () => nav('inventory_hub'))}>
+                        <Settings size={16} /> <span>Gestão do Templo</span>
+                    </button>
+
+                    <div className="ds-sidebar-divider" style={{ margin: '24px 12px' }} />
+
+                    <button className="ds-sidebar-item" onClick={() => setShowSettings(true)}>
+                        <Settings size={16} /> <span>Configurações</span>
+                    </button>
+                    <button className="ds-sidebar-item">
+                        <HelpCircle size={16} /> <span>Ajuda & Suporte</span>
                     </button>
                 </div>
-
-                <div className="ds-sidebar-divider" />
-
-                {/* Conhecimento */}
-                <div className="ds-sidebar-group-label">Conhecimento</div>
-                <button className={`ds-sidebar-item ${view === 'odu_library' ? 'active' : ''}`} onClick={() => nav('odu_library')}>
-                    <Book size={15} /><span>Biblioteca Odu</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'treatise' ? 'active' : ''}`} onClick={() => { handleStudentOrProFeature(t.featureTreatise, () => nav('treatise')); onNav?.(); }}>
-                    <BookOpen size={15} /><span>Tratados</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'study' ? 'active' : ''}`} onClick={() => { setClient({ id: 'study', fullName: 'Estudo', dateOfBirth: 'N/A', mothersName: 'N/A', address: 'N/A', consultationTime: new Date().toLocaleString(), profession: 'Estudante', maritalStatus: 'N/A', phone: 'N/A', email: 'N/A' }); nav('study'); onNav?.(); }}>
-                    <GraduationCap size={15} /><span>Estudos</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'dictionary' ? 'active' : ''}`} onClick={() => nav('dictionary')}>
-                    <Search size={15} /><span>Dicionário</span>
-                </button>
-
-                <div className="ds-sidebar-divider" />
-
-                {/* Espiritualidade */}
-                <div className="ds-sidebar-group-label">Espiritualidade</div>
-                <button className={`ds-sidebar-item ${view === 'prayers' ? 'active' : ''}`} onClick={() => { handleStudentOrProFeature(t.featurePrayers, () => nav('prayers')); onNav?.(); }}>
-                    <Book size={15} /><span>Rituais & Ebó</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'sound_hub' ? 'active' : ''}`} onClick={() => { handleStudentOrProFeature(t.featureSacredSounds, () => nav('sound_hub')); onNav?.(); }}>
-                    <Music size={15} /><span>Sons Sagrados</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'dream_journal' ? 'active' : ''}`} onClick={() => nav('dream_journal')}>
-                    <Moon size={15} /><span>Diário de Sonhos</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'oracle_hub' ? 'active' : ''}`} onClick={() => { handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub')); onNav?.(); }}>
-                    <CircleDot size={15} /><span>Oráculos Sagrados</span>
-                </button>
-
-                <div className="ds-sidebar-divider" />
-
-                {/* Magia */}
-                <div className="ds-sidebar-group-label">Magia (Oogun)</div>
-                <button className={`ds-sidebar-item ${view === 'esoteric_hub' ? 'active' : ''}`} onClick={() => { handleStudentOrProFeature(t.featureEsotericTools, () => nav('esoteric_hub')); onNav?.(); }}>
-                    <Sparkles size={15} /><span>Ferramentas Esotéricas</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'ebo_sim' ? 'active' : ''}`} onClick={() => { handleProFeature(t.featureEboSim, () => nav('ebo_sim')); onNav?.(); }}>
-                    <Move size={15} /><span>Simulador de Ebó</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'reverse_odu' ? 'active' : ''}`} onClick={() => { handleProFeature(t.featureReverseMath, () => nav('reverse_odu')); onNav?.(); }}>
-                    <Database size={15} /><span>Material Reverso</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'ebori' ? 'active' : ''}`} onClick={() => { handleProFeature(t.featureBori, () => nav('ebori')); onNav?.(); }}>
-                    <UserCheck size={15} /><span>Ori & Ara (Bori)</span>
-                </button>
-
-                <div className="ds-sidebar-divider" />
-
-                {/* Gestão */}
-                <div className="ds-sidebar-group-label">Gestão</div>
-                <button className={`ds-sidebar-item ${view === 'agenda' ? 'active' : ''}`} onClick={() => nav('agenda')}>
-                    <CalendarDays size={15} /><span>Agenda</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'inventory_hub' ? 'active' : ''}`} onClick={() => { handleProFeature(t.featureInventory, () => nav('inventory_hub')); onNav?.(); }}>
-                    <Package size={15} /><span>Inventário</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'lineage_tree' ? 'active' : ''}`} onClick={() => { handleStudentOrProFeature(t.featureLineage, () => nav('lineage_tree')); onNav?.(); }}>
-                    <GitBranch size={15} /><span>Linhagem</span>
-                </button>
-                <button className={`ds-sidebar-item ${view === 'analytics' ? 'active' : ''}`} onClick={() => { handleStudentOrProFeature(t.featureAnalytics, () => nav('analytics')); onNav?.(); }}>
-                    <BarChart3 size={15} /><span>Gestão do Templo</span>
-                </button>
-
-                <div className="ds-sidebar-divider" />
-
-                {/* Sistema */}
-                <button className="ds-sidebar-item" onClick={() => setShowSettings(true)}>
-                    <Settings size={15} /><span>Configurações</span>
-                </button>
-                {userProfile?.role === 'admin' && (
-                    <button className="ds-sidebar-item" onClick={() => nav('admin_panel')} style={{ color: 'rgba(240,100,100,0.7)' }}>
-                        <Shield size={15} /><span>Admin</span>
-                    </button>
-                )}
 
                 {/* User Profile */}
-                <div className="ds-sidebar-profile" onClick={() => user ? setShowSettings(true) : setShowLoginModal(true)}>
-                    <div className="ds-sidebar-profile-avatar">{user ? initials : '?'}</div>
+                <div className="ds-sidebar-profile" style={{ margin: '16px 12px 24px', border: 'none', background: 'rgba(196,158,48,0.03)', borderRadius: 12 }} onClick={() => user ? setShowSettings(true) : setShowLoginModal(true)}>
+                    <div className="ds-sidebar-profile-avatar" style={{ border: 'none', background: 'rgba(196,158,48,0.1)' }}>{user ? initials : '?'}</div>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.75)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px' }}>Babaláwo</div>
+                        <div style={{ fontSize: 13, fontWeight: 600, color: '#E8DCC2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
                             {user ? userName : 'Visitante'}
                         </div>
-                        <div style={{ fontSize: 9, color: 'rgba(196,158,48,0.55)', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 4 }}>
-                            {isPlanVip && <Crown size={9} style={{ color: '#C49E30' }} />}
-                            {userProfile?.plan === 'pro_annual' ? 'VIP Anual' : userProfile?.plan === 'pro_monthly' ? 'VIP Mensal' : userProfile?.plan === 'student_monthly' ? 'Estudante' : user ? 'Plano Free' : 'Entrar'}
+                        <div style={{ fontSize: 10, color: '#C49E30', display: 'flex', alignItems: 'center', gap: 4, marginTop: 4 }}>
+                            {isPlanVip && <Crown size={10} />}
+                            {userProfile?.plan === 'pro_annual' ? 'Plano VIP Anual' : userProfile?.plan === 'pro_monthly' ? 'VIP Mensal' : userProfile?.plan === 'student_monthly' ? 'Estudante' : user ? 'Plano Free' : 'Entrar'}
                         </div>
                     </div>
                 </div>
-            </>
+            </div>
         );
     };
 
     const renderHome = () => (
-        <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--ds-bg)' }}>
+        <div style={{ display: 'flex', minHeight: '100vh', background: '#070707' }}>
 
             {/* ===== SIDEBAR DESKTOP ===== */}
-            <aside className="ds-sidebar hidden md:flex md:flex-col">
+            <aside className="ds-sidebar hidden md:flex md:flex-col" style={{ width: 280, borderRight: '1px solid rgba(196,158,48,0.08)' }}>
                 <SidebarContent />
             </aside>
 
             {/* ===== MOBILE DRAWER ===== */}
             {sidebarOpen && (
-                <div className="ds-sidebar-drawer md:hidden">
-                    <div className="ds-sidebar-overlay" onClick={() => setSidebarOpen(false)} />
-                    <div className="ds-sidebar-panel">
+                <div className="ds-sidebar-drawer md:hidden z-50 fixed inset-0">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
+                    <div className="absolute top-0 left-0 bottom-0 w-[280px] bg-[#070707] border-r border-[#1a1a1a]">
                         <SidebarContent onNav={() => setSidebarOpen(false)} />
                     </div>
                 </div>
             )}
 
             {/* ===== MAIN CONTENT ===== */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-
-                {/* ===== TOPBAR ===== */}
-                <div className="ds-topbar flex items-center justify-between px-4 md:px-6 py-3 shrink-0">
-                    {/* Mobile: hamburger + logo */}
-                    <div className="flex items-center gap-3 md:hidden">
-                        <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(196,158,48,0.7)', padding: 6 }}>
-                            <GripHorizontal size={20} />
-                        </button>
-                        <div style={{ fontFamily: 'Cinzel, serif', fontSize: 14, fontWeight: 700, color: '#C49E30', letterSpacing: '2px' }}>IFÁ OLUWO</div>
-                    </div>
-                    {/* Desktop: greeting */}
-                    <div className="hidden md:flex items-center gap-2" style={{ fontSize: 10, letterSpacing: '1.5px', color: 'rgba(196,158,48,0.32)' }}>
-                        <span>256 Odu catalogados</span>
-                        <span style={{ color: 'rgba(196,158,48,0.15)' }}>·</span>
-                        <span>+50.000 sacerdotes</span>
-                    </div>
-                    {/* Right controls */}
-                    <div className="flex items-center gap-2">
-                        {!user && (
-                            <button onClick={() => setShowLoginModal(true)} className="ds-btn-ghost hidden md:inline-flex" style={{ padding: '7px 14px', fontSize: 10 }}>
-                                Entrar
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflowY: 'auto' }} className="scrollbar-hide">
+                <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', padding: '32px 40px' }}>
+                    
+                    {/* TOPBAR GREETING */}
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 40 }}>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                <Sun size={14} style={{ color: '#C49E30' }} />
+                                <span style={{ fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.8)' }}>Bom dia, Babaláwo</span>
+                            </div>
+                            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 28, fontWeight: 700, color: '#E8DCC2', margin: 0, letterSpacing: '1px' }}>
+                                Que Ifá ilumine seus caminhos
+                            </h2>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                            <button style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(196,158,48,0.2)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer', color: 'rgba(196,158,48,0.6)', position: 'relative' }}>
+                                <Bell size={18} />
+                                <div style={{ position: 'absolute', top: 10, right: 10, width: 6, height: 6, borderRadius: '50%', background: '#C49E30' }} />
                             </button>
-                        )}
-                        <button onClick={() => setShowSettings(true)} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(196,158,48,0.12)', borderRadius: 8, padding: '6px 8px', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', transition: 'all 180ms' }}>
-                            <Settings size={15} />
-                        </button>
-                        <div className="relative">
-                            <button onClick={() => setIsLangMenuOpen(!isLangMenuOpen)} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(196,158,48,0.12)', borderRadius: 8, padding: '6px 10px', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', fontSize: 10, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>
-                                {language}
+                            <button className="ds-btn-primary" style={{ padding: '0 24px', height: 40, fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase' }} onClick={() => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander'))}>
+                                <Sparkles size={14} /> Assistente
                             </button>
-                            {isLangMenuOpen && (
-                                <div className="absolute right-0 top-full mt-1 z-50 overflow-hidden min-w-[150px] rounded-xl border" style={{ background: '#0A0A0A', borderColor: 'rgba(196,158,48,0.20)', boxShadow: '0 16px 48px rgba(0,0,0,0.6)' }}>
-                                    {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
-                                        <button key={l} onClick={() => handleChangeLanguage(l)}
-                                            className="w-full text-left px-4 py-2.5 text-xs font-bold uppercase tracking-wider"
-                                            style={{ color: l === language ? '#C49E30' : 'rgba(255,255,255,0.5)', background: l === language ? 'rgba(196,158,48,0.07)' : 'transparent' }}
-                                            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(196,158,48,0.08)')}
-                                            onMouseLeave={e => (e.currentTarget.style.background = l === language ? 'rgba(196,158,48,0.07)' : 'transparent')}>
-                                            {l === 'pt-BR' ? t.langPtBr : l === 'pt-PT' ? t.langPtPt : l === 'en' ? t.langEn : l === 'es' ? t.langEs : t.langYo}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
+                            <button className="md:hidden" onClick={() => setSidebarOpen(true)} style={{ background: 'transparent', border: 'none', color: '#C49E30' }}>
+                                <GripHorizontal size={24} />
+                            </button>
                         </div>
                     </div>
-                </div>
 
-                {/* ===== MAIN SCROLL AREA ===== */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: '28px 28px 48px' }} className="scrollbar-hide">
-                    <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 24 }}>
+                    {/* MAIN GRID P1 */}
+                    <div className="p1-layout">
+                        {/* LEFT: ODU LARGE CARD */}
+                        <div className="p1-card p1-odu-large" style={{ cursor: 'pointer' }} onClick={() => handleStudentOrProFeature('Igbadu Virtual', () => setView('igbadu'))}>
+                            <div style={{ fontSize: 10, letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.6)', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#C49E30' }} />
+                                Odu do Dia
+                            </div>
+                            <h2>OGBE YONO</h2>
+                            <p>A paciência é o pai do bom caráter. Quem tem paciência, tem tudo.</p>
+                            
+                            <div className="p1-odu-badges">
+                                <div className="p1-pill">
+                                    <span className="p1-pill-label">Elemento</span>
+                                    <span className="p1-pill-value">Fogo & Água</span>
+                                </div>
+                                <div className="p1-pill">
+                                    <span className="p1-pill-label">Orixá</span>
+                                    <span className="p1-pill-value">Ogun & Yemanjá</span>
+                                </div>
+                                <div className="p1-pill">
+                                    <span className="p1-pill-label">Vibração</span>
+                                    <span className="p1-pill-value green">Positiva (Ire)</span>
+                                </div>
+                            </div>
+                        </div>
 
-                        {/* ===== HERO: ATENDIMENTO AO CONSULENTE ===== */}
-                        <div className="ds-hero-card" style={{ padding: '28px 32px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                                {/* Header */}
-                                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                        {/* RIGHT COLUMN */}
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div className="p1-stat-row">
+                                <div className="p1-card p1-stat-card">
+                                    <div className="label"><Users size={12} /> Atendimentos Hoje</div>
                                     <div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                                            <Users size={16} style={{ color: '#C49E30', opacity: 0.8 }} />
-                                            <span style={{ fontSize: 9.5, letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.55)', fontFamily: 'Inter, sans-serif' }}>Atendimento ao Consulente</span>
-                                        </div>
-                                        <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 22, fontWeight: 700, color: 'rgba(255,255,255,0.92)', letterSpacing: '0.5px', lineHeight: 1.2, margin: 0 }}>
-                                            Modo Babaláwo
-                                        </h2>
-                                        <p style={{ fontFamily: 'Cormorant Garamond, serif', fontStyle: 'italic', fontSize: 14, color: 'rgba(255,255,255,0.42)', marginTop: 4 }}>
-                                            Que Ifá ilumine seus passos hoje e sempre
-                                        </p>
+                                        <div className="value">{heroStats.pendingCount || 3}</div>
+                                        <div className="desc">Consultas pendentes de análise</div>
                                     </div>
-                                    <span className="ds-badge-green">Ativo</span>
+                                    <div className="action hover:text-white transition-colors cursor-pointer" onClick={startNewSession}>INICIAR SESSÃO <ChevronRight size={12} /></div>
                                 </div>
-
-                                {/* Metrics */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: 20, padding: '16px 0', borderTop: '1px solid rgba(196,158,48,0.08)', borderBottom: '1px solid rgba(196,158,48,0.08)' }}>
-                                    <div className="ds-metric">
-                                        <span className="ds-metric-value">{heroStats.pendingCount}</span>
-                                        <span className="ds-metric-label">Aguardando</span>
+                                <div className="p1-card p1-stat-card">
+                                    <div className="label"><CalendarDays size={12} /> Calendário Litúrgico</div>
+                                    <div>
+                                        <div className="value">14</div>
+                                        <div className="desc">Dias para o próximo festival de Orunmila</div>
                                     </div>
-                                    <div className="ds-metric">
-                                        <span className="ds-metric-value" style={{ fontSize: 18 }}>{heroStats.lastClient}</span>
-                                        <span className="ds-metric-label">Último Consulente</span>
-                                    </div>
-                                    <div className="ds-metric">
-                                        <span className="ds-metric-value">{heroStats.totalCount}</span>
-                                        <span className="ds-metric-label">Total Registros</span>
-                                    </div>
-                                    <div className="ds-metric">
-                                        <span className="ds-metric-value" style={{ fontSize: 18, color: 'rgba(255,255,255,0.5)' }}>{heroStats.lastOdu || '—'}</span>
-                                        <span className="ds-metric-label">Último Odu</span>
-                                    </div>
-                                </div>
-
-                                {/* Actions */}
-                                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                                    <button className="ds-btn-primary" onClick={startNewSession} style={{ flex: '1 1 200px' }}>
-                                        <Users size={14} /> Iniciar Atendimento
-                                    </button>
-                                    <button className="ds-btn-ghost" onClick={() => setView('history')} style={{ flex: '0 0 auto' }}>
-                                        <History size={14} /> Histórico
-                                    </button>
-                                    <button className="ds-btn-ghost" onClick={handleStudyStart} style={{ flex: '0 0 auto' }}>
-                                        <GraduationCap size={14} /> Estudo
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ===== ROW 2: ODU DO DIA + CALENDÁRIO ===== */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }} className="md:grid-cols-[3fr_2fr]">
-
-                            {/* Odu do Dia — Editorial */}
-                            <div className="ds-odu-editorial" style={{ padding: '24px 28px', minHeight: 220 }}>
-                                <div className="ds-odu-halo" />
-                                <div style={{ position: 'relative', zIndex: 1 }}>
-                                    <div style={{ fontSize: 9, letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.40)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <CircleDot size={10} style={{ opacity: 0.6 }} />
-                                        Odu do Dia
-                                    </div>
-                                    <YorubaCalendarWidget onOpenIgbadu={() => handleStudentOrProFeature('Igbadu Virtual', () => setView('igbadu'))} />
-                                    <div style={{ marginTop: 16 }}>
-                                        <button className="ds-btn-ghost" onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => setView('oracle_hub'))} style={{ width: '100%', justifyContent: 'center', fontSize: 10 }}>
-                                            <CircleDot size={12} /> Consultar Oráculo
-                                        </button>
-                                    </div>
+                                    <div className="action hover:text-white transition-colors cursor-pointer" onClick={() => setView('agenda')}>VER AGENDA <ChevronRight size={12} /></div>
                                 </div>
                             </div>
 
-                            {/* Calendário + Ações Rápidas */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                {/* Voz do Trovão */}
-                                <button onClick={() => { handleProFeature(t.featureVoiceCommand, () => setView('voice_commander')); }}
-                                    className="ds-widget-card voz-trovao"
-                                    style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 14, cursor: 'pointer', width: '100%', background: 'rgba(17,17,17,0.95)', border: '1px solid rgba(196,158,48,0.16)' }}>
-                                    <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(196,158,48,0.10)', border: '1px solid rgba(196,158,48,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                        <Mic size={18} style={{ color: '#C49E30' }} />
+                            <div className="p1-card p1-quote-card">
+                                <div className="p1-quote-text">
+                                    "A sabedoria é como uma árvore de baobá; uma pessoa sozinha não consegue abraçá-la."
+                                </div>
+                            </div>
+
+                            <div className="p1-card p1-voice-card">
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                    <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(196,158,48,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(196,158,48,0.3)' }}>
+                                        <Mic size={20} style={{ color: '#C49E30' }} />
                                     </div>
-                                    <div style={{ textAlign: 'left' }}>
-                                        <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.80)', letterSpacing: '0.5px' }}>Voz do Trovão</div>
-                                        <div style={{ fontSize: 9.5, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>Faça sua consulta por voz</div>
+                                    <div>
+                                        <div style={{ fontSize: 13, fontWeight: 600, color: '#E8DCC2', letterSpacing: '1px', textTransform: 'uppercase' }}>Comando de Voz Ativo</div>
+                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>Diga "Ifá, consultar Oráculo"</div>
                                     </div>
+                                </div>
+                                <button className="ds-btn-ghost" style={{ padding: '8px 16px', fontSize: 10 }} onClick={() => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander'))}>
+                                    ATIVAR
                                 </button>
-
-                                {/* Acesso Rápido */}
-                                <div className="ds-widget-card" style={{ padding: '18px 20px' }}>
-                                    <div style={{ fontSize: 9, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.35)', marginBottom: 12 }}>Acesso Rápido</div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                        {[
-                                            { icon: Book, label: 'Biblioteca Odu', action: () => setView('odu_library') },
-                                            { icon: Music, label: 'Sons Sagrados', action: () => handleStudentOrProFeature(t.featureSacredSounds, () => setView('sound_hub')) },
-                                            { icon: CalendarDays, label: 'Agenda', action: () => setView('agenda') },
-                                            { icon: Sparkles, label: 'Ferramentas Esotéricas', action: () => handleStudentOrProFeature(t.featureEsotericTools, () => setView('esoteric_hub')) },
-                                        ].map(({ icon: Icon, label, action }) => (
-                                            <button key={label} onClick={action} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 10px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.55)', fontSize: 11, transition: 'all 180ms', textAlign: 'left', width: '100%' }}
-                                                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(196,158,48,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.82)'; }}
-                                                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; }}>
-                                                <Icon size={13} style={{ color: '#C49E30', opacity: 0.7, flexShrink: 0 }} />
-                                                {label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Plan status */}
-                                {!user ? (
-                                    <button onClick={() => { setBlockedFeature(''); setShowPaywall(true); }} className="ds-widget-card" style={{ padding: '14px 18px', cursor: 'pointer', textAlign: 'left', width: '100%', background: 'rgba(196,158,48,0.05)', border: '1px solid rgba(196,158,48,0.15)' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                                            <Crown size={13} style={{ color: '#C49E30' }} />
-                                            <span style={{ fontSize: 10, fontWeight: 700, color: '#C49E30', letterSpacing: '1px', textTransform: 'uppercase' }}>Plano VIP</span>
-                                        </div>
-                                        <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.42)', lineHeight: 1.5, margin: 0 }}>Acesso ilimitado a todos os recursos sacerdotais</p>
-                                    </button>
-                                ) : (
-                                    <div className="ds-widget-card" style={{ padding: '14px 18px', background: isPro(userProfile?.plan) ? 'rgba(196,158,48,0.05)' : 'rgba(17,17,17,0.8)', border: isPro(userProfile?.plan) ? '1px solid rgba(196,158,48,0.18)' : '1px solid rgba(255,255,255,0.06)' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                                            <Crown size={13} style={{ color: isPro(userProfile?.plan) ? '#C49E30' : 'rgba(255,255,255,0.3)' }} />
-                                            <span style={{ fontSize: 10, fontWeight: 700, color: isPro(userProfile?.plan) ? '#C49E30' : 'rgba(255,255,255,0.4)', letterSpacing: '1px', textTransform: 'uppercase' }}>
-                                                {userProfile?.plan === 'pro_annual' ? 'VIP Anual' : userProfile?.plan === 'pro_monthly' ? 'VIP Mensal' : userProfile?.plan === 'student_monthly' ? 'Estudante' : 'Plano Free'}
-                                            </span>
-                                        </div>
-                                        {!isPro(userProfile?.plan) && (
-                                            <button onClick={() => { setBlockedFeature(''); setShowPaywall(true); }} className="ds-btn-primary" style={{ width: '100%', marginTop: 8, fontSize: 9.5, padding: '8px 12px', justifyContent: 'center' }}>
-                                                Fazer Upgrade
-                                            </button>
-                                        )}
-                                    </div>
-                                )}
                             </div>
                         </div>
-
-                        {/* ===== SEÇÃO: DIVINAÇÃO (ROW 3) ===== */}
-                        <div>
-                            <div className="ds-section-header">
-                                <span className="ds-section-title">Divinação</span>
-                                <div className="ds-section-line" />
-                            </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12 }}>
-                                {[
-                                    { icon: GripHorizontal, label: 'Opele', desc: 'Cadeia de Ifá — 8 sementes sagradas', action: startNewSession, color: '#C49E30' },
-                                    { icon: CircleDot, label: 'Opon Ifá', desc: 'Tabuleiro sagrado de Ifá', action: startNewSession, color: '#C49E30' },
-                                    { icon: Stars, label: 'Ikin — Ritual', desc: 'Sementes de Dendê. Nível sacerdotal', action: startNewSession, color: '#E2B84A' },
-                                    { icon: Move, label: 'Merindilogun', desc: '16 búzios de Orixá', action: startNewSession, color: '#8B6AB5' },
-                                ].map(({ icon: Icon, label, desc, action, color }) => (
-                                    <button key={label} className="ds-module-card" onClick={action}
-                                        style={{ '--ds-card-color': color, '--ds-card-color-border': `${color}44`, '--ds-card-glow': `${color}14`, '--ds-card-color-icon': color } as any}>
-                                        <div className="ds-module-card-icon"><Icon size={18} /></div>
-                                        <div>
-                                            <div className="ds-module-card-title">{label}</div>
-                                            <div className="ds-module-card-desc">{desc}</div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* ===== SEÇÃO: CONHECIMENTO ===== */}
-                        <div>
-                            <div className="ds-section-header">
-                                <span className="ds-section-title">{t.sectionKnowledge}</span>
-                                <div className="ds-section-line" />
-                            </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-                                {[
-                                    { icon: Book, label: t.menuOduLibrary, desc: '256 Odu catalogados', action: () => setView('odu_library'), color: '#C49E30' },
-                                    { icon: BookOpen, label: t.menuTreatise, desc: 'Tratados e textos sagrados', action: () => handleStudentOrProFeature(t.featureTreatise, () => setView('treatise')), color: '#C49E30' },
-                                    { icon: Book, label: t.menuPrayers, desc: 'Rezas, Orins e Orikis', action: () => handleStudentOrProFeature(t.featurePrayers, () => setView('prayers')), color: '#4A90D9' },
-                                    { icon: Baby, label: t.menuYorubaNames, desc: 'Nomes e significados', action: () => setView('amutorunwa'), color: '#B04A8A' },
-                                    { icon: Search, label: t.menuDictionary, desc: 'Dicionário Iorubá', action: () => setView('dictionary'), color: 'rgba(255,255,255,0.5)' },
-                                    { icon: Gamepad2, label: t.menuRPG, desc: 'Modo história imersivo', action: () => handleStudentOrProFeature(t.featureRPG, () => setView('story_mode')), color: '#9B6DD4' },
-                                ].map(({ icon: Icon, label, desc, action, color }) => (
-                                    <button key={label} className="ds-module-card" onClick={action}
-                                        style={{ '--ds-card-color': color, '--ds-card-color-border': `${color}44`, '--ds-card-glow': `${color}14`, '--ds-card-color-icon': color } as any}>
-                                        <div className="ds-module-card-icon"><Icon size={18} /></div>
-                                        <div>
-                                            <div className="ds-module-card-title">{label}</div>
-                                            <div className="ds-module-card-desc">{desc}</div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* ===== SEÇÃO: ESPIRITUALIDADE ===== */}
-                        <div>
-                            <div className="ds-section-header">
-                                <span className="ds-section-title">{t.sectionEsoteric}</span>
-                                <div className="ds-section-line" style={{ background: 'linear-gradient(90deg, rgba(155,109,212,0.25), transparent)' }} />
-                            </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-                                {[
-                                    { icon: Sparkles, label: t.menuEsotericTools, desc: 'Ferramentas e diagnósticos', action: () => handleStudentOrProFeature(t.featureEsotericTools, () => setView('esoteric_hub')), color: '#9B6DD4' },
-                                    { icon: UserCheck, label: t.menuBori, desc: 'Ori e Ara interativos', action: () => handleProFeature(t.featureBori, () => setView('ebori')), color: '#2DB87A' },
-                                    { icon: Move, label: t.menuEboSim, desc: 'Simule ebós e oferendas', action: () => handleProFeature(t.featureEboSim, () => setView('ebo_sim')), color: '#2DB87A' },
-                                    { icon: Music, label: t.menuSacredSounds, desc: 'Sons, cantos e vibrações', action: () => handleStudentOrProFeature(t.featureSacredSounds, () => setView('sound_hub')), color: '#4AB8D4' },
-                                    { icon: Moon, label: t.menuDreamJournal, desc: 'Registre seus sonhos', action: () => setView('dream_journal'), color: '#6B4FAA' },
-                                    { icon: CircleDot, label: t.menuOracleHub, desc: 'Oráculos avançados', action: () => handleStudentOrProFeature(t.featureAdvancedOracles, () => setView('oracle_hub')), color: '#C49E30' },
-                                ].map(({ icon: Icon, label, desc, action, color }) => (
-                                    <button key={label} className="ds-module-card" onClick={action}
-                                        style={{ '--ds-card-color': color, '--ds-card-color-border': `${color}44`, '--ds-card-glow': `${color}14`, '--ds-card-color-icon': color } as any}>
-                                        <div className="ds-module-card-icon"><Icon size={18} /></div>
-                                        <div>
-                                            <div className="ds-module-card-title">{label}</div>
-                                            <div className="ds-module-card-desc">{desc}</div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* ===== SEÇÃO: MAGIA ===== */}
-                        <div>
-                            <div className="ds-section-header">
-                                <span className="ds-section-title">{t.sectionMagic}</span>
-                                <div className="ds-section-line" style={{ background: 'linear-gradient(90deg, rgba(212,74,74,0.20), transparent)' }} />
-                            </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-                                {[
-                                    { icon: Scale, label: t.menuSangoWheel, desc: 'Roda de Xangô', action: () => handleStudentOrProFeature(t.featureSangoWheel, () => setView('sango_wheel')), color: '#D47A4A' },
-                                    { icon: FlaskConical, label: t.menuOogun, desc: 'Plantas e medicamentos', action: () => handleProFeature(t.featureOogun, () => setView('oogun')), color: '#4AB87A' },
-                                    { icon: Leaf, label: t.menuHerbID, desc: 'Identifique ervas sagradas', action: () => handleStudentOrProFeature(t.featureHerbID, () => setView('herb_id')), color: '#7AB84A' },
-                                    { icon: Hammer, label: t.menuAssentamentos, desc: 'Guia de assentamentos', action: () => handleProFeature(t.featureAssentamentos, () => setView('assentamentos')), color: '#C49E30' },
-                                    { icon: MapPin, label: t.menuHerbMap, desc: 'Mapa geolocalizado', action: () => setView('geo_herbs'), color: '#4AB87A' },
-                                    { icon: Stethoscope, label: t.menuAjogun, desc: 'Diagnóstico espiritual', action: () => handleProFeature(t.featureAjogun, () => setView('ajogun')), color: '#D44A4A' },
-                                    { icon: Database, label: t.menuReverseMath, desc: 'Material reverso Odu', action: () => handleProFeature(t.featureReverseMath, () => setView('reverse_odu')), color: '#D44A4A' },
-                                ].map(({ icon: Icon, label, desc, action, color }) => (
-                                    <button key={label} className="ds-module-card" onClick={action}
-                                        style={{ '--ds-card-color': color, '--ds-card-color-border': `${color}44`, '--ds-card-glow': `${color}14`, '--ds-card-color-icon': color } as any}>
-                                        <div className="ds-module-card-icon"><Icon size={18} /></div>
-                                        <div>
-                                            <div className="ds-module-card-title">{label}</div>
-                                            <div className="ds-module-card-desc">{desc}</div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* ===== SEÇÃO: GESTÃO ===== */}
-                        <div>
-                            <div className="ds-section-header">
-                                <span className="ds-section-title">{t.sectionManagement}</span>
-                                <div className="ds-section-line" style={{ background: 'linear-gradient(90deg, rgba(74,144,217,0.18), transparent)' }} />
-                            </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
-                                {[
-                                    { icon: CalendarDays, label: t.menuAgenda, desc: 'Sua agenda litúrgica', action: () => setView('agenda'), color: '#4A8AD4' },
-                                    { icon: Package, label: t.menuInventory, desc: 'Inventário do templo', action: () => handleProFeature(t.featureInventory, () => setView('inventory_hub')), color: '#C49E30' },
-                                    { icon: GitBranch, label: t.menuLineage, desc: 'Árvore de linhagem', action: () => handleStudentOrProFeature(t.featureLineage, () => setView('lineage_tree')), color: '#4AB87A' },
-                                    { icon: BarChart3, label: t.menuAnalytics, desc: 'Gestão e relatórios', action: () => handleStudentOrProFeature(t.featureAnalytics, () => setView('analytics')), color: '#4A8AD4' },
-                                    { icon: Video, label: t.menuVirtualRoom, desc: 'Sala de atendimento virtual', action: () => handleProFeature(t.featureVirtualRoom, () => setView('virtual_room')), color: '#9B6DD4' },
-                                ].map(({ icon: Icon, label, desc, action, color }) => (
-                                    <button key={label} className="ds-module-card" onClick={action}
-                                        style={{ '--ds-card-color': color, '--ds-card-color-border': `${color}44`, '--ds-card-glow': `${color}14`, '--ds-card-color-icon': color } as any}>
-                                        <div className="ds-module-card-icon"><Icon size={18} /></div>
-                                        <div>
-                                            <div className="ds-module-card-title">{label}</div>
-                                            <div className="ds-module-card-desc">{desc}</div>
-                                        </div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Footer ornamental */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16, paddingTop: 16, opacity: 0.25 }}>
-                            <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(196,158,48,0.5))' }} />
-                            <span style={{ fontFamily: 'Cinzel, serif', fontSize: 9, letterSpacing: '3px', color: '#C49E30', textTransform: 'uppercase' }}>Ifá é Sabedoria · Oluwo é o Caminho</span>
-                            <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, rgba(196,158,48,0.5), transparent)' }} />
-                        </div>
-
                     </div>
+
+                    {/* ACESSO RÁPIDO */}
+                    <div className="p1-section-title">Acesso Rápido</div>
+                    <div className="p1-cards-tall-row">
+                        <button className="p1-card-tall active" onClick={() => nav('odu_library')}>
+                            <div className="icon-wrapper"><Book size={20} /></div>
+                            <h3>Biblioteca de Odu</h3>
+                            <p>256 Odus completos, Itans, Ebós e interdições.</p>
+                            <ChevronRight size={14} className="arrow" />
+                        </button>
+                        <button className="p1-card-tall" onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
+                            <div className="icon-wrapper"><Stars size={20} /></div>
+                            <h3>Oráculos Sagrados</h3>
+                            <p>Opele, Ikin, Obi e Merindilogun digitais.</p>
+                            <ChevronRight size={14} className="arrow" />
+                        </button>
+                        <button className="p1-card-tall" onClick={() => handleProFeature(t.featureOogun, () => nav('oogun'))}>
+                            <div className="icon-wrapper"><FlaskConical size={20} /></div>
+                            <h3>Magia (Oogun)</h3>
+                            <p>Bulas de medicamentos tradicionais e banhos.</p>
+                            <ChevronRight size={14} className="arrow" />
+                        </button>
+                        <button className="p1-card-tall" onClick={() => handleStudentOrProFeature(t.featureSacredSounds, () => nav('sound_hub'))}>
+                            <div className="icon-wrapper"><Music size={20} /></div>
+                            <h3>Sons Sagrados</h3>
+                            <p>Orikis, Orins e toques de atabaque em áudio.</p>
+                            <ChevronRight size={14} className="arrow" />
+                        </button>
+                        <button className="p1-card-tall" onClick={() => handleStudentOrProFeature(t.featureLineage, () => nav('lineage_tree'))}>
+                            <div className="icon-wrapper"><Users size={20} /></div>
+                            <h3>Árvore de Linhagem</h3>
+                            <p>Registre seus filhos de santo e hierarquia.</p>
+                            <ChevronRight size={14} className="arrow" />
+                        </button>
+                    </div>
+
+                    <div style={{ marginTop: 48 }} />
+
                 </div>
             </div>
         </div>
