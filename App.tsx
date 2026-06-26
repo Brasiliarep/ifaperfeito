@@ -66,7 +66,7 @@ import { AIAssistant } from './components/AIAssistant';
 import { getTranslation } from './utils/i18n';
 import { checkDomainLock } from './utils/security';
 import { canUseFeature, incrementAnonUsage, getAnonRemaining } from './utils/anonymousTracker';
-import { Feather, Loader2, Users, History, GraduationCap, X, Check, Settings, Globe, Camera, Book, Shuffle, FileText, FlaskConical, BarChart3, Package, Music, Hammer, Leaf, CircleDot, Move, GripHorizontal, Baby, UserCheck, ArrowLeft, Database, Sparkles, Mic, Scale, BookOpen, PenTool, Gamepad2, Stars, ShoppingBag, Crown, Moon, MapPin, Truck, GitBranch, LayoutGrid, Search, Sun, Sunset, CloudMoon, Quote, CalendarDays, Lock, Stethoscope, Zap, Video, Shield } from 'lucide-react';
+import { Feather, Loader2, Users, History, GraduationCap, X, Check, Settings, Globe, Camera, Book, Shuffle, FileText, FlaskConical, BarChart3, Package, Music, Hammer, Leaf, CircleDot, Move, GripHorizontal, Baby, UserCheck, ArrowLeft, Database, Sparkles, Mic, Scale, BookOpen, PenTool, Gamepad2, Stars, ShoppingBag, Crown, Moon, MapPin, Truck, GitBranch, LayoutGrid, Search, Sun, Sunset, CloudMoon, Quote, CalendarDays, Lock, Stethoscope, Zap, Video, Shield, Home, Bell, ChevronRight, HelpCircle, RefreshCw } from 'lucide-react';
 
 const INITIAL_OPELE: OpeleState = {
     rightLeg: ['open', 'open', 'open', 'open'],
@@ -681,7 +681,16 @@ function App() {
         );
     };
 
-    const renderHome = () => (
+    const renderHome = () => {
+        const hour = new Date().getHours();
+        const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+        const GreetIcon = hour < 12 ? Sun : hour < 18 ? Sunset : CloudMoon;
+        const displayName = (userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Babaláwo';
+        const lastOduName = heroStats.lastOdu !== '—' ? heroStats.lastOdu : 'OGBE MEJI';
+
+        const nav = (v: AppView) => setView(v);
+
+        return (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#070707' }}>
 
             {/* ===== SIDEBAR DESKTOP ===== */}
@@ -693,7 +702,7 @@ function App() {
             {sidebarOpen && (
                 <div className="ds-sidebar-drawer md:hidden z-50 fixed inset-0">
                     <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-                    <div className="absolute top-0 left-0 bottom-0 w-[280px] bg-[#070707] border-r border-[#1a1a1a]">
+                    <div className="absolute top-0 left-0 bottom-0 w-[280px] bg-[#070707] border-r border-[rgba(196,158,48,0.08)]">
                         <SidebarContent onNav={() => setSidebarOpen(false)} />
                     </div>
                 </div>
@@ -701,52 +710,88 @@ function App() {
 
             {/* ===== MAIN CONTENT ===== */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflowY: 'auto' }} className="scrollbar-hide">
-                <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', padding: '32px 40px' }}>
-                    
-                    {/* TOPBAR GREETING */}
-                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 40 }}>
+                <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', padding: '32px 40px 64px' }}>
+
+                    {/* ── TOPBAR ── */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 48 }}>
+                        {/* Left: greeting */}
                         <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                                <Sun size={14} style={{ color: '#C49E30' }} />
-                                <span style={{ fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.8)' }}>Bom dia, Babaláwo</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                                <GreetIcon size={13} style={{ color: 'rgba(196,158,48,0.7)' }} />
+                                <span style={{ fontSize: 10, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.7)' }}>
+                                    {greeting}, {displayName}
+                                </span>
                             </div>
-                            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 28, fontWeight: 700, color: '#E8DCC2', margin: 0, letterSpacing: '1px' }}>
+                            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 26, fontWeight: 700, color: '#E8DCC2', margin: 0, letterSpacing: '0.5px', lineHeight: 1.3 }}>
                                 Que Ifá ilumine seus caminhos
                             </h2>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                            <button style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(196,158,48,0.2)', display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer', color: 'rgba(196,158,48,0.6)', position: 'relative' }}>
-                                <Bell size={18} />
-                                <div style={{ position: 'absolute', top: 10, right: 10, width: 6, height: 6, borderRadius: '50%', background: '#C49E30' }} />
+
+                        {/* Right: actions */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            {/* Bell */}
+                            <button
+                                style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(196,158,48,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer', color: 'rgba(196,158,48,0.5)', position: 'relative', flexShrink: 0 }}
+                                title="Notificações"
+                            >
+                                <Bell size={17} />
+                                <div style={{ position: 'absolute', top: 9, right: 9, width: 6, height: 6, borderRadius: '50%', background: '#C49E30', border: '1px solid #070707' }} />
                             </button>
-                            <button className="ds-btn-primary" style={{ padding: '0 24px', height: 40, fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase' }} onClick={() => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander'))}>
-                                <Sparkles size={14} /> Assistente
+
+                            {/* Assistente AI */}
+                            <button
+                                className="ds-btn-primary"
+                                style={{ padding: '0 20px', height: 40, fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}
+                                onClick={() => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander'))}
+                            >
+                                <Sparkles size={13} /> Assistente
                             </button>
-                            <button className="md:hidden" onClick={() => setSidebarOpen(true)} style={{ background: 'transparent', border: 'none', color: '#C49E30' }}>
-                                <GripHorizontal size={24} />
+
+                            {/* Mobile hamburger */}
+                            <button
+                                className="md:hidden"
+                                onClick={() => setSidebarOpen(true)}
+                                style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(196,158,48,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer', color: 'rgba(196,158,48,0.6)', flexShrink: 0 }}
+                            >
+                                <GripHorizontal size={20} />
                             </button>
                         </div>
                     </div>
 
-                    {/* MAIN GRID P1 */}
-                    <div className="p1-layout">
-                        {/* LEFT: ODU LARGE CARD */}
-                        <div className="p1-card p1-odu-large" style={{ cursor: 'pointer' }} onClick={() => handleStudentOrProFeature('Igbadu Virtual', () => setView('igbadu'))}>
-                            <div style={{ fontSize: 10, letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.6)', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#C49E30' }} />
+                    {/* ── HERO GRID (2 colunas) ── */}
+                    <div className="p1-layout" style={{ marginBottom: 40 }}>
+                        {/* LEFT: ODU GRANDE */}
+                        <div
+                            className="p1-card p1-odu-large"
+                            style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
+                            onClick={() => handleStudentOrProFeature('Igbadu Virtual', () => setView('igbadu'))}
+                        >
+                            {/* Glow decorativo */}
+                            <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(196,158,48,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+                            <div style={{ fontSize: 9, letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.55)', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#C49E30', boxShadow: '0 0 6px rgba(196,158,48,0.8)' }} />
                                 Odu do Dia
+                                <div style={{ marginLeft: 'auto', fontSize: 8, color: 'rgba(196,158,48,0.35)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                                    <RefreshCw size={10} /> Atualiza diariamente
+                                </div>
                             </div>
-                            <h2>OGBE YONO</h2>
-                            <p>A paciência é o pai do bom caráter. Quem tem paciência, tem tudo.</p>
-                            
+
+                            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 40, fontWeight: 800, color: '#E8DCC2', margin: '0 0 16px', letterSpacing: '2px', lineHeight: 1.1 }}>
+                                {lastOduName.toUpperCase()}
+                            </h2>
+                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, marginBottom: 32, maxWidth: '85%' }}>
+                                A paciência é o pai do bom caráter. Quem espera com fé, colhe o fruto da sabedoria ancestral.
+                            </p>
+
                             <div className="p1-odu-badges">
                                 <div className="p1-pill">
                                     <span className="p1-pill-label">Elemento</span>
-                                    <span className="p1-pill-value">Fogo & Água</span>
+                                    <span className="p1-pill-value">Fogo &amp; Água</span>
                                 </div>
                                 <div className="p1-pill">
                                     <span className="p1-pill-label">Orixá</span>
-                                    <span className="p1-pill-value">Ogun & Yemanjá</span>
+                                    <span className="p1-pill-value">Ogun &amp; Yemanjá</span>
                                 </div>
                                 <div className="p1-pill">
                                     <span className="p1-pill-label">Vibração</span>
@@ -755,91 +800,100 @@ function App() {
                             </div>
                         </div>
 
-                        {/* RIGHT COLUMN */}
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        {/* RIGHT COLUMN: stats + quote + voz */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                            {/* Row: 2 stat cards */}
                             <div className="p1-stat-row">
-                                <div className="p1-card p1-stat-card">
-                                    <div className="label"><Users size={12} /> Atendimentos Hoje</div>
+                                <div className="p1-card p1-stat-card" style={{ cursor: 'pointer' }} onClick={startNewSession}>
+                                    <div className="label"><Users size={11} /> Atendimentos</div>
                                     <div>
-                                        <div className="value">{heroStats.pendingCount || 3}</div>
-                                        <div className="desc">Consultas pendentes de análise</div>
+                                        <div className="value">{heroStats.totalCount}</div>
+                                        <div className="desc">{heroStats.pendingCount} pendentes</div>
                                     </div>
-                                    <div className="action hover:text-white transition-colors cursor-pointer" onClick={startNewSession}>INICIAR SESSÃO <ChevronRight size={12} /></div>
+                                    <div className="action">INICIAR SESSÃO <ChevronRight size={11} /></div>
                                 </div>
-                                <div className="p1-card p1-stat-card">
-                                    <div className="label"><CalendarDays size={12} /> Calendário Litúrgico</div>
+                                <div className="p1-card p1-stat-card" style={{ cursor: 'pointer' }} onClick={() => setView('agenda')}>
+                                    <div className="label"><CalendarDays size={11} /> Litúrgico</div>
                                     <div>
                                         <div className="value">14</div>
-                                        <div className="desc">Dias para o próximo festival de Orunmila</div>
+                                        <div className="desc">dias para Orunmila</div>
                                     </div>
-                                    <div className="action hover:text-white transition-colors cursor-pointer" onClick={() => setView('agenda')}>VER AGENDA <ChevronRight size={12} /></div>
+                                    <div className="action">VER AGENDA <ChevronRight size={11} /></div>
                                 </div>
                             </div>
 
+                            {/* Quote */}
                             <div className="p1-card p1-quote-card">
                                 <div className="p1-quote-text">
-                                    "A sabedoria é como uma árvore de baobá; uma pessoa sozinha não consegue abraçá-la."
+                                    "{dailyWisdom.pt}"
+                                </div>
+                                <div style={{ marginTop: 16, fontSize: 9, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.4)' }}>
+                                    Provérbio Iorubá — Corpus de Ifá
                                 </div>
                             </div>
 
+                            {/* Voice card */}
                             <div className="p1-card p1-voice-card">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                                    <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(196,158,48,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(196,158,48,0.3)' }}>
-                                        <Mic size={20} style={{ color: '#C49E30' }} />
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1 }}>
+                                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(196,158,48,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(196,158,48,0.25)', flexShrink: 0 }}>
+                                        <Mic size={18} style={{ color: '#C49E30' }} />
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: 13, fontWeight: 600, color: '#E8DCC2', letterSpacing: '1px', textTransform: 'uppercase' }}>Comando de Voz Ativo</div>
-                                        <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>Diga "Ifá, consultar Oráculo"</div>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: '#E8DCC2', letterSpacing: '0.5px' }}>Comando de Voz</div>
+                                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>Diga "Ifá, consultar Oráculo"</div>
                                     </div>
                                 </div>
-                                <button className="ds-btn-ghost" style={{ padding: '8px 16px', fontSize: 10 }} onClick={() => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander'))}>
+                                <button
+                                    className="ds-btn-ghost"
+                                    style={{ padding: '7px 14px', fontSize: 9, letterSpacing: '1.5px', flexShrink: 0 }}
+                                    onClick={() => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander'))}
+                                >
                                     ATIVAR
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    {/* ACESSO RÁPIDO */}
-                    <div className="p1-section-title">Acesso Rápido</div>
-                    <div className="p1-cards-tall-row">
+                    {/* ── ACESSO RÁPIDO ── */}
+                    <div className="p1-section-title" style={{ marginBottom: 20 }}>Acesso Rápido</div>
+                    <div className="p1-cards-tall-row" style={{ marginBottom: 48 }}>
                         <button className="p1-card-tall active" onClick={() => nav('odu_library')}>
                             <div className="icon-wrapper"><Book size={20} /></div>
                             <h3>Biblioteca de Odu</h3>
                             <p>256 Odus completos, Itans, Ebós e interdições.</p>
-                            <ChevronRight size={14} className="arrow" />
+                            <ChevronRight size={13} className="arrow" />
                         </button>
                         <button className="p1-card-tall" onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
                             <div className="icon-wrapper"><Stars size={20} /></div>
                             <h3>Oráculos Sagrados</h3>
                             <p>Opele, Ikin, Obi e Merindilogun digitais.</p>
-                            <ChevronRight size={14} className="arrow" />
+                            <ChevronRight size={13} className="arrow" />
                         </button>
                         <button className="p1-card-tall" onClick={() => handleProFeature(t.featureOogun, () => nav('oogun'))}>
                             <div className="icon-wrapper"><FlaskConical size={20} /></div>
                             <h3>Magia (Oogun)</h3>
-                            <p>Bulas de medicamentos tradicionais e banhos.</p>
-                            <ChevronRight size={14} className="arrow" />
+                            <p>Preparos tradicionais, banhos e Akoses.</p>
+                            <ChevronRight size={13} className="arrow" />
                         </button>
                         <button className="p1-card-tall" onClick={() => handleStudentOrProFeature(t.featureSacredSounds, () => nav('sound_hub'))}>
                             <div className="icon-wrapper"><Music size={20} /></div>
                             <h3>Sons Sagrados</h3>
-                            <p>Orikis, Orins e toques de atabaque em áudio.</p>
-                            <ChevronRight size={14} className="arrow" />
+                            <p>Orikis, Orins e toques de atabaque.</p>
+                            <ChevronRight size={13} className="arrow" />
                         </button>
                         <button className="p1-card-tall" onClick={() => handleStudentOrProFeature(t.featureLineage, () => nav('lineage_tree'))}>
                             <div className="icon-wrapper"><Users size={20} /></div>
                             <h3>Árvore de Linhagem</h3>
-                            <p>Registre seus filhos de santo e hierarquia.</p>
-                            <ChevronRight size={14} className="arrow" />
+                            <p>Registro de filhos de santo e hierarquia.</p>
+                            <ChevronRight size={13} className="arrow" />
                         </button>
                     </div>
-
-                    <div style={{ marginTop: 48 }} />
 
                 </div>
             </div>
         </div>
-    );
+        );
+    };
 
 
     if (authLoading) return <div className="min-h-screen bg-black flex items-center justify-center text-ifa-gold"><Loader2 className="animate-spin" size={48} /></div>;
