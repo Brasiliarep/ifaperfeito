@@ -71,9 +71,9 @@
       :root {
         /* === IFÁ OLUWO 2.0 — DESIGN SYSTEM === */
         /* Paleta */
-        --ds-bg:          #070707;
-        --ds-surface:     #111111;
-        --ds-surface-2:   #161616;
+        --ds-bg:          #090e14;
+        --ds-surface:     #101622;
+        --ds-surface-2:   #141b29;
         --ds-border:      rgba(196,158,48,0.18);
         --ds-border-hover:rgba(196,158,48,0.38);
         --ds-gold:        #C49E30;
@@ -96,7 +96,7 @@
         --ds-duration: 200ms;
 
         /* Sidebar */
-        --ds-sidebar-w: 220px;
+        --ds-sidebar-w: 80px; /* Reduzido para o design slim */
 
         /* Legado — mantido para compatibilidade com componentes existentes */
         --gold: #e2b84a;
@@ -111,8 +111,8 @@
         --text-bright: rgba(255,255,255,0.88);
         --sat: env(safe-area-inset-top);
         --sab: env(safe-area-inset-bottom);
-        --color-bg: #070707;
-        --color-bg-dark: #050505;
+        --color-bg: #090e14;
+        --color-bg-dark: #070a0f;
         --color-surface: rgba(255,255,255,0.042);
         --color-gold: #e2b84a;
         --color-gold-light: #f0d060;
@@ -181,6 +181,91 @@
         position: sticky;
         top: 0;
         z-index: 100;
+      }
+
+      /* --- SIDEBAR ESTREITA (SLIM SIDEBAR) --- */
+      .ds-sidebar-slim {
+        background: #070c12; /* Deep slate blue background */
+        border-right: 1px solid rgba(196,158,48,0.12);
+        width: 80px;
+        min-width: 80px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        flex-shrink: 0;
+        scrollbar-width: none;
+        padding: 24px 0;
+        z-index: 10;
+      }
+      .ds-sidebar-slim::-webkit-scrollbar { display: none; }
+      
+      .ds-sidebar-slim-logo {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 28px;
+        color: var(--ds-gold);
+        filter: drop-shadow(0 0 8px rgba(196,158,48,0.35));
+        transition: transform 0.3s ease;
+      }
+      .ds-sidebar-slim-logo:hover {
+        transform: rotate(15deg) scale(1.05);
+      }
+      
+      .ds-sidebar-slim-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 12px 2px;
+        font-size: 9.5px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.45);
+        cursor: pointer;
+        transition: all 200ms ease;
+        position: relative;
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 4px;
+      }
+      .ds-sidebar-slim-item:hover {
+        color: rgba(255,255,255,0.85);
+        background: rgba(196,158,48,0.04);
+      }
+      .ds-sidebar-slim-item.active {
+        color: #E2B84A;
+        background: rgba(196,158,48,0.08);
+      }
+      .ds-sidebar-slim-item.active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 15%;
+        bottom: 15%;
+        width: 3px;
+        background: #C49E30;
+        border-radius: 0 2px 2px 0;
+        box-shadow: 0 0 8px rgba(196,158,48,0.6);
+      }
+      .ds-sidebar-slim-item svg {
+        opacity: 0.6;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+        color: currentColor;
+      }
+      .ds-sidebar-slim-item:hover svg,
+      .ds-sidebar-slim-item.active svg {
+        opacity: 1;
+        transform: scale(1.08);
       }
 
       /* --- SIDEBAR: COLUNA DO TEMPLO --- */
@@ -1330,7 +1415,7 @@
             navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
             caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
           } else {
-            navigator.serviceWorker.register('./service-worker.js?v=mqvg6yaw')
+            navigator.serviceWorker.register('./service-worker.js?v=mqvhavg3')
               .then(registration => console.log('SW registered'))
               .catch(err => console.log('SW failed', err));
           }

@@ -89,6 +89,23 @@ import { useAuth } from './services/AuthContext';
 type AppView = 'home' | 'history' | 'register' | 'input' | 'result' | 'print' | 'prayers' | 'manual' | 'oogun' | 'analytics' | 'inventory_hub' | 'sound_hub' | 'study' | 'dream_journal' | 'face_reading' | 'geo_herbs' | 'lineage_tree' | 'igbadu' | 'oracle_hub' | 'ajogun' | 'assentamentos' | 'herb_id' | 'ebo_sim' | 'mandala' | 'amutorunwa' | 'ebori' | 'dictionary' | 'sango_wheel' | 'reverse_odu' | 'esoteric_hub' | 'door_guardian' | 'voice_commander' | 'treatise' | 'story_mode' | 'mojuba' | 'constellation' | 'delivery' | 'agenda' | 'verse_builder' | 'odu_library' | 'virtual_room' | 'admin_panel';
 import LoginScreen from './components/LoginScreen';
 
+const YorubaLogo = () => (
+    <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="45" stroke="#C49E30" strokeWidth="2.5" />
+        <circle cx="50" cy="50" r="38" stroke="#C49E30" strokeWidth="1" strokeDasharray="3 3" />
+        <circle cx="50" cy="50" r="30" stroke="#C49E30" strokeWidth="1.5" />
+        <circle cx="50" cy="50" r="15" stroke="#C49E30" strokeWidth="2" />
+        <line x1="50" y1="5" x2="50" y2="95" stroke="#C49E30" strokeWidth="1.5" />
+        <line x1="5" y1="50" x2="95" y2="50" stroke="#C49E30" strokeWidth="1.5" />
+        <line x1="18.2" y1="18.2" x2="81.8" y2="81.8" stroke="#C49E30" strokeWidth="1" strokeDasharray="4 4" />
+        <line x1="18.2" y1="81.8" x2="81.8" y2="18.2" stroke="#C49E30" strokeWidth="1" strokeDasharray="4 4" />
+        <circle cx="50" cy="15" r="3" fill="#E2B84A" />
+        <circle cx="50" cy="85" r="3" fill="#E2B84A" />
+        <circle cx="15" cy="50" r="3" fill="#E2B84A" />
+        <circle cx="85" cy="50" r="3" fill="#E2B84A" />
+    </svg>
+);
+
 function App() {
     useEffect(() => {
       if (location.hostname.includes('localhost')) {
@@ -587,7 +604,7 @@ function App() {
         const isPlanVip = isPro(userProfile?.plan);
 
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0 12px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0 12px', background: '#070c12' }}>
                 {/* Logo */}
                 <div className="p1-sidebar-brand" style={{ padding: '32px 12px 24px' }}>
                     <div style={{ color: '#E8DCC2' }}>
@@ -681,28 +698,101 @@ function App() {
         );
     };
 
-    const renderHome = () => {
-        const hour = new Date().getHours();
-        const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
-        const GreetIcon = hour < 12 ? Sun : hour < 18 ? Sunset : CloudMoon;
-        const displayName = (userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Babaláwo';
-        const lastOduName = heroStats.lastOdu !== '—' ? heroStats.lastOdu : 'OGBE MEJI';
+    // Slim Sidebar Content for Desktop
+    const SidebarSlimContent = () => {
+        const nav = (v: AppView) => setView(v);
+        const userName = (userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Babaláwo';
+        const initials = userName.slice(0, 2).toUpperCase();
 
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', alignItems: 'center' }}>
+                {/* Logo */}
+                <div className="ds-sidebar-slim-logo">
+                    <YorubaLogo />
+                </div>
+
+                {/* Nav Links */}
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center' }} className="scrollbar-hide">
+                    <button className={`ds-sidebar-slim-item ${view === 'home' ? 'active' : ''}`} onClick={() => nav('home')} title="Início">
+                        <Home size={20} />
+                        <span>Início</span>
+                    </button>
+                    
+                    <button className="ds-sidebar-slim-item" onClick={startNewSession} title="Atendimento">
+                        <Users size={20} />
+                        <span>Atender</span>
+                    </button>
+
+                    <button className={`ds-sidebar-slim-item ${view === 'oracle_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))} title="Oráculo">
+                        <CircleDot size={20} />
+                        <span>Divinar</span>
+                    </button>
+
+                    <button className={`ds-sidebar-slim-item ${view === 'treatise' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureTreatise, () => nav('treatise'))} title="Tratados">
+                        <GraduationCap size={20} />
+                        <span>Estudos</span>
+                    </button>
+
+                    <button className={`ds-sidebar-slim-item ${view === 'odu_library' ? 'active' : ''}`} onClick={() => nav('odu_library')} title="Biblioteca de Odu">
+                        <Book size={20} />
+                        <span>Biblioteca</span>
+                    </button>
+
+                    <button className={`ds-sidebar-slim-item ${view === 'oogun' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureOogun, () => nav('oogun'))} title="Magia (Oogun)">
+                        <FlaskConical size={20} />
+                        <span>Magia</span>
+                    </button>
+
+                    <button className={`ds-sidebar-slim-item ${view === 'agenda' ? 'active' : ''}`} onClick={() => nav('agenda')} title="Calendário Litúrgico">
+                        <CalendarDays size={20} />
+                        <span>Agenda</span>
+                    </button>
+                </div>
+
+                {/* Bottom Settings & Profile */}
+                <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center', gap: 12 }}>
+                    <button className="ds-sidebar-slim-item" onClick={() => setShowSettings(true)} title="Configurações">
+                        <Settings size={20} />
+                        <span>Ajustes</span>
+                    </button>
+                    
+                    <div 
+                        className="ds-sidebar-profile-avatar" 
+                        style={{ 
+                            width: 36, 
+                            height: 36, 
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s ease',
+                            border: '1px solid rgba(196,158,48,0.3)',
+                            background: 'rgba(196,158,48,0.1)'
+                        }}
+                        onClick={() => user ? setShowSettings(true) : setShowLoginModal(true)}
+                        title={user ? userName : 'Entrar'}
+                    >
+                        {user ? initials : '?'}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderHome = () => {
+        const lastOduName = heroStats.lastOdu !== '—' ? heroStats.lastOdu : 'OGBE MEJI';
         const nav = (v: AppView) => setView(v);
 
         return (
-        <div style={{ display: 'flex', minHeight: '100vh', background: '#070707' }}>
+        <div style={{ display: 'flex', minHeight: '100vh', background: '#090e14' }}>
 
             {/* ===== SIDEBAR DESKTOP ===== */}
-            <aside className="ds-sidebar hidden md:flex md:flex-col" style={{ width: 280, borderRight: '1px solid rgba(196,158,48,0.08)' }}>
-                <SidebarContent />
+            <aside className="ds-sidebar-slim hidden md:flex md:flex-col">
+                <SidebarSlimContent />
             </aside>
 
             {/* ===== MOBILE DRAWER ===== */}
             {sidebarOpen && (
                 <div className="ds-sidebar-drawer md:hidden z-50 fixed inset-0">
                     <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
-                    <div className="absolute top-0 left-0 bottom-0 w-[280px] bg-[#070707] border-r border-[rgba(196,158,48,0.08)]">
+                    <div className="absolute top-0 left-0 bottom-0 w-[280px] bg-[#070c12] border-r border-[rgba(196,158,48,0.08)]">
                         <SidebarContent onNav={() => setSidebarOpen(false)} />
                     </div>
                 </div>
@@ -713,180 +803,317 @@ function App() {
                 <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', padding: '32px 40px 64px' }}>
 
                     {/* ── TOPBAR ── */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 48 }}>
-                        {/* Left: greeting */}
-                        <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                                <GreetIcon size={13} style={{ color: 'rgba(196,158,48,0.7)' }} />
-                                <span style={{ fontSize: 10, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.7)' }}>
-                                    {greeting}, {displayName}
-                                </span>
-                            </div>
-                            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 26, fontWeight: 700, color: '#E8DCC2', margin: 0, letterSpacing: '0.5px', lineHeight: 1.3 }}>
-                                Que Ifá ilumine seus caminhos
-                            </h2>
-                        </div>
-
-                        {/* Right: actions */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 36 }}>
+                        {/* Left: Branding */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            {/* Bell */}
-                            <button
-                                style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(196,158,48,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer', color: 'rgba(196,158,48,0.5)', position: 'relative', flexShrink: 0 }}
-                                title="Notificações"
-                            >
-                                <Bell size={17} />
-                                <div style={{ position: 'absolute', top: 9, right: 9, width: 6, height: 6, borderRadius: '50%', background: '#C49E30', border: '1px solid #070707' }} />
-                            </button>
-
-                            {/* Assistente AI */}
-                            <button
-                                className="ds-btn-primary"
-                                style={{ padding: '0 20px', height: 40, fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}
-                                onClick={() => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander'))}
-                            >
-                                <Sparkles size={13} /> Assistente
-                            </button>
-
-                            {/* Mobile hamburger */}
+                            {/* Hamburger mobile button */}
                             <button
                                 className="md:hidden"
                                 onClick={() => setSidebarOpen(true)}
-                                style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(196,158,48,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer', color: 'rgba(196,158,48,0.6)', flexShrink: 0 }}
+                                style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(196,158,48,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(196,158,48,0.05)', cursor: 'pointer', color: '#E2B84A' }}
                             >
-                                <GripHorizontal size={20} />
+                                <GripHorizontal size={18} style={{ margin: 'auto' }} />
+                            </button>
+                            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 24, fontWeight: 700, color: '#E8DCC2', margin: 0, letterSpacing: '2.5px', textShadow: '0 0 10px rgba(196,158,48,0.15)' }}>
+                                IFÁ OLUWO
+                            </h2>
+                        </div>
+
+                        {/* Right: Actions */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                            {/* Search */}
+                            <button
+                                style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', color: 'rgba(255,255,255,0.6)', transition: 'all 0.2s' }}
+                                onClick={() => nav('odu_library')}
+                                title="Buscar Odu"
+                                className="hover:text-white hover:border-[rgba(196,158,48,0.3)]"
+                            >
+                                <Search size={16} />
+                            </button>
+
+                            {/* Bell */}
+                            <button
+                                style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', color: 'rgba(255,255,255,0.6)', position: 'relative', transition: 'all 0.2s' }}
+                                title="Notificações"
+                                className="hover:text-white hover:border-[rgba(196,158,48,0.3)]"
+                            >
+                                <Bell size={16} />
+                                <div style={{ position: 'absolute', top: 8, right: 8, width: 6, height: 6, borderRadius: '50%', background: '#C49E30', boxShadow: '0 0 6px #C49E30' }} />
+                            </button>
+
+                            {/* User Avatar with Gold Ring */}
+                            <div 
+                                style={{ 
+                                    width: 36, 
+                                    height: 36, 
+                                    borderRadius: '50%', 
+                                    border: '1.5px solid #C49E30', 
+                                    padding: '1px', 
+                                    cursor: 'pointer',
+                                    transition: 'transform 0.2s' 
+                                }}
+                                onClick={() => user ? setShowSettings(true) : setShowLoginModal(true)}
+                                className="hover:scale-105"
+                                title={user ? userName : 'Entrar'}
+                            >
+                                <div style={{ 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    borderRadius: '50%', 
+                                    background: 'rgba(196,158,48,0.2)', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center',
+                                    fontSize: 11,
+                                    fontWeight: 'bold',
+                                    color: '#E8DCC2',
+                                    fontFamily: 'Cinzel, serif'
+                                }}>
+                                    {user ? initials : '?'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ── HEADER HERO CARD (Capa de Divinação) ── */}
+                    <div style={{ 
+                        background: 'rgba(16, 22, 34, 0.45)', 
+                        border: '1px solid rgba(196, 158, 48, 0.25)', 
+                        borderRadius: 16, 
+                        padding: '24px 32px', 
+                        marginBottom: 32,
+                        backdropFilter: 'blur(10px)',
+                        display: 'flex',
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: 20,
+                        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.25)'
+                    }}>
+                        {/* Left Side */}
+                        <div style={{ flex: '1 1 300px' }}>
+                            <h3 style={{ fontFamily: 'Cinzel, serif', fontSize: 22, fontWeight: 700, color: '#E8DCC2', margin: '0 0 14px 0', letterSpacing: '1px' }}>
+                                IFÁ OLUWO
+                            </h3>
+                            <button 
+                                className="ds-btn-primary" 
+                                style={{ 
+                                    padding: '8px 18px', 
+                                    fontSize: 10, 
+                                    letterSpacing: '1px', 
+                                    fontFamily: 'Inter, sans-serif',
+                                    borderRadius: 30,
+                                    background: 'rgba(196, 158, 48, 0.12)',
+                                    color: '#E2B84A',
+                                    border: '1px solid rgba(196, 158, 48, 0.4)',
+                                    boxShadow: 'none'
+                                }}
+                                onClick={startNewSession}
+                            >
+                                Capa de Divinação
                             </button>
                         </div>
-                    </div>
 
-                    {/* ── HERO GRID (2 colunas) ── */}
-                    <div className="p1-layout" style={{ marginBottom: 40 }}>
-                        {/* LEFT: ODU GRANDE */}
-                        <div
-                            className="p1-card p1-odu-large"
-                            style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
-                            onClick={() => handleStudentOrProFeature('Igbadu Virtual', () => setView('igbadu'))}
-                        >
-                            {/* Glow decorativo */}
-                            <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(196,158,48,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
-
-                            <div style={{ fontSize: 9, letterSpacing: '3px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.55)', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#C49E30', boxShadow: '0 0 6px rgba(196,158,48,0.8)' }} />
-                                Odu do Dia
-                                <div style={{ marginLeft: 'auto', fontSize: 8, color: 'rgba(196,158,48,0.35)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                                    <RefreshCw size={10} /> Atualiza diariamente
-                                </div>
+                        {/* Right Side */}
+                        <div style={{ flex: '2 1 400px', textAlign: 'right', borderLeft: '1px solid rgba(196, 158, 48, 0.15)', paddingLeft: 24 }}>
+                            <div style={{ fontSize: 9, letterSpacing: '2px', textTransform: 'uppercase', color: '#C49E30', marginBottom: 4 }}>
+                                ODU DO DIA REVELADO
                             </div>
-
-                            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 40, fontWeight: 800, color: '#E8DCC2', margin: '0 0 16px', letterSpacing: '2px', lineHeight: 1.1 }}>
-                                {lastOduName.toUpperCase()}
-                            </h2>
-                            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, marginBottom: 32, maxWidth: '85%' }}>
-                                A paciência é o pai do bom caráter. Quem espera com fé, colhe o fruto da sabedoria ancestral.
+                            <h4 style={{ fontFamily: 'Cinzel, serif', fontSize: 18, fontWeight: 700, color: '#E8DCC2', margin: '0 0 8px 0', letterSpacing: '1px' }}>
+                                OPON IFÁ — {lastOduName.toUpperCase()}
+                            </h4>
+                            <p style={{ fontSize: 12, color: 'rgba(255, 255, 255, 0.5)', margin: 0, lineHeight: 1.5 }}>
+                                "A verdade é o caminho da retidão. Aquele que consulta com o coração puro recebe a sabedoria eterna."
                             </p>
-
-                            <div className="p1-odu-badges">
-                                <div className="p1-pill">
-                                    <span className="p1-pill-label">Elemento</span>
-                                    <span className="p1-pill-value">Fogo &amp; Água</span>
-                                </div>
-                                <div className="p1-pill">
-                                    <span className="p1-pill-label">Orixá</span>
-                                    <span className="p1-pill-value">Ogun &amp; Yemanjá</span>
-                                </div>
-                                <div className="p1-pill">
-                                    <span className="p1-pill-label">Vibração</span>
-                                    <span className="p1-pill-value green">Positiva (Ire)</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* RIGHT COLUMN: stats + quote + voz */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                            {/* Row: 2 stat cards */}
-                            <div className="p1-stat-row">
-                                <div className="p1-card p1-stat-card" style={{ cursor: 'pointer' }} onClick={startNewSession}>
-                                    <div className="label"><Users size={11} /> Atendimentos</div>
-                                    <div>
-                                        <div className="value">{heroStats.totalCount}</div>
-                                        <div className="desc">{heroStats.pendingCount} pendentes</div>
-                                    </div>
-                                    <div className="action">INICIAR SESSÃO <ChevronRight size={11} /></div>
-                                </div>
-                                <div className="p1-card p1-stat-card" style={{ cursor: 'pointer' }} onClick={() => setView('agenda')}>
-                                    <div className="label"><CalendarDays size={11} /> Litúrgico</div>
-                                    <div>
-                                        <div className="value">14</div>
-                                        <div className="desc">dias para Orunmila</div>
-                                    </div>
-                                    <div className="action">VER AGENDA <ChevronRight size={11} /></div>
-                                </div>
-                            </div>
-
-                            {/* Quote */}
-                            <div className="p1-card p1-quote-card">
-                                <div className="p1-quote-text">
-                                    "{dailyWisdom.pt}"
-                                </div>
-                                <div style={{ marginTop: 16, fontSize: 9, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.4)' }}>
-                                    Provérbio Iorubá — Corpus de Ifá
-                                </div>
-                            </div>
-
-                            {/* Voice card */}
-                            <div className="p1-card p1-voice-card">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1 }}>
-                                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(196,158,48,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(196,158,48,0.25)', flexShrink: 0 }}>
-                                        <Mic size={18} style={{ color: '#C49E30' }} />
-                                    </div>
-                                    <div>
-                                        <div style={{ fontSize: 12, fontWeight: 600, color: '#E8DCC2', letterSpacing: '0.5px' }}>Comando de Voz</div>
-                                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>Diga "Ifá, consultar Oráculo"</div>
-                                    </div>
-                                </div>
-                                <button
-                                    className="ds-btn-ghost"
-                                    style={{ padding: '7px 14px', fontSize: 9, letterSpacing: '1.5px', flexShrink: 0 }}
-                                    onClick={() => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander'))}
-                                >
-                                    ATIVAR
-                                </button>
-                            </div>
                         </div>
                     </div>
 
-                    {/* ── ACESSO RÁPIDO ── */}
-                    <div className="p1-section-title" style={{ marginBottom: 20 }}>Acesso Rápido</div>
-                    <div className="p1-cards-tall-row" style={{ marginBottom: 48 }}>
-                        <button className="p1-card-tall active" onClick={() => nav('odu_library')}>
-                            <div className="icon-wrapper"><Book size={20} /></div>
-                            <h3>Biblioteca de Odu</h3>
-                            <p>256 Odus completos, Itans, Ebós e interdições.</p>
-                            <ChevronRight size={13} className="arrow" />
-                        </button>
-                        <button className="p1-card-tall" onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
-                            <div className="icon-wrapper"><Stars size={20} /></div>
-                            <h3>Oráculos Sagrados</h3>
-                            <p>Opele, Ikin, Obi e Merindilogun digitais.</p>
-                            <ChevronRight size={13} className="arrow" />
-                        </button>
-                        <button className="p1-card-tall" onClick={() => handleProFeature(t.featureOogun, () => nav('oogun'))}>
-                            <div className="icon-wrapper"><FlaskConical size={20} /></div>
-                            <h3>Magia (Oogun)</h3>
-                            <p>Preparos tradicionais, banhos e Akoses.</p>
-                            <ChevronRight size={13} className="arrow" />
-                        </button>
-                        <button className="p1-card-tall" onClick={() => handleStudentOrProFeature(t.featureSacredSounds, () => nav('sound_hub'))}>
-                            <div className="icon-wrapper"><Music size={20} /></div>
-                            <h3>Sons Sagrados</h3>
-                            <p>Orikis, Orins e toques de atabaque.</p>
-                            <ChevronRight size={13} className="arrow" />
-                        </button>
-                        <button className="p1-card-tall" onClick={() => handleStudentOrProFeature(t.featureLineage, () => nav('lineage_tree'))}>
-                            <div className="icon-wrapper"><Users size={20} /></div>
-                            <h3>Árvore de Linhagem</h3>
-                            <p>Registro de filhos de santo e hierarquia.</p>
-                            <ChevronRight size={13} className="arrow" />
-                        </button>
+                    {/* ── GIANT OPON IFÁ BOARD HERO ── */}
+                    <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        margin: '40px 0 64px 0',
+                        position: 'relative' 
+                    }}>
+                        {/* Blue/Gold Background Glows */}
+                        <div style={{ 
+                            position: 'absolute', 
+                            width: 320, 
+                            height: 320, 
+                            borderRadius: '50%', 
+                            background: 'radial-gradient(circle, rgba(45, 130, 200, 0.18) 0%, transparent 70%)', 
+                            filter: 'blur(30px)',
+                            zIndex: 1 
+                        }} />
+                        <div style={{ 
+                            position: 'absolute', 
+                            width: 250, 
+                            height: 250, 
+                            borderRadius: '50%', 
+                            background: 'radial-gradient(circle, rgba(196, 158, 48, 0.12) 0%, transparent 70%)', 
+                            filter: 'blur(20px)',
+                            zIndex: 1 
+                        }} />
+                        
+                        {/* Opon Ifá Board Image */}
+                        <img 
+                            src="/opon_ifa_hero.png" 
+                            alt="Opon Ifá Board" 
+                            style={{ 
+                                width: 440, 
+                                height: 440, 
+                                borderRadius: '50%', 
+                                objectFit: 'cover', 
+                                border: '3px solid rgba(196, 158, 48, 0.45)', 
+                                boxShadow: '0 20px 80px rgba(0, 0, 0, 0.6), 0 0 50px rgba(45, 130, 200, 0.35)', 
+                                zIndex: 2,
+                                transition: 'transform 0.5s ease',
+                            }}
+                            className="hover:scale-102 cursor-pointer"
+                            onClick={startNewSession}
+                        />
+                    </div>
+
+                    {/* ── THREE GLASS ACTION CARDS ── */}
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
+                        gap: 20, 
+                        marginTop: 24 
+                    }}>
+                        {/* Card 1: Iniciar Consulta */}
+                        <div 
+                            className="glass-card cursor-pointer" 
+                            style={{ 
+                                padding: '32px 20px', 
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                gap: 20,
+                                background: 'rgba(16, 22, 34, 0.5)',
+                                border: '1px solid rgba(196, 158, 48, 0.2)',
+                                borderRadius: 16,
+                                textAlign: 'center',
+                                transition: 'all 0.3s'
+                            }}
+                            onClick={startNewSession}
+                        >
+                            <div style={{ 
+                                width: 56, 
+                                height: 56, 
+                                borderRadius: '50%', 
+                                background: 'rgba(196, 158, 48, 0.08)', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                border: '1px solid rgba(196, 158, 48, 0.3)',
+                                color: '#E2B84A'
+                            }}>
+                                <Sparkles size={24} />
+                            </div>
+                            <h3 style={{ 
+                                fontFamily: 'Cinzel, serif', 
+                                fontSize: 14, 
+                                fontWeight: 700, 
+                                color: '#E8DCC2', 
+                                margin: 0, 
+                                letterSpacing: '2px', 
+                                textTransform: 'uppercase' 
+                            }}>
+                                Iniciar Consulta
+                            </h3>
+                        </div>
+
+                        {/* Card 2: Biblioteca de Odu */}
+                        <div 
+                            className="glass-card cursor-pointer" 
+                            style={{ 
+                                padding: '32px 20px', 
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                gap: 20,
+                                background: 'rgba(16, 22, 34, 0.5)',
+                                border: '1px solid rgba(196, 158, 48, 0.2)',
+                                borderRadius: 16,
+                                textAlign: 'center',
+                                transition: 'all 0.3s'
+                            }}
+                            onClick={() => nav('odu_library')}
+                        >
+                            <div style={{ 
+                                width: 56, 
+                                height: 56, 
+                                borderRadius: '50%', 
+                                background: 'rgba(196, 158, 48, 0.08)', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                border: '1px solid rgba(196, 158, 48, 0.3)',
+                                color: '#E2B84A'
+                            }}>
+                                <BookOpen size={24} />
+                            </div>
+                            <h3 style={{ 
+                                fontFamily: 'Cinzel, serif', 
+                                fontSize: 14, 
+                                fontWeight: 700, 
+                                color: '#E8DCC2', 
+                                margin: 0, 
+                                letterSpacing: '2px', 
+                                textTransform: 'uppercase' 
+                            }}>
+                                Biblioteca de Odu
+                            </h3>
+                        </div>
+
+                        {/* Card 3: Calendário Litúrgico */}
+                        <div 
+                            className="glass-card cursor-pointer" 
+                            style={{ 
+                                padding: '32px 20px', 
+                                display: 'flex', 
+                                flexDirection: 'column', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                gap: 20,
+                                background: 'rgba(16, 22, 34, 0.5)',
+                                border: '1px solid rgba(196, 158, 48, 0.2)',
+                                borderRadius: 16,
+                                textAlign: 'center',
+                                transition: 'all 0.3s'
+                            }}
+                            onClick={() => nav('agenda')}
+                        >
+                            <div style={{ 
+                                width: 56, 
+                                height: 56, 
+                                borderRadius: '50%', 
+                                background: 'rgba(196, 158, 48, 0.08)', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                border: '1px solid rgba(196, 158, 48, 0.3)',
+                                color: '#E2B84A'
+                            }}>
+                                <CalendarDays size={24} />
+                            </div>
+                            <h3 style={{ 
+                                fontFamily: 'Cinzel, serif', 
+                                fontSize: 14, 
+                                fontWeight: 700, 
+                                color: '#E8DCC2', 
+                                margin: 0, 
+                                letterSpacing: '2px', 
+                                textTransform: 'uppercase' 
+                            }}>
+                                Calendário Litúrgico
+                            </h3>
+                        </div>
                     </div>
 
                 </div>
