@@ -819,7 +819,7 @@ function App() {
 
                     {/* ── HERO GRID (2 colunas) ── */}
                     <div className="p1-layout" style={{ marginBottom: 40 }}>
-                        {/* LEFT: ODU GRANDE (Now with Image Background) */}
+                        {/* LEFT: ODU GRANDE */}
                         <div
                             className="p1-card p1-odu-large hero-btn"
                             style={{ 
@@ -828,14 +828,14 @@ function App() {
                                 overflow: 'hidden',
                                 backgroundImage: 'url(/opon_ifa_hero.png)',
                                 backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                border: '1px solid rgba(196,158,48,0.2)',
-                                boxShadow: 'inset 0 0 80px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5)',
+                                backgroundPosition: 'center 30%',
+                                border: '1px solid rgba(196,158,48,0.35)',
+                                boxShadow: 'inset 0 0 60px rgba(0,0,0,0.6), 0 10px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(196,158,48,0.1)',
                             }}
                             onClick={() => handleStudentOrProFeature('Igbadu Virtual', () => setView('igbadu'))}
                         >
-                            {/* Dark overlay for readability */}
-                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(7,12,18,0.95) 0%, rgba(7,12,18,0.4) 100%)', pointerEvents: 'none' }} />
+                            {/* Gradient overlay — stronger at bottom for text readability */}
+                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(5,10,16,0.98) 0%, rgba(5,10,16,0.7) 50%, rgba(5,10,16,0.25) 100%)', pointerEvents: 'none' }} />
 
                             <div style={{ position: 'relative', zIndex: 1 }}>
                                 <div style={{ fontSize: 9, letterSpacing: '3px', textTransform: 'uppercase', color: '#E8DCC2', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 8, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
