@@ -66,7 +66,7 @@ import { AIAssistant } from './components/AIAssistant';
 import { getTranslation } from './utils/i18n';
 import { checkDomainLock } from './utils/security';
 import { canUseFeature, incrementAnonUsage, getAnonRemaining } from './utils/anonymousTracker';
-import { Feather, Loader2, Users, History, GraduationCap, X, Check, Settings, Globe, Camera, Book, Shuffle, FileText, FlaskConical, BarChart3, Package, Music, Hammer, Leaf, CircleDot, Move, GripHorizontal, Baby, UserCheck, ArrowLeft, Database, Sparkles, Mic, Scale, BookOpen, PenTool, Gamepad2, Stars, ShoppingBag, Crown, Moon, MapPin, Truck, GitBranch, LayoutGrid, Search, Sun, Sunset, CloudMoon, Quote, CalendarDays, Lock, Stethoscope, Zap, Video, Shield, Home, Bell, ChevronRight, HelpCircle, RefreshCw } from 'lucide-react';
+import { Activity, Feather, Loader2, Users, History, GraduationCap, X, Check, Settings, Globe, Camera, Book, Shuffle, FileText, FlaskConical, BarChart3, Package, Music, Hammer, Leaf, CircleDot, Move, GripHorizontal, Baby, UserCheck, ArrowLeft, Database, Sparkles, Mic, Scale, BookOpen, PenTool, Gamepad2, Stars, Star, ShoppingBag, Crown, Moon, MapPin, Truck, GitBranch, LayoutGrid, Search, Sun, Sunset, CloudMoon, Quote, CalendarDays, Lock, Stethoscope, Zap, Video, Shield, Home, Bell, ChevronRight, HelpCircle, RefreshCw } from 'lucide-react';
 
 const INITIAL_OPELE: OpeleState = {
     rightLeg: ['open', 'open', 'open', 'open'],
@@ -76,11 +76,11 @@ const INITIAL_OPELE: OpeleState = {
 const INITIAL_COWRIES: CowrieState = Array(16).fill('closed');
 
 const PROVERBS = [
-    { yo: "A kii gbo kikun odo, ki a fi omi rẹ se oube.", pt: "Não se ouve o ronco do mar e se usa sua água para matar a sede (Respeite as forças)." },
-    { yo: "Iwa l'ewa", pt: "O caráter é a beleza." },
-    { yo: "Bi omi ti nsan, bee ni a nfi oju gba a.", pt: "Como a água corre, assim devemos acompanhar o fluxo da vida." },
-    { yo: "Agba kii wa loja, ki ori omo titun o wo.", pt: "O ancião não está no mercado para deixar a cabeça do bebê torta (Responsabilidade)." },
-    { yo: "Aje ke lana, omo ku loni.", pt: "A bruxa gritou ontem, a criança morreu hoje (Cuidado com coincidências)." }
+    { yo: "A kii gbo kikun odo, ki a fi omi rß║╣ se oube.", pt: "N├úo se ouve o ronco do mar e se usa sua ├ígua para matar a sede (Respeite as for├ºas)." },
+    { yo: "Iwa l'ewa", pt: "O car├íter ├® a beleza." },
+    { yo: "Bi omi ti nsan, bee ni a nfi oju gba a.", pt: "Como a ├ígua corre, assim devemos acompanhar o fluxo da vida." },
+    { yo: "Agba kii wa loja, ki ori omo titun o wo.", pt: "O anci├úo n├úo est├í no mercado para deixar a cabe├ºa do beb├¬ torta (Responsabilidade)." },
+    { yo: "Aje ke lana, omo ku loni.", pt: "A bruxa gritou ontem, a crian├ºa morreu hoje (Cuidado com coincid├¬ncias)." }
 ];
 
 import AdminPanel from './components/AdminPanel';
@@ -207,10 +207,10 @@ function App() {
             if (Math.abs(deltaX) > 80 && Math.abs(deltaY) < 50) {
                 // Swipe Left-to-Right (Back)
                 if (deltaX > 0 && viewRef.current !== 'home') {
-                    // Se o sistema já cuidou do popstate pelo gesto lateral do Android, 
-                    // não precisamos forçar aqui, mas para garantir compatibilidade:
+                    // Se o sistema j├í cuidou do popstate pelo gesto lateral do Android, 
+                    // n├úo precisamos for├ºar aqui, mas para garantir compatibilidade:
                     if (viewRef.current === 'result') {
-                        if (confirm("Deseja sair da leitura e voltar ao início?")) setView('home');
+                        if (confirm("Deseja sair da leitura e voltar ao in├¡cio?")) setView('home');
                     } else {
                         setView('home');
                     }
@@ -251,25 +251,25 @@ function App() {
         return () => window.removeEventListener('open-legal', handleLegalEvent);
     }, []);
 
-    // ── isPro: true somente para planos pro_monthly e pro_annual ──
+    // ÔöÇÔöÇ isPro: true somente para planos pro_monthly e pro_annual ÔöÇÔöÇ
     const isPro = (plan?: string) => plan !== 'free' && plan !== 'student_monthly' && plan !== undefined;
 
-    // ── GUARD: bloqueia acesso funcional às views exclusivas de Sacerdote (pro_monthly / pro_annual) ──
-    // Estudantes e usuários free são redirecionados ao home + paywall, independente de como chegaram aqui.
+    // ÔöÇÔöÇ GUARD: bloqueia acesso funcional ├ás views exclusivas de Sacerdote (pro_monthly / pro_annual) ÔöÇÔöÇ
+    // Estudantes e usu├írios free s├úo redirecionados ao home + paywall, independente de como chegaram aqui.
     useEffect(() => {
-        if (authLoading) return; // Aguarda confirmação de auth antes de agir
+        if (authLoading) return; // Aguarda confirma├º├úo de auth antes de agir
         const PRO_ONLY_LABELS: Partial<Record<AppView, string>> = {
             ebori:          'Bori',
             reverse_odu:    'Material Reverso',
             assentamentos:  'Assentamentos',
-            ajogun:         'Diagnóstico Ajogun',
+            ajogun:         'Diagn├│stico Ajogun',
             virtual_room:   'Sala Virtual',
         };
         const featureLabel = PRO_ONLY_LABELS[view];
-        if (!featureLabel) return; // View não é restrita
+        if (!featureLabel) return; // View n├úo ├® restrita
 
         if (!user) {
-            // Não autenticado: vai para login
+            // N├úo autenticado: vai para login
             setView('home');
             setShowLoginModal(true);
             return;
@@ -314,7 +314,7 @@ function App() {
         try {
             const currentUid = user?.uid;
             if (!currentUid) {
-                throw new Error('Usuário não autenticado. Faça login novamente.');
+                throw new Error('Usu├írio n├úo autenticado. Fa├ºa login novamente.');
             }
             const res = await fetch('/api/activate-subscription', {
                 method: 'POST',
@@ -338,7 +338,7 @@ function App() {
       try { localStorage.setItem('ifa_language', lang); } catch {}
     };
 
-    // --- NAVEGAÇÃO PARA CHAT VIA BUSCA ---
+    // --- NAVEGA├ç├âO PARA CHAT VIA BUSCA ---
     const handleConsultOracle = (query: string) => {
         setChatInitialQuery(query);
         setView('voice_commander');
@@ -373,7 +373,7 @@ function App() {
     };
 
     const handlePreparationComplete = (opeleResult?: OpeleState) => {
-        if (opeleResult) setOpele(opeleResult); // Ikin: auto-sets the Odù from throw results
+        if (opeleResult) setOpele(opeleResult); // Ikin: auto-sets the Od├╣ from throw results
         setDivinationMethod(pendingMethod);
         setPendingMethod(null);
         setShowPreparation(false);
@@ -446,7 +446,7 @@ function App() {
             }
             setView('result');
         } catch (e: any) {
-            alert(`Erro na leitura. Verifique sua conexão. Detalhe: ${e.message}`);
+            alert(`Erro na leitura. Verifique sua conex├úo. Detalhe: ${e.message}`);
         } finally {
             setLoading({ isLoading: false });
         }
@@ -488,7 +488,7 @@ function App() {
                 selections: finalSelections, timestamp: new Date().toLocaleString(), language: language, notes: notes, status: 'pending'
             };
             saveConsultation(record); setActiveRecord(record);
-            // Navegação para impressão agora é controlada pelo PrintCenter inline (InterpretationView)
+            // Navega├º├úo para impress├úo agora ├® controlada pelo PrintCenter inline (InterpretationView)
         }
     }
 
@@ -563,7 +563,7 @@ function App() {
 
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    // Dados reais do histórico de consultas para o hero
+    // Dados reais do hist├│rico de consultas para o hero
     const heroStats = useMemo(() => {
         try {
             const raw = localStorage.getItem('ifa_consultations_v1');
@@ -573,10 +573,10 @@ function App() {
             return {
                 pendingCount: pending.length,
                 totalCount: records.length,
-                lastClient: last?.client?.fullName || '—',
-                lastOdu: last?.odu?.name || '—',
+                lastClient: last?.client?.fullName || 'ÔÇö',
+                lastOdu: last?.odu?.name || 'ÔÇö',
             };
-        } catch { return { pendingCount: 0, totalCount: 0, lastClient: '—', lastOdu: '—' }; }
+        } catch { return { pendingCount: 0, totalCount: 0, lastClient: 'ÔÇö', lastOdu: 'ÔÇö' }; }
     }, [view]); // re-computa ao voltar para home
 
     const YorubaLogo = () => (
@@ -589,62 +589,197 @@ function App() {
         </svg>
     );
 
-    // Slim Sidebar Content for Desktop
+    // Full Sidebar Content for Desktop (220px, with text labels + groups)
     const SidebarSlimContent = () => {
         const nav = (v: AppView) => { setView(v); };
-        const userName = (userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Babaláwo';
+        const userName = (userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Babal├íwo';
         const initials = userName.slice(0, 2).toUpperCase();
+        const isPlanVip = isPro(userProfile?.plan);
 
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', alignItems: 'center', padding: '24px 0' }}>
-                <div style={{ marginBottom: 32, cursor: 'pointer' }} onClick={() => nav('home')}>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                {/* Logo / Brand */}
+                <div className="ds-sidebar-brand" onClick={() => nav('home')}>
                     <YorubaLogo />
+                    <div className="logo-text">
+                        <h1>IF├ü OLUWO</h1>
+                        <span>C├│dex Sacerdotal</span>
+                    </div>
                 </div>
-                
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, width: '100%', alignItems: 'center' }}>
-                    <button className={`ds-sidebar-slim-item ${view === 'home' ? 'active' : ''}`} onClick={() => nav('home')} title="Início">
-                        <Home size={18} />
+
+                {/* Home Button */}
+                <div style={{ flex: 1, overflowY: 'auto', paddingBottom: 16 }} className="scrollbar-hide">
+                    <button className="ds-sidebar-slim-home" onClick={() => nav('home')} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                        <Home size={14} style={{ color: '#C49E30', opacity: 0.9 }} />
+                        <span>Painel Principal</span>
                     </button>
-                    <button className="ds-sidebar-slim-item" onClick={startNewSession} title="Atendimento">
-                        <Users size={18} />
-                        <div style={{ position: 'absolute', top: 4, right: 4, width: 6, height: 6, borderRadius: '50%', background: '#C49E30' }} />
+
+                    {/* DIVINA├ç├âO */}
+                    <div className="ds-sidebar-slim-group">Divina├º├úo</div>
+                    <button className={`ds-sidebar-slim-item ${view === 'oracle_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
+                        <CircleDot size={13} /> <span>Todos os Or├ículos</span>
                     </button>
-                    <button className={`ds-sidebar-slim-item ${view === 'oracle_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))} title="Divinação">
-                        <CircleDot size={18} />
+                    <button className="ds-sidebar-slim-item" onClick={startNewSession}>
+                        <Users size={13} /> <span>Nova Consulta</span>
+                        {heroStats.pendingCount > 0 && <span className="item-badge">{heroStats.pendingCount}</span>}
                     </button>
-                    <button className="ds-sidebar-slim-item" onClick={() => handleStudentOrProFeature(t.featureTreatise, () => nav('treatise'))} title="Estudos">
-                        <GraduationCap size={18} />
+                    <button className={`ds-sidebar-slim-item ${view === 'history' ? 'active' : ''}`} onClick={() => nav('history')}>
+                        <History size={13} /> <span>Hist├│rico Completo</span>
                     </button>
-                    <button className={`ds-sidebar-slim-item ${view === 'odu_library' ? 'active' : ''}`} onClick={() => nav('odu_library')} title="Biblioteca Odu">
-                        <Book size={18} />
+                    <button className="ds-sidebar-slim-item" onClick={() => handleStudentOrProFeature(t.featureAnalytics, () => nav('analytics'))}>
+                        <BarChart3 size={13} /> <span>Analytics e Dados</span>
                     </button>
-                    <button className={`ds-sidebar-slim-item ${view === 'ebori' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureBori, () => nav('ebori'))} title="Rituais & Ebó">
-                        <UserCheck size={18} />
+                    <button className="ds-sidebar-slim-item" onClick={() => handleProFeature(t.featureInventory, () => nav('inventory_hub'))}>
+                        <Package size={13} /> <span>Resultados</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'virtual_room' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureVirtualRoom, () => nav('virtual_room'))}>
+                        <Video size={13} /> <span>Sala Virtual</span>
+                        <span className="item-badge-new">Novo</span>
+                    </button>
+
+                    {/* CONHECIMENTO */}
+                    <div className="ds-sidebar-slim-group">Conhecimento</div>
+                    <button className={`ds-sidebar-slim-item ${view === 'odu_library' ? 'active' : ''}`} onClick={() => nav('odu_library')}>
+                        <Book size={13} /> <span>Biblioteca de Odus</span>
+                        <span style={{ marginLeft: 'auto', fontSize: 8, color: 'rgba(196,158,48,0.45)' }}>256</span>
+                    </button>
+                    <button className="ds-sidebar-slim-item" onClick={() => handleStudentOrProFeature(t.featureTreatise, () => nav('treatise'))}>
+                        <GraduationCap size={13} /> <span>Tratados &amp; Estudos</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'prayers' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featurePrayers, () => nav('prayers'))}>
+                        <BookOpen size={13} /> <span>Ora├º├Áes &amp; Textos</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'dictionary' ? 'active' : ''}`} onClick={() => nav('dictionary')}>
+                        <Search size={13} /> <span>Dicion├írio Yorub├í</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'amutorunwa' ? 'active' : ''}`} onClick={() => nav('amutorunwa')}>
+                        <Baby size={13} /> <span>Nomes Iorub├ís (Amutorunwa)</span>
+                    </button>
+                    <button className="ds-sidebar-slim-item" onClick={() => nav('manual')}>
+                        <HelpCircle size={13} /> <span>Manual de Uso</span>
+                    </button>
+
+                    {/* FERRAMENTAS ESPIRITUAIS */}
+                    <div className="ds-sidebar-slim-group">Ferramentas Espirituais</div>
+                    <button className={`ds-sidebar-slim-item ${view === 'esoteric_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureEsotericTools, () => nav('esoteric_hub'))}>
+                        <Sparkles size={13} /> <span>Eb├│ Simulador</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'ebori' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureBori, () => nav('ebori'))}>
+                        <UserCheck size={13} /> <span>Bori (Fortalecimento)</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'sound_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureSacredSounds, () => nav('sound_hub'))}>
+                        <Music size={13} /> <span>Mojuba (Reza)</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'constellation' ? 'active' : ''}`} onClick={() => nav('constellation')}>
+                        <Stars size={13} /> <span>Sons Sagrados</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'dream_journal' ? 'active' : ''}`} onClick={() => nav('dream_journal')}>
+                        <Moon size={13} /> <span>Di├írio de Sonhos</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'constellation' ? 'active' : ''}`} onClick={() => nav('constellation')}>
+                        <CircleDot size={13} /> <span>Constela├º├úo de Odu</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'mandala' ? 'active' : ''}`} onClick={() => nav('mandala')}>
+                        <RefreshCw size={13} /> <span>Material Reverso</span>
+                    </button>
+
+                    {/* OOGUN & MAGIA */}
+                    <div className="ds-sidebar-slim-group">Oogun &amp; Magia</div>
+                    <button className={`ds-sidebar-slim-item ${view === 'oogun' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureOogun, () => nav('oogun'))}>
+                        <FlaskConical size={13} /> <span>Oogun Hub</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'herb_id' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureHerbID, () => nav('herb_id'))}>
+                        <Leaf size={13} /> <span>Identificador de Ervas</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'geo_herbs' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureHerbMap, () => nav('geo_herbs'))}>
+                        <MapPin size={13} /> <span>Mapa Geobot├ónico</span>
+                    </button>
+                    <button className="ds-sidebar-slim-item" onClick={() => handleProFeature(t.featureAjogun, () => nav('ajogun'))}>
+                        <Stethoscope size={13} /> <span>Ajogun (Diagn├│stico)</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'assentamentos' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureAssentamentos, () => nav('assentamentos'))}>
+                        <Hammer size={13} /> <span>Assentamentos</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'sango_wheel' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureSangoWheel, () => nav('sango_wheel'))}>
+                        <Scale size={13} /> <span>Roda de Xang├┤</span>
+                    </button>
+
+                    {/* GEST├âO & TEMPLO */}
+                    <div className="ds-sidebar-slim-group">Gest├úo &amp; Templo</div>
+                    <button className={`ds-sidebar-slim-item ${view === 'inventory_hub' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureInventory, () => nav('inventory_hub'))}>
+                        <Package size={13} /> <span>Invent├írio</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'agenda' ? 'active' : ''}`} onClick={() => nav('agenda')}>
+                        <CalendarDays size={13} /> <span>Agenda Lit├║rgica</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'analytics' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureAnalytics, () => nav('analytics'))}>
+                        <BarChart3 size={13} /> <span>Analytics &amp; Relat├│rios</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'lineage_tree' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureLineage, () => nav('lineage_tree'))}>
+                        <GitBranch size={13} /> <span>├ürvore de Linhagem</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'delivery' ? 'active' : ''}`} onClick={() => nav('delivery')}>
+                        <Truck size={13} /> <span>Entrega de Eb├┤</span>
+                    </button>
+
+                    {/* EXTRAS */}
+                    <div className="ds-sidebar-slim-group">Extras</div>
+                    <button className={`ds-sidebar-slim-item ${view === 'igbadu' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature('Igbadu Virtual', () => nav('igbadu'))}>
+                        <LayoutGrid size={13} /> <span>Igbadu (Altar)</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'mandala' ? 'active' : ''}`} onClick={() => nav('mandala')}>
+                        <CircleDot size={13} /> <span>Mandala de Odu</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'story_mode' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureRPG, () => nav('story_mode'))}>
+                        <Gamepad2 size={13} /> <span>Story Mode (RPG)</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'igbadu' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature('Igbadu Virtual', () => nav('igbadu'))}>
+                        <Stars size={13} /> <span>B├║ssola de Il├¬-If├¬</span>
+                    </button>
+                    <button className={`ds-sidebar-slim-item ${view === 'agenda' ? 'active' : ''}`} onClick={() => nav('agenda')}>
+                        <CalendarDays size={13} /> <span>Calend├írio Yorub├í</span>
+                        <span className="item-badge-new">Novo</span>
+                    </button>
+
+                    {/* IA & INTERA├ç├âO */}
+                    <div className="ds-sidebar-slim-group">IA &amp; Intera├º├úo</div>
+                    <button className="ds-sidebar-slim-item" onClick={() => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander'))}>
+                        <Mic size={13} /> <span>Comando de Voz</span>
+                    </button>
+                    <button className="ds-sidebar-slim-item" onClick={() => nav('verse_builder')}>
+                        <PenTool size={13} /> <span>Construtor de Versos</span>
+                    </button>
+
+                    <div className="ds-sidebar-divider" style={{ margin: '12px 16px' }} />
+
+                    <button className="ds-sidebar-slim-item" onClick={() => setShowSettings(true)}>
+                        <Settings size={13} /> <span>Configura├º├Áes</span>
                     </button>
                 </div>
 
-                <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-                    <div style={{ width: 24, height: 1, background: 'rgba(196,158,48,0.1)' }} />
-                    <button className="ds-sidebar-slim-item" onClick={() => setShowSettings(true)} title="Configurações">
-                        <Settings size={18} />
-                    </button>
-                    <div 
-                        className="ds-sidebar-profile-avatar" 
-                        style={{ border: 'none', background: 'rgba(196,158,48,0.1)', width: 32, height: 32, fontSize: 11, cursor: 'pointer', marginTop: 8 }} 
-                        onClick={() => user ? setShowSettings(true) : setShowLoginModal(true)}
-                        title={userName}
-                    >
-                        {user ? initials : '?'}
+                {/* User Profile Footer */}
+                <div className="ds-sidebar-profile" style={{ padding: '12px 14px', borderTop: '1px solid rgba(196,158,48,0.08)', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+                    onClick={() => user ? setShowSettings(true) : setShowLoginModal(true)}>
+                    <div className="ds-sidebar-profile-avatar" style={{ border: 'none', background: 'rgba(196,158,48,0.1)' }}>{user ? initials : '?'}</div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px' }}>Babal├íwo</div>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: '#E8DCC2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
+                            {user ? userName : 'Visitante'}
+                        </div>
+                        <div style={{ fontSize: 9.5, color: '#C49E30', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                            {isPlanVip && <Crown size={9} />}
+                            {userProfile?.plan === 'pro_annual' ? 'VIP Anual' : userProfile?.plan === 'pro_monthly' ? 'VIP Mensal' : userProfile?.plan === 'student_monthly' ? 'Estudante' : user ? 'Plano Free' : 'Entrar'}
+                        </div>
                     </div>
                 </div>
             </div>
         );
     };
 
-    // Sidebar content — shared between desktop and mobile drawer
+    // Sidebar content ÔÇö shared between desktop and mobile drawer
     const SidebarContent = ({ onNav }: { onNav?: () => void }) => {
         const nav = (v: AppView) => { setView(v); onNav?.(); };
-        const userName = (userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Babaláwo';
+        const userName = (userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Babal├íwo';
         const initials = userName.slice(0, 2).toUpperCase();
         const isPlanVip = isPro(userProfile?.plan);
 
@@ -656,15 +791,15 @@ function App() {
                         <CircleDot size={32} />
                     </div>
                     <div className="logo-text">
-                        <h1>IFÁ OLUWO</h1>
-                        <span>CÓDEX SACERDOTAL</span>
+                        <h1>IF├ü OLUWO</h1>
+                        <span>C├ôDEX SACERDOTAL</span>
                     </div>
                 </div>
 
                 {/* Nav Links */}
                 <div style={{ flex: 1, overflowY: 'auto' }} className="scrollbar-hide">
                     <button className={`ds-sidebar-item ${view === 'home' ? 'active' : ''}`} onClick={() => nav('home')}>
-                        <Home size={16} /> <span>Início</span>
+                        <Home size={16} /> <span>In├¡cio</span>
                     </button>
                     
                     <button className="ds-sidebar-item mt-2" onClick={startNewSession}>
@@ -676,7 +811,7 @@ function App() {
                     </button>
 
                     <button className={`ds-sidebar-item ${view === 'oracle_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
-                        <CircleDot size={16} /> <span>Divinação</span>
+                        <CircleDot size={16} /> <span>Divina├º├úo</span>
                     </button>
 
                     <button className="ds-sidebar-item" onClick={() => handleStudentOrProFeature(t.featureTreatise, () => nav('treatise'))}>
@@ -692,7 +827,7 @@ function App() {
                     </button>
 
                     <button className={`ds-sidebar-item ${view === 'ebori' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureBori, () => nav('ebori'))}>
-                        <UserCheck size={16} /> <span>Rituais & Ebó</span>
+                        <UserCheck size={16} /> <span>Rituais & Eb├│</span>
                     </button>
 
                     <button className={`ds-sidebar-item ${view === 'oogun' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureOogun, () => nav('oogun'))}>
@@ -700,25 +835,25 @@ function App() {
                     </button>
 
                     <button className={`ds-sidebar-item ${view === 'agenda' ? 'active' : ''}`} onClick={() => nav('agenda')}>
-                        <CalendarDays size={16} /> <span>Calendário Litúrgico</span>
+                        <CalendarDays size={16} /> <span>Calend├írio Lit├║rgico</span>
                     </button>
 
                     <button className="ds-sidebar-item" onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
-                        <Sparkles size={16} /> <span>Oráculos Sagrados</span>
+                        <Sparkles size={16} /> <span>Or├ículos Sagrados</span>
                     </button>
 
                     <button className={`ds-sidebar-item ${view === 'esoteric_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureEsotericTools, () => nav('esoteric_hub'))}>
-                        <Stars size={16} /> <span>Ferramentas Esotéricas</span>
+                        <Stars size={16} /> <span>Ferramentas Esot├®ricas</span>
                     </button>
 
                     <button className={`ds-sidebar-item ${view === 'inventory_hub' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureInventory, () => nav('inventory_hub'))}>
-                        <Settings size={16} /> <span>Gestão do Templo</span>
+                        <Settings size={16} /> <span>Gest├úo do Templo</span>
                     </button>
 
                     <div className="ds-sidebar-divider" style={{ margin: '24px 12px' }} />
 
                     <button className="ds-sidebar-item" onClick={() => setShowSettings(true)}>
-                        <Settings size={16} /> <span>Configurações</span>
+                        <Settings size={16} /> <span>Configura├º├Áes</span>
                     </button>
                     <button className="ds-sidebar-item">
                         <HelpCircle size={16} /> <span>Ajuda & Suporte</span>
@@ -729,7 +864,7 @@ function App() {
                 <div className="ds-sidebar-profile" style={{ margin: '16px 12px 24px', border: 'none', background: 'rgba(196,158,48,0.03)', borderRadius: 12 }} onClick={() => user ? setShowSettings(true) : setShowLoginModal(true)}>
                     <div className="ds-sidebar-profile-avatar" style={{ border: 'none', background: 'rgba(196,158,48,0.1)' }}>{user ? initials : '?'}</div>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px' }}>Babaláwo</div>
+                        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '1px' }}>Babal├íwo</div>
                         <div style={{ fontSize: 13, fontWeight: 600, color: '#E8DCC2', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.2 }}>
                             {user ? userName : 'Visitante'}
                         </div>
@@ -747,8 +882,8 @@ function App() {
         const hour = new Date().getHours();
         const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
         const GreetIcon = hour < 12 ? Sun : hour < 18 ? Sunset : CloudMoon;
-        const displayName = (userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Babaláwo';
-        const lastOduName = heroStats.lastOdu !== '—' ? heroStats.lastOdu : 'OGBE MEJI';
+        const displayName = (userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Babal├íwo';
+        const lastOduName = heroStats.lastOdu !== 'ÔÇö' ? heroStats.lastOdu : 'OGBE MEJI';
 
         const nav = (v: AppView) => setView(v);
 
@@ -774,50 +909,163 @@ function App() {
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, height: '100vh', overflowY: 'auto' }} className="scrollbar-hide">
                 <div style={{ maxWidth: 1200, width: '100%', margin: '0 auto', padding: '32px 40px 64px' }}>
 
-                    {/* ── TOPBAR ── */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 48 }}>
-                        {/* Left: Brand / Logo Text */}
-                        <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ fontSize: 9, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.7)', marginBottom: 2 }}>
-                                Sistema de Divinação
+
+                    {/* ÔöÇÔöÇ TOPBAR COM ESTAT├ìSTICAS ÔöÇÔöÇ */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28, flexWrap: 'wrap' }}>
+                        {/* Search */}
+                        <div style={{ position: 'relative', flex: '1 1 200px', minWidth: 140, maxWidth: 280 }}>
+                            <Search size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'rgba(196,158,48,0.45)', pointerEvents: 'none' }} />
+                            <input
+                                value={homeSearch}
+                                onChange={e => setHomeSearch(e.target.value)}
+                                placeholder="Buscar odus, estudos, ora├º├Áes..."
+                                style={{ width: '100%', height: 34, paddingLeft: 30, paddingRight: 10, borderRadius: 8, border: '1px solid rgba(196,158,48,0.15)', background: 'rgba(255,255,255,0.03)', color: '#E8DCC2', fontSize: 11, outline: 'none', boxSizing: 'border-box' }}
+                            />
+                        </div>
+
+                        {/* Stat chips */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                            {[
+                                { label: 'Consultas hoje', value: heroStats.totalCount, icon: Users, color: '#C49E30' },
+                                { label: 'Odus estudados', value: 89, icon: Book, color: '#C49E30' },
+                                { label: `Odu do dia`, value: lastOduName.split(' ').slice(0,2).join(' '), icon: CircleDot, color: '#C49E30', isText: true },
+                                { label: 'Pr├│ximo evento', value: 'Eb├┤ de Ox├│ssi', icon: CalendarDays, color: '#4ab87a', isText: true },
+                            ].map((s, i) => (
+                                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '5px 12px', borderRadius: 20, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(196,158,48,0.12)', flexShrink: 0 }}>
+                                    <s.icon size={11} style={{ color: s.color, opacity: 0.8 }} />
+                                    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.1 }}>
+                                        <span style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)', letterSpacing: '1px', textTransform: 'uppercase' }}>{s.label}</span>
+                                        <span style={{ fontSize: 11, fontWeight: 600, color: s.color }}>{s.value}</span>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Spacer */}
+                        <div style={{ flex: 1 }} />
+
+                        {/* Language selector */}
+                        <div style={{ position: 'relative', flexShrink: 0 }}>
+                            <button
+                                onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                                style={{ height: 34, padding: '0 12px', borderRadius: 8, border: '1px solid rgba(196,158,48,0.2)', background: 'rgba(196,158,48,0.05)', cursor: 'pointer', color: 'rgba(196,158,48,0.8)', fontSize: 10, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 5 }}
+                            >
+                                <Globe size={11} />{language}
+                            </button>
+                            {isLangMenuOpen && (
+                                <div style={{ position: 'absolute', right: 0, top: '100%', marginTop: 4, zIndex: 50, overflow: 'hidden', minWidth: 150, borderRadius: 12, border: '1px solid rgba(196,158,48,0.25)', background: '#090e14', boxShadow: '0 16px 48px rgba(0,0,0,0.6)' }}>
+                                    {(['pt-BR', 'pt-PT', 'en', 'es', 'yo'] as Language[]).map(l => (
+                                        <button key={l} onClick={() => { setLanguage(l); setIsLangMenuOpen(false); try { localStorage.setItem('ifa_language', l); } catch {} }}
+                                            style={{ width: '100%', textAlign: 'left', padding: '10px 16px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: l === language ? '#e2b84a' : 'rgba(255,255,255,0.5)', background: l === language ? 'rgba(210,165,40,0.08)' : 'transparent', border: 'none', cursor: 'pointer' }}>
+                                            {l === 'pt-BR' ? t.langPtBr : l === 'pt-PT' ? t.langPtPt : l === 'en' ? t.langEn : l === 'es' ? t.langEs : t.langYo}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Assistente */}
+                        <button
+                            onClick={() => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander'))}
+                            style={{ height: 34, padding: '0 14px', borderRadius: 8, border: '1px solid rgba(196,158,48,0.3)', background: 'rgba(196,158,48,0.08)', cursor: 'pointer', color: '#E8DCC2', fontSize: 10, fontWeight: 600, letterSpacing: '1px', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}
+                        >
+                            <Mic size={11} style={{ color: '#C49E30' }} /> Assistente
+                        </button>
+
+                        {/* Pre├ºos */}
+                        <button
+                            onClick={() => { setBlockedFeature(''); setShowPaywall(true); }}
+                            style={{ height: 34, padding: '0 14px', borderRadius: 8, border: '1px solid rgba(196,158,48,0.35)', background: 'linear-gradient(135deg, rgba(170,120,15,0.85), rgba(210,160,25,0.75))', cursor: 'pointer', color: '#1a0e00', fontSize: 10, fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}
+                        >
+                            <Star size={11} /> Pre├ºos
+                        </button>
+
+                        {/* Bell */}
+                        <button
+                            style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid rgba(196,158,48,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer', color: 'rgba(196,158,48,0.5)', position: 'relative', flexShrink: 0 }}
+                            title="Notifica├º├Áes"
+                        >
+                            <Bell size={15} />
+                            <div style={{ position: 'absolute', top: 7, right: 7, width: 6, height: 6, borderRadius: '50%', background: '#C49E30', border: '1px solid #090e14' }} />
+                        </button>
+
+                        {/* Admin */}
+                        {(userProfile as any)?.role === 'admin' && (
+                            <button onClick={() => setView('admin_panel')} style={{ height: 34, padding: '0 10px', borderRadius: 8, border: '1px solid rgba(200,40,40,0.3)', background: 'rgba(200,40,40,0.1)', cursor: 'pointer', color: 'rgba(240,100,100,0.85)', fontSize: 10, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <Shield size={11} /> Admin
+                            </button>
+                        )}
+
+                        {/* Babalawo profile chip */}
+                        <div
+                            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 10px 4px 4px', borderRadius: 24, border: '1px solid rgba(196,158,48,0.2)', background: 'rgba(196,158,48,0.04)', cursor: 'pointer', flexShrink: 0 }}
+                            onClick={() => user ? setShowSettings(true) : setShowLoginModal(true)}
+                        >
+                            <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(196,158,48,0.15)', border: '1px solid rgba(196,158,48,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, fontWeight: 700, color: '#C49E30', fontFamily: 'Cinzel, serif' }}>
+                                {((userProfile as any)?.displayName || user?.email?.split('@')[0] || 'B').slice(0,2).toUpperCase()}
                             </div>
-                            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 24, fontWeight: 700, color: '#E8DCC2', margin: 0, letterSpacing: '2px', lineHeight: 1 }}>
-                                IFÁ OLUWO
-                            </h2>
+                            <div style={{ lineHeight: 1.1 }}>
+                                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '1px' }}>Babal├íwo</div>
+                                <div style={{ fontSize: 10, fontWeight: 600, color: '#E8DCC2' }}>
+                                    {((userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Visitante').split(' ')[0]}
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Right: actions */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                            {/* Bell */}
-                            <button
-                                style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(196,158,48,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer', color: 'rgba(196,158,48,0.5)', position: 'relative', flexShrink: 0 }}
-                                title="Notificações"
-                            >
-                                <Bell size={17} />
-                                <div style={{ position: 'absolute', top: 9, right: 9, width: 6, height: 6, borderRadius: '50%', background: '#C49E30', border: '1px solid #070707' }} />
-                            </button>
-
-                            {/* Assistente AI */}
-                            <button
-                                className="ds-btn-primary"
-                                style={{ padding: '0 20px', height: 40, fontSize: 11, letterSpacing: '1.5px', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}
-                                onClick={() => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander'))}
-                            >
-                                <Sparkles size={13} /> Assistente
-                            </button>
-
-                            {/* Mobile hamburger */}
-                            <button
-                                className="md:hidden"
-                                onClick={() => setSidebarOpen(true)}
-                                style={{ width: 40, height: 40, borderRadius: '50%', border: '1px solid rgba(196,158,48,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer', color: 'rgba(196,158,48,0.6)', flexShrink: 0 }}
-                            >
-                                <GripHorizontal size={20} />
-                            </button>
-                        </div>
+                        {/* Mobile hamburger */}
+                        <button
+                            className="md:hidden"
+                            onClick={() => setSidebarOpen(true)}
+                            style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid rgba(196,158,48,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', cursor: 'pointer', color: 'rgba(196,158,48,0.6)', flexShrink: 0 }}
+                        >
+                            <GripHorizontal size={18} />
+                        </button>
                     </div>
 
-                    {/* ── HERO GRID (2 colunas) ── */}
+
+                    {/* ÔöÇÔöÇ 2 BOT├òES PRINCIPAIS: CONSULENTE + ESTUDANTE ÔöÇÔöÇ */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                        <button onClick={startNewSession}
+                            className="glass-card glass-hero-gold hero-btn"
+                            style={{ minHeight: 82, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 16, padding: '0 24px', cursor: 'pointer', textAlign: 'left' }}>
+                            <div style={{ width: 46, height: 46, borderRadius: 13, background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <Users size={20} style={{ color: '#f0d060', opacity: 0.9 }} />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontSize: 12.5, fontWeight: 600, color: '#f0d060', fontFamily: 'Cinzel, serif', letterSpacing: '0.8px' }}>{t.btnConsultation}</span>
+                                <span style={{ fontSize: 9.5, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.55)', marginTop: 3 }}>Modo Babala├┤ ativo</span>
+                            </div>
+                        </button>
+                        <button onClick={handleStudyStart}
+                            className="glass-card glass-hero-green hero-btn"
+                            style={{ minHeight: 82, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 16, padding: '0 24px', cursor: 'pointer', textAlign: 'left' }}>
+                            <div style={{ width: 46, height: 46, borderRadius: 13, background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                <GraduationCap size={20} style={{ color: 'rgba(80,220,140,0.9)', opacity: 0.9 }} />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(80,220,140,0.9)', fontFamily: 'Cinzel, serif', letterSpacing: '0.8px' }}>{t.btnStudy}</span>
+                                <span style={{ fontSize: 9.5, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(80,220,140,0.4)', marginTop: 3 }}>Aprendizado guiado</span>
+                            </div>
+                        </button>
+                    </div>
+
+                    {/* ÔöÇÔöÇ CARDS M├ëDIOS: VIRTUAL ROOM + ORACLE HUB ÔöÇÔöÇ */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 32 }}>
+                        <button onClick={() => handleProFeature(t.featureVirtualRoom, () => setView('virtual_room'))}
+                            className="glass-card glass-blue"
+                            style={{ height: 60, display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px', cursor: 'pointer' }}>
+                            <Video size={18} style={{ opacity: 0.8, flexShrink: 0 }} />
+                            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.5px' }}>{t.menuVirtualRoom}</span>
+                        </button>
+                        <button onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => setView('oracle_hub'))}
+                            className="glass-card glass-terra"
+                            style={{ height: 60, display: 'flex', alignItems: 'center', gap: 12, padding: '0 20px', cursor: 'pointer' }}>
+                            <CircleDot size={18} style={{ opacity: 0.8, flexShrink: 0 }} />
+                            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.5px' }}>{t.menuOracleHub}</span>
+                        </button>
+                    </div>
+
+                    {/* ÔöÇÔöÇ HERO GRID (2 colunas) ÔöÇÔöÇ */}
                     <div className="p1-layout" style={{ marginBottom: 40 }}>
                         {/* LEFT: ODU GRANDE */}
                         <div
@@ -834,7 +1082,7 @@ function App() {
                             }}
                             onClick={() => handleStudentOrProFeature('Igbadu Virtual', () => setView('igbadu'))}
                         >
-                            {/* Gradient overlay — stronger at bottom for text readability */}
+                            {/* Gradient overlay ÔÇö stronger at bottom for text readability */}
                             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(5,10,16,0.98) 0%, rgba(5,10,16,0.7) 50%, rgba(5,10,16,0.25) 100%)', pointerEvents: 'none' }} />
 
                             <div style={{ position: 'relative', zIndex: 1 }}>
@@ -850,20 +1098,20 @@ function App() {
                                     {lastOduName.toUpperCase()}
                                 </h2>
                                 <p style={{ fontSize: 13, color: 'rgba(232,220,194,0.7)', lineHeight: 1.7, marginBottom: 32, maxWidth: '85%', textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>
-                                    A paciência é o pai do bom caráter. Quem espera com fé, colhe o fruto da sabedoria ancestral.
+                                    A paci├¬ncia ├® o pai do bom car├íter. Quem espera com f├®, colhe o fruto da sabedoria ancestral.
                                 </p>
 
                                 <div className="p1-odu-badges">
                                     <div className="p1-pill" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', borderColor: 'rgba(196,158,48,0.3)' }}>
                                         <span className="p1-pill-label" style={{ color: 'rgba(232,220,194,0.6)' }}>Elemento</span>
-                                        <span className="p1-pill-value" style={{ color: '#E8DCC2' }}>Fogo & Água</span>
+                                        <span className="p1-pill-value" style={{ color: '#E8DCC2' }}>Fogo & ├ügua</span>
                                     </div>
                                     <div className="p1-pill" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', borderColor: 'rgba(196,158,48,0.3)' }}>
-                                        <span className="p1-pill-label" style={{ color: 'rgba(232,220,194,0.6)' }}>Orixá</span>
-                                        <span className="p1-pill-value" style={{ color: '#E8DCC2' }}>Ogun & Yemanjá</span>
+                                        <span className="p1-pill-label" style={{ color: 'rgba(232,220,194,0.6)' }}>Orix├í</span>
+                                        <span className="p1-pill-value" style={{ color: '#E8DCC2' }}>Ogun & Yemanj├í</span>
                                     </div>
                                     <div className="p1-pill" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', borderColor: 'rgba(196,158,48,0.3)' }}>
-                                        <span className="p1-pill-label" style={{ color: 'rgba(232,220,194,0.6)' }}>Vibração</span>
+                                        <span className="p1-pill-label" style={{ color: 'rgba(232,220,194,0.6)' }}>Vibra├º├úo</span>
                                         <span className="p1-pill-value green" style={{ color: '#4ab87a' }}>Positiva (Ire)</span>
                                     </div>
                                 </div>
@@ -880,10 +1128,10 @@ function App() {
                                         <div className="value">{heroStats.totalCount}</div>
                                         <div className="desc">{heroStats.pendingCount} pendentes</div>
                                     </div>
-                                    <div className="action">INICIAR SESSÃO <ChevronRight size={11} /></div>
+                                    <div className="action">INICIAR SESS├âO <ChevronRight size={11} /></div>
                                 </div>
                                 <div className="p1-card p1-stat-card" style={{ cursor: 'pointer' }} onClick={() => setView('agenda')}>
-                                    <div className="label"><CalendarDays size={11} /> Litúrgico</div>
+                                    <div className="label"><CalendarDays size={11} /> Lit├║rgico</div>
                                     <div>
                                         <div className="value">14</div>
                                         <div className="desc">dias para Orunmila</div>
@@ -898,7 +1146,7 @@ function App() {
                                     "{dailyWisdom.pt}"
                                 </div>
                                 <div style={{ marginTop: 16, fontSize: 9, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.4)' }}>
-                                    Provérbio Iorubá — Corpus de Ifá
+                                    Prov├®rbio Iorub├í ÔÇö Corpus de If├í
                                 </div>
                             </div>
 
@@ -910,7 +1158,7 @@ function App() {
                                     </div>
                                     <div>
                                         <div style={{ fontSize: 12, fontWeight: 600, color: '#E8DCC2', letterSpacing: '0.5px' }}>Comando de Voz</div>
-                                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>Diga "Ifá, consultar Oráculo"</div>
+                                        <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>Diga "If├í, consultar Or├ículo"</div>
                                     </div>
                                 </div>
                                 <button
@@ -924,7 +1172,7 @@ function App() {
                         </div>
                     </div>
 
-                    {/* ── BÚSSOLA + CALENDÁRIO (estava na sidebar original) ── */}
+                    {/* ÔöÇÔöÇ B├ÜSSOLA + CALEND├üRIO (estava na sidebar original) ÔöÇÔöÇ */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 24 }}>
                         <div className="glass-card-no-clip rounded-xl" style={{ background: 'rgba(20,80,45,0.12)', borderColor: 'rgba(30,150,80,0.2)' }}>
                             <IleIfeCompass />
@@ -934,7 +1182,7 @@ function App() {
                         </div>
                     </div>
 
-                    {/* ── SEÇÕES ORIGINAIS RESTAURADAS ── */}
+                    {/* ÔöÇÔöÇ SE├ç├òES ORIGINAIS RESTAURADAS ÔöÇÔöÇ */}
                     <div className="space-y-6 md:space-y-8 mt-12">
                         {/* Conhecimento */}
                         <div>
@@ -952,7 +1200,7 @@ function App() {
                             </div>
                         </div>
 
-                        {/* Esotérico */}
+                        {/* Esot├®rico */}
                         <div>
                             <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
                                 <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '3px', color: 'rgba(196,158,48,0.8)' }}>{t.sectionEsoteric}</span>
@@ -964,7 +1212,6 @@ function App() {
                                     <Mic size={20} className="shrink-0 drop-shadow-md opacity-90" />
                                     <span className="text-xs uppercase tracking-widest font-medium drop-shadow-md">{t.menuVoiceThunder}</span>
                                 </button>
-                                <GlassCard onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))} label={t.menuOracleHub} icon={CircleDot} variant="purple" theme="purple" />
                                 <GlassCard onClick={() => handleStudentOrProFeature(t.featureEsotericTools, () => nav('esoteric_hub'))} label={t.menuEsotericTools} icon={Sparkles} variant="purple" theme="purple" />
                                 <GlassCard onClick={() => handleProFeature(t.featureBori, () => nav('ebori'))} label={t.menuBori} icon={UserCheck} variant="purple" theme="green" proOnly />
                                 <GlassCard onClick={() => handleProFeature(t.featureReverseMath, () => nav('reverse_odu'))} label={t.menuReverseMath} icon={Database} variant="purple" theme="red" proOnly />
@@ -990,7 +1237,7 @@ function App() {
                             </div>
                         </div>
 
-                        {/* Gestão */}
+                        {/* Gest├úo */}
                         <div>
                             <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
                                 <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '3px', color: 'rgba(196,158,48,0.8)' }}>{t.sectionManagement}</span>
@@ -1001,6 +1248,94 @@ function App() {
                                 <GlassCard onClick={() => nav('agenda')} label={t.menuAgenda} icon={CalendarDays} theme="sapphire" />
                                 <GlassCard onClick={() => handleStudentOrProFeature(t.featureLineage, () => nav('lineage_tree'))} label={t.menuLineage} icon={GitBranch} />
                                 <GlassCard onClick={() => handleStudentOrProFeature(t.featureAnalytics, () => nav('analytics'))} label={t.menuAnalytics} icon={BarChart3} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ÔöÇÔöÇ CENTRO OPERACIONAL DO SACERDOTE ÔöÇÔöÇ */}
+                    <div style={{ marginTop: 40, marginBottom: 24 }}>
+                        <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '3px', color: '#E8DCC2' }}>Centro Operacional</span>
+                            <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, rgba(196,158,48,0.3), transparent)' }}></div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
+                            <div className="glass-card" style={{ padding: '24px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,158,48,0.1)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <Activity size={16} color="#C49E30" />
+                                        <h4 style={{ margin: 0, fontSize: 12, color: '#C49E30', textTransform: 'uppercase', letterSpacing: '1px' }}>Timeline do Dia</h4>
+                                    </div>
+                                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>Hoje</span>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                    {/* Mocks timeline */}
+                                    {[
+                                        { time: '09:00', title: 'Consulta: Jo├úo Silva', type: 'consulta', icon: Users, color: '#4ab87a' },
+                                        { time: '14:30', title: 'Prepara├º├úo: Eb├│ de Caminhos', type: 'ebo', icon: Package, color: '#e2b84a' },
+                                        { time: '16:00', title: 'Estudo: Ogbe Meji', type: 'estudo', icon: BookOpen, color: '#50a0e0' }
+                                    ].map((item, i) => (
+                                        <div key={i} style={{ display: 'flex', gap: 16, alignItems: 'center', padding: '12px', background: 'rgba(0,0,0,0.2)', borderRadius: 8, borderLeft: `3px solid ${item.color}` }}>
+                                            <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.5)', width: 40 }}>{item.time}</div>
+                                            <div style={{ width: 28, height: 28, borderRadius: '50%', background: `${item.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                                <item.icon size={12} color={item.color} />
+                                            </div>
+                                            <div style={{ fontSize: 13, color: '#E8DCC2' }}>{item.title}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ÔöÇÔöÇ ANALYTICS & INDICADORES ÔöÇÔöÇ */}
+                    <div style={{ marginBottom: 24 }}>
+                        <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '3px', color: '#E8DCC2' }}>Analytics & Indicadores</span>
+                            <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, rgba(196,158,48,0.3), transparent)' }}></div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16 }}>
+                            {/* Mock analytics cards */}
+                            {[
+                                { label: 'Consultas/M├¬s', value: '34', icon: BarChart3, color: '#e2b84a' },
+                                { label: 'Odu Frequente', value: 'Ogbe', icon: CircleDot, color: '#4ab87a' },
+                                { label: 'Receita Est.', value: 'R$ 2.4k', icon: Zap, color: '#e2b84a' },
+                                { label: 'Horas Atend.', value: '42h', icon: History, color: '#50a0e0' }
+                            ].map((stat, i) => (
+                                <div key={i} className="glass-card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(196,158,48,0.1)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: stat.color }}>
+                                        <stat.icon size={14} />
+                                        <span style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '1px', opacity: 0.8 }}>{stat.label}</span>
+                                    </div>
+                                    <div style={{ fontSize: 24, fontWeight: 700, color: '#E8DCC2', fontFamily: 'Cinzel, serif' }}>{stat.value}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* ÔöÇÔöÇ IA & INSIGHTS ÔöÇÔöÇ */}
+                    <div style={{ marginBottom: 40 }}>
+                        <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+                            <span style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '3px', color: '#E8DCC2' }}>Intelig├¬ncia Sacerdotal</span>
+                            <div className="h-px flex-1" style={{ background: 'linear-gradient(90deg, rgba(196,158,48,0.3), transparent)' }}></div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                            <div className="glass-card" style={{ padding: '20px', background: 'linear-gradient(135deg, rgba(196,158,48,0.05), rgba(0,0,0,0.5))', border: '1px solid rgba(196,158,48,0.2)' }}>
+                                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                    <div style={{ padding: 8, borderRadius: 8, background: 'rgba(196,158,48,0.1)', color: '#C49E30' }}><Sparkles size={16} /></div>
+                                    <div>
+                                        <h4 style={{ margin: '0 0 4px', fontSize: 12, color: '#E8DCC2', fontWeight: 600 }}>Sugest├úo do Dia</h4>
+                                        <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>Com base nas consultas recentes, considere revisar os rituais de prosperidade (Ire Aje).</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="glass-card" style={{ padding: '20px', background: 'linear-gradient(135deg, rgba(200,50,50,0.05), rgba(0,0,0,0.5))', border: '1px solid rgba(200,50,50,0.2)' }}>
+                                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                    <div style={{ padding: 8, borderRadius: 8, background: 'rgba(200,50,50,0.1)', color: '#e55' }}><Users size={16} /></div>
+                                    <div>
+                                        <h4 style={{ margin: '0 0 4px', fontSize: 12, color: '#E8DCC2', fontWeight: 600 }}>Aten├º├úo Necess├íria</h4>
+                                        <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.6)', lineHeight: 1.5 }}>2 clientes est├úo aguardando retorno sobre orienta├º├Áes de Eb├│.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1028,7 +1363,7 @@ function App() {
                 {view === 'prayers' && <SacredTextLibrary onBack={() => setView('home')} />}
                 {view === 'sango_wheel' && <SangoWheel onBack={() => setView('home')} />}
 
-                {/* OOGUN HUB COM FUNÇÃO DE NAVEGAÇÃO CORRETA */}
+                {/* OOGUN HUB COM FUN├ç├âO DE NAVEGA├ç├âO CORRETA */}
                 {view === 'oogun' && <OogunHub onBack={() => setView('home')} onOpenInventory={() => setView('inventory_hub')} onConsultOracle={handleConsultOracle} />}
 
                 {view === 'ebori' && <InteractiveEbori onBack={() => setView('home')} />}
@@ -1050,7 +1385,7 @@ function App() {
                 {view === 'lineage_tree' && <LineageTree onBack={() => setView('home')} />}
                 {view === 'inventory_hub' && <InventoryHub onBack={() => setView('home')} />}
                 {view === 'sound_hub' && <SoundHub onBack={() => setView('home')} />}
-                {/* ASSENTAMENTOS COM FUNÇÃO DE NAVEGAÇÃO */}
+                {/* ASSENTAMENTOS COM FUN├ç├âO DE NAVEGA├ç├âO */}
                 {view === 'assentamentos' && <AssentamentoGuideView onBack={() => setView('home')} onConsultOracle={handleConsultOracle} />}
 
                 {view === 'ebo_sim' && <EboSimulator onBack={() => setView('home')} />}
@@ -1187,7 +1522,6 @@ function App() {
             )}
 
             <CookieConsentBanner />
-            <AIAssistant lang={language} />
         </div>
     );
 }

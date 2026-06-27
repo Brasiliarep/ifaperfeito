@@ -22,9 +22,9 @@
     <meta name="theme-color" content="#1a1510" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Ifá Oluwo">
+    <meta name="apple-mobile-web-app-title" content="If├í Oluwo">
     
-    <title>Ifá Oluwo - Codex Sacerdotal</title>
+    <title>If├í Oluwo - Codex Sacerdotal</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="./manifest.json" />
@@ -69,7 +69,7 @@
     </script>
     <style>
       :root {
-        /* === IFÁ OLUWO 2.0 — DESIGN SYSTEM === */
+        /* === IF├ü OLUWO 2.0 ÔÇö DESIGN SYSTEM === */
         /* Paleta */
         --ds-bg:          #090e14;
         --ds-surface:     #101622;
@@ -90,15 +90,15 @@
         --ds-text-muted:     rgba(255,255,255,0.32);
         --ds-text-gold:      #C49E30;
 
-        /* Animações */
+        /* Anima├º├Áes */
         --ds-ease:    cubic-bezier(0.25,0.46,0.45,0.94);
         --ds-spring:  cubic-bezier(0.34,1.56,0.64,1);
         --ds-duration: 200ms;
 
         /* Sidebar */
-        --ds-sidebar-w: 80px; /* Reduzido para o design slim */
+        --ds-sidebar-w: 220px; /* Sidebar completa com texto */
 
-        /* Legado — mantido para compatibilidade com componentes existentes */
+        /* Legado ÔÇö mantido para compatibilidade com componentes existentes */
         --gold: #e2b84a;
         --gold-dim: rgba(210,165,40,0.55);
         --gold-ghost: rgba(210,165,40,0.12);
@@ -155,7 +155,7 @@
           radial-gradient(ellipse 50% 40% at 50% 100%, rgba(196,158,48,0.04) 0%, transparent 70%),
           var(--ds-bg);
       }
-      /* Textura Adire — ultra-discreta */
+      /* Textura Adire ÔÇö ultra-discreta */
       #root::before {
         content: '';
         position: fixed;
@@ -169,7 +169,7 @@
       }
 
       /* ======================================================= */
-      /* ========== DS 2.0 — COMPONENTES PREMIUM =============== */
+      /* ========== DS 2.0 ÔÇö COMPONENTES PREMIUM =============== */
       /* ======================================================= */
 
       /* --- TOPBAR SACERDOTAL --- */
@@ -183,15 +183,14 @@
         z-index: 100;
       }
 
-      /* --- SIDEBAR ESTREITA (SLIM SIDEBAR) --- */
+      /* --- SIDEBAR FULL (TEXTO + ├ìCONES) --- */
       .ds-sidebar-slim {
-        background: #070c12; /* Deep slate blue background */
-        border-right: 1px solid rgba(196,158,48,0.12);
-        width: 80px;
-        min-width: 80px;
+        background: #07090d;
+        border-right: 1px solid rgba(196,158,48,0.10);
+        width: 220px;
+        min-width: 220px;
         display: flex;
         flex-direction: column;
-        align-items: center;
         height: 100vh;
         position: sticky;
         top: 0;
@@ -199,73 +198,123 @@
         overflow-x: hidden;
         flex-shrink: 0;
         scrollbar-width: none;
-        padding: 24px 0;
         z-index: 10;
       }
       .ds-sidebar-slim::-webkit-scrollbar { display: none; }
-      
-      .ds-sidebar-slim-logo {
-        width: 44px;
-        height: 44px;
+
+      /* Sidebar brand/logo area */
+      .ds-sidebar-brand {
         display: flex;
         align-items: center;
-        justify-content: center;
-        margin-bottom: 28px;
-        color: var(--ds-gold);
-        filter: drop-shadow(0 0 8px rgba(196,158,48,0.35));
-        transition: transform 0.3s ease;
+        gap: 10px;
+        padding: 20px 16px 16px;
+        border-bottom: 1px solid rgba(196,158,48,0.07);
+        cursor: pointer;
+        text-decoration: none;
       }
-      .ds-sidebar-slim-logo:hover {
-        transform: rotate(15deg) scale(1.05);
+      .ds-sidebar-brand .logo-text h1 {
+        font-family: 'Cinzel', serif;
+        font-size: 13px;
+        font-weight: 700;
+        color: #E8DCC2;
+        margin: 0;
+        letter-spacing: 1.5px;
+        line-height: 1.1;
       }
-      
+      .ds-sidebar-brand .logo-text span {
+        font-size: 8px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: rgba(196,158,48,0.5);
+      }
+
+      /* Active home button in sidebar */
+      .ds-sidebar-slim-home {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 9px 16px;
+        margin: 8px 10px 4px;
+        border-radius: 8px;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #E8DCC2;
+        background: rgba(196,158,48,0.10);
+        border: 1px solid rgba(196,158,48,0.18);
+        cursor: pointer;
+        width: calc(100% - 20px);
+        text-align: left;
+      }
+
+      /* Section group label */
+      .ds-sidebar-slim-group {
+        font-size: 8px;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: rgba(196,158,48,0.35);
+        padding: 14px 16px 4px;
+        white-space: nowrap;
+      }
+
+      /* Sidebar nav item with text */
       .ds-sidebar-slim-item {
         display: flex;
-        flex-direction: column;
         align-items: center;
-        justify-content: center;
-        gap: 6px;
-        padding: 12px 2px;
-        font-size: 9.5px;
-        font-weight: 500;
-        color: rgba(255,255,255,0.45);
+        gap: 9px;
+        padding: 7px 16px;
+        font-size: 11px;
+        font-weight: 400;
+        color: rgba(255,255,255,0.50);
         cursor: pointer;
-        transition: all 200ms ease;
+        transition: all 150ms ease;
         position: relative;
         background: none;
         border: none;
         width: 100%;
-        text-align: center;
-        margin-bottom: 4px;
+        text-align: left;
+        border-left: 2px solid transparent;
+        white-space: nowrap;
       }
       .ds-sidebar-slim-item:hover {
-        color: rgba(255,255,255,0.85);
+        color: rgba(255,255,255,0.82);
         background: rgba(196,158,48,0.04);
+        border-left-color: rgba(196,158,48,0.2);
       }
       .ds-sidebar-slim-item.active {
         color: #E2B84A;
-        background: rgba(196,158,48,0.08);
+        background: rgba(196,158,48,0.07);
+        border-left-color: #C49E30;
+        font-weight: 500;
       }
-      .ds-sidebar-slim-item.active::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 15%;
-        bottom: 15%;
-        width: 3px;
+      .ds-sidebar-slim-item .item-badge {
+        margin-left: auto;
         background: #C49E30;
-        border-radius: 0 2px 2px 0;
-        box-shadow: 0 0 8px rgba(196,158,48,0.6);
+        color: #070707;
+        font-size: 8px;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 10px;
+        line-height: 1.5;
+      }
+      .ds-sidebar-slim-item .item-badge-new {
+        margin-left: auto;
+        background: rgba(74,184,122,0.15);
+        color: #4ab87a;
+        font-size: 8px;
+        font-weight: 600;
+        padding: 1px 5px;
+        border-radius: 10px;
+        line-height: 1.5;
+        border: 1px solid rgba(74,184,122,0.25);
       }
       .ds-sidebar-slim-item svg {
-        opacity: 0.6;
-        transition: transform 0.2s ease, opacity 0.2s ease;
-        color: currentColor;
+        opacity: 0.55;
+        flex-shrink: 0;
+        transition: opacity 150ms ease;
       }
       .ds-sidebar-slim-item:hover svg,
       .ds-sidebar-slim-item.active svg {
         opacity: 1;
-        transform: scale(1.08);
       }
 
       /* --- SIDEBAR: COLUNA DO TEMPLO --- */
@@ -413,7 +462,7 @@
         font-family: 'Cinzel', serif;
       }
 
-      /* ========== HERO — ATENDIMENTO AO CONSULENTE ========== */
+      /* ========== HERO ÔÇö ATENDIMENTO AO CONSULENTE ========== */
       .ds-hero-card {
         background: var(--ds-surface);
         border: 1px solid rgba(196,158,48,0.20);
@@ -447,7 +496,7 @@
         box-shadow: 0 0 40px rgba(196,158,48,0.06);
       }
 
-      /* Indicador de métrica dentro do hero */
+      /* Indicador de m├®trica dentro do hero */
       .ds-metric {
         display: flex;
         flex-direction: column;
@@ -467,7 +516,7 @@
         color: rgba(255,255,255,0.35);
       }
 
-      /* ========== ODU DO DIA — EDITORIAL ========== */
+      /* ========== ODU DO DIA ÔÇö EDITORIAL ========== */
       .ds-odu-editorial {
         background: var(--ds-surface);
         border: 1px solid rgba(196,158,48,0.16);
@@ -676,7 +725,7 @@
         50% { opacity: 0.4; }
       }
 
-      /* ========== WIDGET CARDS (calendário/quick) ========== */
+      /* ========== WIDGET CARDS (calend├írio/quick) ========== */
       .ds-widget-card {
         background: var(--ds-surface);
         border: 1px solid rgba(196,158,48,0.12);
@@ -833,7 +882,7 @@
         white-space: nowrap;
       }
 
-      /* ========== ANIMAÇÕES RITUAIS ========== */
+      /* ========== ANIMA├ç├òES RITUAIS ========== */
       @media (prefers-reduced-motion: no-preference) {
         /* --- NAV CARD --- */
         .nav-card {
@@ -912,7 +961,7 @@
           cursor: pointer;
         }
 
-        /* --- MERINDILOGUN — TAPETE + BUZIOS --- */
+        /* --- MERINDILOGUN ÔÇö TAPETE + BUZIOS --- */
         @keyframes treme-tapete {
           0%,100% { transform: translateX(0) rotate(0); }
           20%  { transform: translateX(-5px) rotate(-1deg); }
@@ -974,7 +1023,7 @@
           100% { transform: translate(var(--dx),var(--dy)); opacity: 0; }
         }
 
-        /* --- VOZ DO TROVÃO --- */
+        /* --- VOZ DO TROV├âO --- */
         .voz-trovao {
           position: relative;
           overflow: hidden;
@@ -1011,7 +1060,7 @@
         }
       }
 
-      /* === MERINDILOGUN — CLASS RULES === */
+      /* === MERINDILOGUN ÔÇö CLASS RULES === */
       .merindilogun-page {
         background: #0c0810;
         min-height: 100vh;
@@ -1415,7 +1464,7 @@
             navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
             caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
           } else {
-            navigator.serviceWorker.register('./service-worker.js?v=mqvnq5gd')
+            navigator.serviceWorker.register('./service-worker.js?v=mqwrtsom')
               .then(registration => console.log('SW registered'))
               .catch(err => console.log('SW failed', err));
           }
