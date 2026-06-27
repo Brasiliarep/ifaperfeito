@@ -27,8 +27,12 @@
     "exclude": [
         "node_modules",
         "vite.config.ts",
+        "server.ts",
         "ifa-olwo-completo-ultimo",
-        "precificador-sfimports"
+        "precificador-sfimports",
+        "prints-layout",
+        "vyttai-studio-ai",
+        "claude-code-security-review"
     ],
   "references": [
     {
