@@ -27,3 +27,6 @@ create_paypal_plans.ps1
 
 # Local Netlify folder
 .netlify
+
+# Cloned tools
+claude-code-security-review/
