@@ -924,6 +924,16 @@ function App() {
                         </div>
                     </div>
 
+                    {/* ── BÚSSOLA + CALENDÁRIO (estava na sidebar original) ── */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginTop: 24 }}>
+                        <div className="glass-card-no-clip rounded-xl" style={{ background: 'rgba(20,80,45,0.12)', borderColor: 'rgba(30,150,80,0.2)' }}>
+                            <IleIfeCompass />
+                        </div>
+                        <div className="glass-card-no-clip rounded-xl">
+                            <YorubaCalendarWidget onOpenIgbadu={() => handleStudentOrProFeature('Igbadu Virtual', () => setView('igbadu'))} />
+                        </div>
+                    </div>
+
                     {/* ── SEÇÕES ORIGINAIS RESTAURADAS ── */}
                     <div className="space-y-6 md:space-y-8 mt-12">
                         {/* Conhecimento */}
