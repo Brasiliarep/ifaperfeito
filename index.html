@@ -1415,7 +1415,7 @@
             navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
             caches.keys().then(ks => ks.forEach(k => caches.delete(k)));
           } else {
-            navigator.serviceWorker.register('./service-worker.js?v=mqvhavg3')
+            navigator.serviceWorker.register('./service-worker.js?v=mqvlvs1q')
               .then(registration => console.log('SW registered'))
               .catch(err => console.log('SW failed', err));
           }
