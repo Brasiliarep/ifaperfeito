@@ -776,16 +776,13 @@ function App() {
 
                     {/* ── TOPBAR ── */}
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 48 }}>
-                        {/* Left: greeting */}
-                        <div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                                <GreetIcon size={13} style={{ color: 'rgba(196,158,48,0.7)' }} />
-                                <span style={{ fontSize: 10, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.7)' }}>
-                                    {greeting}, {displayName}
-                                </span>
+                        {/* Left: Brand / Logo Text */}
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                            <div style={{ fontSize: 9, letterSpacing: '2.5px', textTransform: 'uppercase', color: 'rgba(196,158,48,0.7)', marginBottom: 2 }}>
+                                Sistema de Divinação
                             </div>
-                            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 26, fontWeight: 700, color: '#E8DCC2', margin: 0, letterSpacing: '0.5px', lineHeight: 1.3 }}>
-                                Que Ifá ilumine seus caminhos
+                            <h2 style={{ fontFamily: 'Cinzel, serif', fontSize: 24, fontWeight: 700, color: '#E8DCC2', margin: 0, letterSpacing: '2px', lineHeight: 1 }}>
+                                IFÁ OLUWO
                             </h2>
                         </div>
 
