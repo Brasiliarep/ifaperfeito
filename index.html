@@ -21,6 +21,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#1a1510" />
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Ifá Oluwo">
     
@@ -31,42 +32,11 @@
     <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="apple-touch-icon" href="/logo.png" />
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fontes: carregadas via CDN (Google Fonts) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        darkMode: ['class', '[data-theme="dark"]'],
-        theme: {
-          extend: {
-            fontFamily: {
-              serif: ['Cinzel', 'serif'],
-              sans: ['Inter', 'sans-serif'],
-            },
-            colors: {
-              'ifa-base': 'var(--color-bg)',
-              'ifa-base-dark': 'var(--color-bg-dark)',
-              'ifa-surface': 'var(--color-surface)',
-              'ifa-gold': 'var(--color-gold)',
-              'ifa-gold-light': 'var(--color-gold-light)',
-              'ifa-gold-dark': 'var(--color-gold-dark)',
-              'ifa-green': 'var(--color-green)',
-              'ifa-green-light': 'var(--color-green-light)',
-              'ifa-wood': 'var(--color-wood)',
-              'ifa-neutral': 'var(--color-neutral)',
-              'ifa-text': 'var(--color-text)',
-              'ifa-text-light': 'var(--color-text-light)',
-              'ifa-border': 'var(--color-border)',
-            },
-            padding: {
-              'safe-top': 'env(safe-area-inset-top)',
-              'safe-bottom': 'env(safe-area-inset-bottom)',
-            }
-          }
-        }
-      }
-    </script>
+    <!-- Tailwind processado pelo Vite/PostCSS em build time — sem CDN em produção -->
     <style>
       :root {
         /* === IFÁ OLUWO 2.0 ÔÇö DESIGN SYSTEM === */
