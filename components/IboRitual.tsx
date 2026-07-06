@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, HelpCircle } from 'lucide-react';
 import { IreOsogboType } from '../types';
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
 
 const IboRitual: React.FC<Props> = ({ onComplete, onCancel }) => {
     const [step, setStep] = useState<'instruction' | 'waiting' | 'reveal'>('instruction');
+    const [questionType, setQuestionType] = useState<'general' | 'health' | 'wealth' | 'love'>('general');
     const [result, setResult] = useState<IreOsogboType | null>(null);
 
     const handleChoice = (choice: 'PEDRA' | 'OSSO') => {
@@ -16,35 +17,49 @@ const IboRitual: React.FC<Props> = ({ onComplete, onCancel }) => {
         setTimeout(() => {
             let resolved: IreOsogboType;
             if (choice === 'PEDRA') {
-                const subtypes: IreOsogboType[] = [
-                    { type: 'IRE', subType: 'Ire Aiku', description: 'Longevidade e saúde plena. Ifá abençoa com vida longa e vitalidade.' },
-                    { type: 'IRE', subType: 'Ire Aje', description: 'Prosperidade e riqueza material. Aje (Orixá da riqueza) está presente.' },
-                    { type: 'IRE', subType: 'Ire Iya', description: 'Amor, união e maternidade. Forças de Oshun cercam o consulente.' },
-                    { type: 'IRE', subType: 'Ire Ogbo', description: 'Velhice com sabedoria e dignidade. O caminho é de amadurecimento.' },
-                    { type: 'IRE', subType: 'Ire Omo', description: 'Bênçãos de filhos e descendência. O Ori abre caminhos para a família.' },
-                    { type: 'IRE', subType: 'Ire Gbogbo', description: 'Bênçãos gerais em todos os aspectos da vida. Caminho aberto e iluminado.' },
-                ];
-                resolved = subtypes[Math.floor(Math.random() * subtypes.length)];
+                if (questionType === 'health') {
+                    resolved = { type: 'IRE', subType: 'Ire Aiku', description: 'Longevidade e saúde plena. Ifá abençoa com vida longa e vitalidade.' };
+                } else if (questionType === 'wealth') {
+                    resolved = { type: 'IRE', subType: 'Ire Aje', description: 'Prosperidade e riqueza material. Aje (Orixá da riqueza) está presente.' };
+                } else if (questionType === 'love') {
+                    resolved = { type: 'IRE', subType: 'Ire Iya', description: 'Amor, união e relacionamento. Forças de Oshun cercam o consulente.' };
+                } else {
+                    // General or fallback - select from others
+                    const generalSubtypes: IreOsogboType[] = [
+                        { type: 'IRE', subType: 'Ire Ogbo', description: 'Velhice com sabedoria e dignidade. O caminho é de amadurecimento.' },
+                        { type: 'IRE', subType: 'Ire Omo', description: 'Bênçãos de filhos e descendência. O Ori abre caminhos para a família.' },
+                        { type: 'IRE', subType: 'Ire Gbogbo', description: 'Bênçãos gerais em todos os aspectos da vida. Caminho aberto e iluminado.' },
+                    ];
+                    resolved = generalSubtypes[Math.floor(Math.random() * generalSubtypes.length)];
+                }
             } else {
-                const subtypes: IreOsogboType[] = [
-                    { type: 'OSOGBO', subType: 'Osogbo Iku', description: 'Advertência sobre perdas e finalizações. Ebó urgente é necessário.' },
-                    { type: 'OSOGBO', subType: 'Osogbo Arun', description: 'Aviso sobre doenças e enfermidades. Cuidar da saúde com prioridade.' },
-                    { type: 'OSOGBO', subType: 'Osogbo Eyo', description: 'Alerta para tragédias e luto. Atenção redobrada nos próximos ciclos.' },
-                    { type: 'OSOGBO', subType: 'Osogbo Ofo', description: 'Perdas materiais e financeiras em curso. Ebó de proteção imediato.' },
-                    { type: 'OSOGBO', subType: 'Osogbo Oran', description: 'Conflitos, disputas e processos. Moderação e cautela são essenciais.' },
-                    { type: 'OSOGBO', subType: 'Osogbo Gbogbo', description: 'Adversidades gerais. O caminho pede Ebó amplo e dedicação aos Orixás.' },
-                ];
-                resolved = subtypes[Math.floor(Math.random() * subtypes.length)];
+                if (questionType === 'health') {
+                    const healthSubtypes: IreOsogboType[] = [
+                        { type: 'OSOGBO', subType: 'Osogbo Arun', description: 'Aviso sobre doenças e enfermidades. Cuidar da saúde com prioridade.' },
+                        { type: 'OSOGBO', subType: 'Osogbo Iku', description: 'Advertência sobre perdas graves e finalizações de ciclos de vida.' }
+                    ];
+                    resolved = healthSubtypes[Math.floor(Math.random() * healthSubtypes.length)];
+                } else if (questionType === 'wealth') {
+                    resolved = { type: 'OSOGBO', subType: 'Osogbo Ofo', description: 'Perdas materiais e financeiras em curso. Ebó de proteção imediato.' };
+                } else if (questionType === 'love') {
+                    resolved = { type: 'OSOGBO', subType: 'Osogbo Oran', description: 'Conflitos, disputas amorosas, intrigas e processos. Cautela é essencial.' };
+                } else {
+                    const generalOsogbo: IreOsogboType[] = [
+                        { type: 'OSOGBO', subType: 'Osogbo Eyo', description: 'Alerta para tragédias, discussões públicas e luto. Atenção redobrada.' },
+                        { type: 'OSOGBO', subType: 'Osogbo Gbogbo', description: 'Adversidades gerais. O caminho pede Ebó amplo e dedicação aos Orixás.' }
+                    ];
+                    resolved = generalOsogbo[Math.floor(Math.random() * generalOsogbo.length)];
+                }
             }
             setResult(resolved);
             setStep('reveal');
-        }, 2200);
+        }, 2000);
     };
 
     const isIre = result?.type === 'IRE';
 
     return (
-        <div className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[200] bg-black/95 flex items-center justify-center p-4 backdrop-blur-sm">
             <div className="bg-ifa-base border border-ifa-gold/40 rounded-2xl p-6 max-w-lg w-full relative shadow-2xl max-h-[90vh] overflow-y-auto text-center animate-fade-in">
                 <button
                     onClick={onCancel}
@@ -63,6 +78,37 @@ const IboRitual: React.FC<Props> = ({ onComplete, onCancel }) => {
                 {/* STEP: INSTRUCTION */}
                 {step === 'instruction' && (
                     <div className="animate-fade-in">
+                        {/* CATEGORY SELECTION CARD */}
+                        <div className="bg-ifa-base-dark border border-ifa-border rounded-xl p-5 mb-5 text-left">
+                            <h3 className="text-sm font-bold text-ifa-gold mb-3 flex items-center gap-1.5"><HelpCircle size={16} /> O que deseja determinar?</h3>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                                <button 
+                                    onClick={() => setQuestionType('general')} 
+                                    className={`py-2.5 px-3 rounded-lg border font-bold transition-all ${questionType === 'general' ? 'bg-ifa-gold text-black border-ifa-gold' : 'border-ifa-border hover:bg-white/5 text-gray-300'}`}
+                                >
+                                    Geral (Ire/Osogbo)
+                                </button>
+                                <button 
+                                    onClick={() => setQuestionType('wealth')} 
+                                    className={`py-2.5 px-3 rounded-lg border font-bold transition-all ${questionType === 'wealth' ? 'bg-ifa-gold text-black border-ifa-gold' : 'border-ifa-border hover:bg-white/5 text-gray-300'}`}
+                                >
+                                    Financeiro
+                                </button>
+                                <button 
+                                    onClick={() => setQuestionType('health')} 
+                                    className={`py-2.5 px-3 rounded-lg border font-bold transition-all ${questionType === 'health' ? 'bg-ifa-gold text-black border-ifa-gold' : 'border-ifa-border hover:bg-white/5 text-gray-300'}`}
+                                >
+                                    Saúde
+                                </button>
+                                <button 
+                                    onClick={() => setQuestionType('love')} 
+                                    className={`py-2.5 px-3 rounded-lg border font-bold transition-all ${questionType === 'love' ? 'bg-ifa-gold text-black border-ifa-gold' : 'border-ifa-border hover:bg-white/5 text-gray-300'}`}
+                                >
+                                    Relacionamento
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="bg-ifa-base-dark border border-ifa-border rounded-xl p-5 mb-6 text-left">
                             <p className="text-ifa-text text-sm leading-7 mb-4">
                                 Antes de revelarmos o que Ifá vê, é preciso abrir o caminho com o <strong className="text-ifa-gold">Ibó</strong>.

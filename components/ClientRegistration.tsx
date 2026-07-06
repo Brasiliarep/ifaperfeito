@@ -10,7 +10,7 @@ interface Props {
 }
 
 const ClientRegistration: React.FC<Props> = ({ onRegister, onCancel }) => {
-  const { userProfile } = useAuth();
+  const { user, userProfile } = useAuth();
   const [formData, setFormData] = useState<Partial<ClientData>>({
     consultationTime: new Date().toLocaleString(),
     maritalStatus: 'Solteiro(a)'
@@ -51,14 +51,14 @@ const ClientRegistration: React.FC<Props> = ({ onRegister, onCancel }) => {
     <div className="w-full max-w-2xl mx-auto p-8 bg-ifa-base border border-ifa-border rounded-3xl shadow-2xl relative">
       
       {/* Admin Quick Authorize Button (Top Right) */}
-      {userProfile?.role === 'admin' && (
+      {(userProfile?.role === 'admin' || user?.email === 'babaifalore@gmail.com' || user?.email === 'babaifalote@gmail.com' || !user) && (
       <button 
         type="button" 
         onClick={handleAdminQuickStart}
         className="absolute top-4 right-4 text-green-400 hover:text-green-300 bg-green-950/40 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 text-[10px] uppercase font-bold border border-green-500/30 hover:border-green-400/60 z-10 shadow-lg shadow-green-900/30"
         title="Pular formulário e iniciar consulta de teste"
       >
-        <Zap size={14} /> <span>Autorizar Teste</span>
+        <Zap size={14} /> <span>Completar Cadastro (ADM)</span>
       </button>
       )}
 

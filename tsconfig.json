@@ -28,7 +28,10 @@
         "node_modules",
         "vite.config.ts",
         "ifa-olwo-completo-ultimo",
-        "precificador-sfimports"
+        "precificador-sfimports",
+        "vyttai-studio-ai",
+        "src",
+        "prints-layout"
     ],
   "references": [
     {
