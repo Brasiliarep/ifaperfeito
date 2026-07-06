@@ -381,6 +381,10 @@ function App() {
         setDivinationMethod(pendingMethod);
         setPendingMethod(null);
         setShowPreparation(false);
+        // Se veio da Adivinhação Rápida (home) com cliente já definido, vai direto para input
+        if (view === 'home') {
+            setView('input');
+        }
     };
 
     const renderBoard = () => {
@@ -1124,11 +1128,15 @@ function App() {
                             <div key={i} className="neo-div-card" onClick={() => {
                                 setHomeSearch('');
                                 if (!user) {
+                                    // Anônimo: verifica quota e define cliente
                                     if (!canUseFeature('consultation')) { setBlockedFeature(t.btnConsultation); setShowPaywall(true); return; }
                                     setClient({ id: 'anon', fullName: 'Visitante', dateOfBirth: '', mothersName: '', address: '', consultationTime: new Date().toLocaleString(), profession: '', maritalStatus: '', phone: '', email: '' });
                                 } else {
-                                    setClient(null); setInterpretation(null); setOpele(INITIAL_OPELE); setCowries(INITIAL_COWRIES);
-                                    setDivinationMethod(null); setActiveRecord(null);
+                                    // Logado: verifica quota e define cliente temporário para a sessão rápida
+                                    if (userPlan === 'student_monthly') { setBlockedFeature(t.btnConsultation); setShowPaywall(true); return; }
+                                    if (userPlan === 'free' && (userProfile?.consultationCount || 0) >= 3) { setBlockedFeature(t.btnConsultation); setShowPaywall(true); return; }
+                                    setClient({ id: 'quick', fullName: 'Consulta Rápida', dateOfBirth: '', mothersName: '', address: '', consultationTime: new Date().toLocaleString(), profession: '', maritalStatus: '', phone: '', email: '' });
+                                    setInterpretation(null); setOpele(INITIAL_OPELE); setCowries(INITIAL_COWRIES); setActiveRecord(null);
                                 }
                                 setPendingMethod(card.method);
                                 setShowPreparation(true);
