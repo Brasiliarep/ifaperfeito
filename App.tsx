@@ -885,14 +885,38 @@ function App() {
     const renderHome = () => {
         const hour = new Date().getHours();
         const displayName = (userProfile as any)?.displayName || user?.email?.split('@')[0] || 'Babalawo';
-        const lastOduName = heroStats.lastOdu !== '—' ? heroStats.lastOdu : 'OGBE MEJI';
         const nav = (v: AppView) => setView(v);
 
+        // ── ODU DO DIA: calculado deterministicamente pela data (muda todo dia, igual para todos) ──
+        const ODU_DO_DIA_LIST: Array<{ name: string; regente: string; elemento: string; energia: string; simbolo: string; desc: string }> = [
+            { name: 'Ejiogbe',       regente: 'Orunmila',  elemento: 'Luz',      energia: 'Renovação',    simbolo: 'Clareza',     desc: 'O Grande Caminho está aberto. Momento de recomeços e visão espiritual.' },
+            { name: 'Oyeku Meji',    regente: 'Orixanlá',  elemento: 'Vazio',    energia: 'Transição',    simbolo: 'Silêncio',    desc: 'Tempo de recolhimento. Oyeku pede respeito aos ancestrais e cautela.' },
+            { name: 'Iwori Meji',    regente: 'Esú',       elemento: 'Fogo',     energia: 'Revelação',    simbolo: 'Mente',       desc: 'O pensamento domina. Hora de consultar o Ori antes de agir.' },
+            { name: 'Odi Meji',      regente: 'Iemanjá',   elemento: 'Água',     energia: 'Fertilidade',  simbolo: 'Womb',        desc: 'Energia de gestação. Projetos plantados hoje geram frutos abundantes.' },
+            { name: 'Irosun Meji',   regente: 'Xangô',     elemento: 'Sangue',   energia: 'Justiça',      simbolo: 'Verdade',     desc: 'Xangô exige honestidade. Verdades ocultas vêm à tona.' },
+            { name: 'Owonrin Meji',  regente: 'Esú',       elemento: 'Vento',    energia: 'Transformação',simbolo: 'Mudança',     desc: 'Owonrin traz imprevistos. Esteja preparado para viradas rápidas.' },
+            { name: 'Obara Meji',    regente: 'Xangô',     elemento: 'Ouro',     energia: 'Realeza',      simbolo: 'Nobreza',     desc: 'Obara é o Odù dos reis. Aja com dignidade e liderança hoje.' },
+            { name: 'Okanran Meji',  regente: 'Ogum',      elemento: 'Ferro',    energia: 'Batalha',      simbolo: 'Conflito',    desc: 'Okanran acende o fogo da disputa. Evite brigas desnecessárias.' },
+            { name: 'Ogunda Meji',   regente: 'Ogum',      elemento: 'Ferro',    energia: 'Abertura',     simbolo: 'Movimento',   desc: 'Ogum abre caminhos. Ótimo dia para iniciar projetos e viagens.' },
+            { name: 'Osa Meji',      regente: 'Iansã',     elemento: 'Trovão',   energia: 'Revolução',    simbolo: 'Tempestade',  desc: 'Osa varre o velho para o novo entrar. Deixe ir o que não serve.' },
+            { name: 'Ika Meji',      regente: 'Nanã',      elemento: 'Terra',    energia: 'Proteção',     simbolo: 'Raiz',        desc: 'Ika protege as raízes. Honre seus ancestrais e sua linhagem hoje.' },
+            { name: 'Oturupon Meji', regente: 'Omolu',     elemento: 'Cinzas',   energia: 'Cura',         simbolo: 'Renovação',   desc: 'Oturupon transforma doenças em saúde. Dia propício para curas.' },
+            { name: 'Otura Meji',    regente: 'Oxalá',     elemento: 'Branco',   energia: 'Paz',          simbolo: 'Harmonia',    desc: 'Otura traz paz profunda. Resolva conflitos com diálogo e serenidade.' },
+            { name: 'Irete Meji',    regente: 'Oxóssi',    elemento: 'Floresta', energia: 'Prosperidade', simbolo: 'Abundância',  desc: 'Irete promete fartura. Caçe suas metas com foco e persistência.' },
+            { name: 'Ose Meji',      regente: 'Oxum',      elemento: 'Mel',      energia: 'Amor',         simbolo: 'Doçura',      desc: 'Oxum derrama sua benção. Excelente dia para assuntos do coração.' },
+            { name: 'Ofun Meji',     regente: 'Iemanjá',   elemento: 'Mar',      energia: 'Profundidade', simbolo: 'Mistério',    desc: 'Ofun guarda segredos antigos. Aprofunde sua espiritualidade hoje.' },
+        ];
+        // Índice determinístico: dias desde 01/01/2024, mod 16
+        const today = new Date();
+        const epoch = new Date(2024, 0, 1);
+        const daysSinceEpoch = Math.floor((today.getTime() - epoch.getTime()) / 86400000);
+        const dailyOduData = ODU_DO_DIA_LIST[daysSinceEpoch % ODU_DO_DIA_LIST.length];
+
         const oduAttrs = [
-            { label: 'Elemento', value: 'Ferro' },
-            { label: 'Regente', value: 'Ogum' },
-            { label: 'Energia', value: 'Expansão' },
-            { label: 'Símbolo', value: 'Movimento' },
+            { label: 'Regente', value: dailyOduData.regente },
+            { label: 'Elemento', value: dailyOduData.elemento },
+            { label: 'Energia', value: dailyOduData.energia },
+            { label: 'Símbolo', value: dailyOduData.simbolo },
         ];
 
         const timelineItems = [
@@ -946,7 +970,7 @@ function App() {
                             {[
                                 { icon: Users, label: 'Consultas hoje', value: heroStats.totalCount, delta: '+5', color: '#C49E30' },
                                 { icon: Book, label: 'Odus estudados', value: 89, delta: '+7', color: '#C49E30' },
-                                { icon: CircleDot, label: 'Odu do dia', value: lastOduName.split(' ').slice(0,2).join(' '), delta: null, color: '#C49E30' },
+                                { icon: CircleDot, label: 'Odu do dia', value: dailyOduData.name.split(' ').slice(0,2).join(' '), delta: null, color: '#C49E30' },
                                 { icon: Bell, label: 'Próximo evento', value: 'Ebô de Oxóssi', delta: '20 Jun', color: '#4ab87a' },
                             ].map((s, i) => (
                                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(196,158,48,0.12)', flexShrink: 0 }}>
@@ -1019,15 +1043,15 @@ function App() {
                         <div className="neo-odu-content">
                             <div className="neo-odu-label">Odu do Dia</div>
                             <h2 className="neo-odu-title">
-                                {lastOduName.toUpperCase().split(' ').map((word, idx) => (
+                                {dailyOduData.name.toUpperCase().split(' ').map((word, idx) => (
                                     <React.Fragment key={idx}>
                                         {word}
-                                        {idx < lastOduName.split(' ').length - 1 && <br />}
+                                        {idx < dailyOduData.name.split(' ').length - 1 && <br />}
                                     </React.Fragment>
                                 ))}
                             </h2>
-                            <div className="neo-odu-subtitle">Energia de renovação e movimento.</div>
-                            <p className="neo-odu-desc">Momento propício para iniciar projetos, buscar conhecimento e fortalecer sua conexão espiritual.</p>
+                            <div className="neo-odu-subtitle">Regente: {dailyOduData.regente} · {dailyOduData.energia}</div>
+                            <p className="neo-odu-desc">{dailyOduData.desc}</p>
                             <button onClick={() => handleStudentOrProFeature('Igbadu Virtual', () => nav('igbadu'))}
                                 style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 6, background: '#07090d', border: '1px solid rgba(196,158,48,0.5)', cursor: 'pointer', color: '#C49E30', fontSize: 9, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
                                 Consultar Odu do Dia <ChevronRight size={12} />
