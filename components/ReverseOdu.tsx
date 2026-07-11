@@ -26,7 +26,7 @@ const REVERSE_DB = [
     }
 ];
 
-const ReverseOdu = ({ onBack }: { onBack: () => void }) => {
+const ReverseOdu = ({ onBack, isStudent }: { onBack: () => void, isStudent?: boolean }) => {
     const [input, setInput] = useState<string>("");
     // USO DE 'any' PARA GARANTIR O BUILD
     const [result, setResult] = useState<any>(null);
@@ -114,16 +114,21 @@ const ReverseOdu = ({ onBack }: { onBack: () => void }) => {
                             <p className="text-ifa-text-light">{result.meaning}</p>
                         </div>
 
-                        <EboSelector 
-                            category="Ebó Identificado"
-                            basic={result.ebos.basic}
-                            medium={result.ebos.medium}
-                            complete={result.ebos.complete}
-                            currentSelection={selection}
-                            onSelect={setSelection}
-                            oduName={result.odu}
-                            context="Engenharia Reversa"
-                        />
+                        {!isStudent && (
+                            <EboSelector 
+                                category="Ebó Identificado"
+                                basic={result.ebos.basic}
+                                medium={result.ebos.medium}
+                                complete={result.ebos.complete}
+                                currentSelection={selection}
+                                onSelect={setSelection}
+                                oduName={result.odu}
+                                context="Engenharia Reversa"
+                            />
+                        )}
+                        {isStudent && (
+                            <p className="mt-8 text-center text-red-500 italic">Rituais e Ebós indisponíveis no Modo Estudante.</p>
+                        )}
                     </div>
                 )}
             </div>

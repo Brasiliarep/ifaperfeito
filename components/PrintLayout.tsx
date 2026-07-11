@@ -9,9 +9,10 @@ interface Props {
     record: ConsultationRecord;
     onBack: () => void;
     onReturnToSession?: () => void;
+    isStudent?: boolean;
 }
 
-export const PrintLayout = ({ record, onBack, onReturnToSession }: Props) => {
+export const PrintLayout = ({ record, onBack, onReturnToSession, isStudent }: Props) => {
     const [profile, setProfile] = useState<BabalawoProfile | null>(null);
     const [isPreviewMode, setIsPreviewMode] = useState(false);
     const [showBabalawoList, setShowBabalawoList] = useState(false);
@@ -416,32 +417,34 @@ export const PrintLayout = ({ record, onBack, onReturnToSession }: Props) => {
             )}
 
             {/* 7. PRESCRIÇÕES E RITUAIS (ALL SELECTED EBOS) */}
-            <section className="mb-10">
-                <h3 className="flex items-center gap-2 text-lg font-bold uppercase text-[#8D6E63] mb-4 border-b border-gray-300 pb-2">
-                    <span className="text-xl">🍃</span> PRESCRIÇÕES E RITUAIS
-                </h3>
+            {!isStudent && (
+                <section className="mb-10">
+                    <h3 className="flex items-center gap-2 text-lg font-bold uppercase text-[#8D6E63] mb-4 border-b border-gray-300 pb-2">
+                        <span className="text-xl">🍃</span> PRESCRIÇÕES E RITUAIS
+                    </h3>
 
-                <div className="mb-6">
-                    <h4 className="font-bold text-sm text-green-700 uppercase mb-2">Ervas & Banhos</h4>
-                    <div className="bg-green-50 p-4 rounded border border-green-100 text-sm">
-                        <p className="mb-2"><strong>Nome:</strong> {record.interpretation?.herbalBaths?.name}</p>
-                        <p className="mb-2"><strong>Ingredientes:</strong> {record.interpretation?.herbalBaths?.ingredients?.join(', ')}</p>
-                        <p className="text-justify leading-relaxed"><strong>Preparo:</strong> {record.interpretation?.herbalBaths?.preparation}</p>
+                    <div className="mb-6">
+                        <h4 className="font-bold text-sm text-green-700 uppercase mb-2">Ervas & Banhos</h4>
+                        <div className="bg-green-50 p-4 rounded border border-green-100 text-sm">
+                            <p className="mb-2"><strong>Nome:</strong> {record.interpretation?.herbalBaths?.name}</p>
+                            <p className="mb-2"><strong>Ingredientes:</strong> {record.interpretation?.herbalBaths?.ingredients?.join(', ')}</p>
+                            <p className="text-justify leading-relaxed"><strong>Preparo:</strong> {record.interpretation?.herbalBaths?.preparation}</p>
+                        </div>
                     </div>
-                </div>
 
-                {/* Renderizar TODOS os Ebós selecionados + OSOGBO se houver */}
-                {renderOsogboEbo()}
+                    {/* Renderizar TODOS os Ebós selecionados + OSOGBO se houver */}
+                    {renderOsogboEbo()}
 
-                {renderEboBlock("Ebó Principal (Geral)", record.selections?.general, record.interpretation?.solutionsAndEbos)}
-                {renderEboBlock("Trabalho para Amor", record.selections?.love, record.interpretation?.love?.ebos)}
-                {renderEboBlock("Trabalho Financeiro", record.selections?.finance, record.interpretation?.finance?.ebos)}
-                {renderEboBlock("Trabalho de Saúde", record.selections?.health, record.interpretation?.health?.ebos)}
+                    {renderEboBlock("Ebó Principal (Geral)", record.selections?.general, record.interpretation?.solutionsAndEbos)}
+                    {renderEboBlock("Trabalho para Amor", record.selections?.love, record.interpretation?.love?.ebos)}
+                    {renderEboBlock("Trabalho Financeiro", record.selections?.finance, record.interpretation?.finance?.ebos)}
+                    {renderEboBlock("Trabalho de Saúde", record.selections?.health, record.interpretation?.health?.ebos)}
 
-            </section>
+                </section>
+            )}
 
-            {/* ORÇAMENTO ESTIMADO - EXIBIR SOMENTE SE HOUVER VALOR TOTAL > 0 */}
-            {babalawoData.grandTotal > 0 && (
+            {/* ORÇAMENTO ESTIMADO - EXIBIR SOMENTE SE HOUVER VALOR TOTAL > 0 E NAO FOR ESTUDANTE */}
+            {!isStudent && babalawoData.grandTotal > 0 && (
                 <section className="mb-10 break-inside-avoid bg-gray-50 p-6 rounded border border-gray-300">
                     <h3 className="flex items-center gap-2 text-lg font-bold uppercase text-black mb-4 border-b border-black pb-2">
                         <Coins size={20} /> Orçamento Estimado de Materiais
@@ -524,12 +527,14 @@ export const PrintLayout = ({ record, onBack, onReturnToSession }: Props) => {
                         <h3 className="text-sm font-bold uppercase text-ifa-gold mb-4">Configurar Impressão / PDF</h3>
 
                         <div className="space-y-3 text-left">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm flex items-center gap-2"><Lock size={14} /> Mostrar Ebó Secreto (Matança)</span>
-                                <button onClick={() => setShowSecretEbos(!showSecretEbos)} className={`w-12 h-6 rounded-full transition-colors ${showSecretEbos ? 'bg-green-600' : 'bg-gray-600'} relative`}>
-                                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${showSecretEbos ? 'left-7' : 'left-1'}`}></div>
-                                </button>
-                            </div>
+                            {!isStudent && (
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm flex items-center gap-2"><Lock size={14} /> Mostrar Ebó Secreto (Matança)</span>
+                                    <button onClick={() => setShowSecretEbos(!showSecretEbos)} className={`w-12 h-6 rounded-full transition-colors ${showSecretEbos ? 'bg-green-600' : 'bg-gray-600'} relative`}>
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${showSecretEbos ? 'left-7' : 'left-1'}`}></div>
+                                    </button>
+                                </div>
+                            )}
 
                             <div className="flex items-center justify-between">
                                 <span className="text-sm flex items-center gap-2"><Eye size={14} /> Mostrar Notas Confidenciais</span>

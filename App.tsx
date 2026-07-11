@@ -61,6 +61,7 @@ import IboRitual from './components/IboRitual';
 import OraclePreparation from './components/OraclePreparation';
 import VirtualRoom from './components/VirtualRoom';
 import CookieConsentBanner from './components/CookieConsentBanner';
+import CameraButtons from './components/CameraButtons';
 import { AIAssistant } from './components/AIAssistant';
 
 import { getTranslation } from './utils/i18n';
@@ -255,7 +256,7 @@ function App() {
     // —— isPro: true somente para planos pro_monthly e pro_annual ——
     const isPro = (plan?: string) => {
         if (user?.email === 'babaifalore@gmail.com' || user?.email === 'babaifalote@gmail.com') return true;
-        return plan !== 'free' && plan !== 'student_monthly' && plan !== undefined;
+        return plan !== 'free' && plan !== 'student_monthly' && plan !== 'estudante' && plan !== undefined;
     };
 
     // —— GUARD: bloqueia acesso funcional às views exclusivas de Sacerdote (pro_monthly / pro_annual) ——
@@ -268,6 +269,11 @@ function App() {
             assentamentos:  'Assentamentos',
             ajogun:         'Diagnóstico Ajogun',
             virtual_room:   'Sala Virtual',
+            esoteric_hub:   'Ebó Simulador / Ferramentas',
+            delivery:       'Entrega de Ebó',
+            oogun:          'Oogun Hub',
+            inventory_hub:  'Inventário',
+            story_mode:     'Story Mode (RPG)',
         };
         const featureLabel = PRO_ONLY_LABELS[view];
         if (!featureLabel) return; // View não é restrita
@@ -395,21 +401,24 @@ function App() {
             return (<div className="w-full flex justify-center py-4"><IkinRitual key={ikinKey} opele={opele} onToggle={toggleSeed} onReset={() => { setOpele(INITIAL_OPELE); setIkinKey(k => k + 1); }} oduName={currentOdu?.name} /></div>);
         }
         if (divinationMethod === 'opon') {
-            return (<div className="w-full flex justify-center py-4"><OponIfaBoard opele={opele} onToggle={toggleSeed} /></div>);
+            return (<div className="w-full flex justify-center py-4"><OponIfaBoard opele={opele} onToggle={toggleSeed} onSetState={setOpele} /></div>);
         }
         return (
-            <div className="bg-ifa-base border border-ifa-border p-8 md:p-12 rounded-3xl shadow-2xl relative max-w-2xl w-full mb-8">
-                <div className="flex justify-center gap-12 md:gap-24 mb-10 relative">
-                    <div className="absolute left-1/2 top-4 bottom-4 w-1 -ml-0.5 bg-ifa-border rounded opacity-50 hidden md:block"></div>
-                    <div className="flex flex-col items-center gap-4 z-10">
-                        <h3 className="text-ifa-gold text-sm uppercase tracking-widest mb-2 font-bold">{t.rightLeg}</h3>
-                        {opele.rightLeg.map((state, idx) => (<OpeleSeed key={`r-${idx}`} position={idx} state={state} onClick={() => toggleSeed('right', idx)} isAnimating={true} />))}
-                    </div>
-                    <div className="flex flex-col items-center gap-4 z-10">
-                        <h3 className="text-ifa-gold text-sm uppercase tracking-widest mb-2 font-bold">{t.leftLeg}</h3>
-                        {opele.leftLeg.map((state, idx) => (<OpeleSeed key={`l-${idx}`} position={idx} state={state} onClick={() => toggleSeed('left', idx)} isAnimating={true} />))}
+            <div className="w-full flex flex-col items-center">
+                <div className="bg-ifa-base border border-ifa-border p-8 md:p-12 rounded-3xl shadow-2xl relative max-w-2xl w-full mb-4">
+                    <div className="flex justify-center gap-12 md:gap-24 mb-10 relative">
+                        <div className="absolute left-1/2 top-4 bottom-4 w-1 -ml-0.5 bg-ifa-border rounded opacity-50 hidden md:block"></div>
+                        <div className="flex flex-col items-center gap-4 z-10">
+                            <h3 className="text-ifa-gold text-sm uppercase tracking-widest mb-2 font-bold">{t.rightLeg}</h3>
+                            {opele.rightLeg.map((state, idx) => (<OpeleSeed key={`r-${idx}`} position={idx} state={state} onClick={() => toggleSeed('right', idx)} isAnimating={true} />))}
+                        </div>
+                        <div className="flex flex-col items-center gap-4 z-10">
+                            <h3 className="text-ifa-gold text-sm uppercase tracking-widest mb-2 font-bold">{t.leftLeg}</h3>
+                            {opele.leftLeg.map((state, idx) => (<OpeleSeed key={`l-${idx}`} position={idx} state={state} onClick={() => toggleSeed('left', idx)} isAnimating={true} />))}
+                        </div>
                     </div>
                 </div>
+                <CameraButtons />
             </div>
         );
     };
@@ -669,7 +678,7 @@ function App() {
 
                     {/* FERRAMENTAS ESPIRITUAIS */}
                     <div className="ds-sidebar-slim-group">Ferramentas Espirituais</div>
-                    <button className={`ds-sidebar-slim-item ${view === 'esoteric_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureEsotericTools, () => nav('esoteric_hub'))}>
+                    <button className={`ds-sidebar-slim-item ${view === 'esoteric_hub' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureEsotericTools, () => nav('esoteric_hub'))}>
                         <Sparkles size={13} /> <span>Ebó Simulador</span>
                     </button>
                     <button className={`ds-sidebar-slim-item ${view === 'ebori' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureBori, () => nav('ebori'))}>
@@ -726,7 +735,7 @@ function App() {
                     <button className={`ds-sidebar-slim-item ${view === 'lineage_tree' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureLineage, () => nav('lineage_tree'))}>
                         <GitBranch size={13} /> <span>Árvore de Linhagem</span>
                     </button>
-                    <button className={`ds-sidebar-slim-item ${view === 'delivery' ? 'active' : ''}`} onClick={() => nav('delivery')}>
+                    <button className={`ds-sidebar-slim-item ${view === 'delivery' ? 'active' : ''}`} onClick={() => handleProFeature('Entrega de Ebó', () => nav('delivery'))}>
                         <Truck size={13} /> <span>Entrega de Ebô</span>
                     </button>
 
@@ -818,11 +827,11 @@ function App() {
                         <div className="ds-sidebar-badge">{heroStats.pendingCount || 1}</div>
                     </button>
 
-                    <button className={`ds-sidebar-item ${view === 'oracle_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
+                    <button className={`ds-sidebar-item ${view === 'oracle_hub' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
                         <CircleDot size={16} /> <span>Divinação</span>
                     </button>
 
-                    <button className="ds-sidebar-item" onClick={() => handleStudentOrProFeature(t.featureTreatise, () => nav('treatise'))}>
+                    <button className="ds-sidebar-item" onClick={() => handleProFeature(t.featureTreatise, () => nav('treatise'))}>
                         <GraduationCap size={16} /> <span>Estudos</span>
                     </button>
 
@@ -846,11 +855,11 @@ function App() {
                         <CalendarDays size={16} /> <span>Calendário Litúrgico</span>
                     </button>
 
-                    <button className="ds-sidebar-item" onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
+                    <button className="ds-sidebar-item" onClick={() => handleProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
                         <Sparkles size={16} /> <span>Oráculos Sagrados</span>
                     </button>
 
-                    <button className={`ds-sidebar-item ${view === 'esoteric_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureEsotericTools, () => nav('esoteric_hub'))}>
+                    <button className={`ds-sidebar-item ${view === 'esoteric_hub' ? 'active' : ''}`} onClick={() => handleProFeature(t.featureEsotericTools, () => nav('esoteric_hub'))}>
                         <Stars size={16} /> <span>Ferramentas Esot├®ricas</span>
                     </button>
 
@@ -1265,12 +1274,12 @@ function App() {
                             {
                                 title: 'Esotérico', color: '#b04a8a', icon: Sparkles,
                                 items: [
-                                    { icon: Sparkles, label: 'Central Esotérica', sub: '14 ferramentas', color: '#b04a8a', action: () => handleStudentOrProFeature(t.featureEsotericTools, () => nav('esoteric_hub')) },
-                                    { icon: Stethoscope, label: 'Detector Iyami', sub: 'Energia das mães', color: '#b04a8a', action: () => handleStudentOrProFeature(t.featureEsotericTools, () => nav('esoteric_hub')) },
-                                    { icon: Lock, label: 'Leitor de Presságios', sub: 'Base de presságios', color: '#b04a8a', action: () => handleStudentOrProFeature(t.featureEsotericTools, () => nav('esoteric_hub')) },
+                                    { icon: Sparkles, label: 'Central Esotérica', sub: '14 ferramentas', color: '#b04a8a', action: () => handleProFeature(t.featureEsotericTools, () => nav('esoteric_hub')) },
+                                    { icon: Stethoscope, label: 'Detector Iyami', sub: 'Energia das mães', color: '#b04a8a', action: () => handleProFeature(t.featureEsotericTools, () => nav('esoteric_hub')) },
+                                    { icon: Lock, label: 'Leitor de Presságios', sub: 'Base de presságios', color: '#b04a8a', action: () => handleProFeature(t.featureEsotericTools, () => nav('esoteric_hub')) },
                                     { icon: RefreshCw, label: 'Mandala do Odu', sub: 'Geometria sagrada', color: '#9b6dd4', action: () => nav('mandala') },
                                     { icon: Stars, label: 'Bússola Sagrada', sub: 'Direções espirituais', color: '#9b6dd4', action: () => handleStudentOrProFeature('Igbadu Virtual', () => nav('igbadu')) },
-                                    { icon: CircleDot, label: 'Mais Ferramentas', sub: 'E muito mais...', color: 'rgba(176,74,138,0.5)', action: () => handleStudentOrProFeature(t.featureEsotericTools, () => nav('esoteric_hub')) },
+                                    { icon: CircleDot, label: 'Mais Ferramentas', sub: 'E muito mais...', color: 'rgba(176,74,138,0.5)', action: () => handleProFeature(t.featureEsotericTools, () => nav('esoteric_hub')) },
                                 ]
                             },
                             {
@@ -1729,7 +1738,7 @@ function App() {
 
             <div className="pt-8">
                 {view === 'prayers' && <SacredTextLibrary onBack={() => setView('home')} />}
-                {view === 'sango_wheel' && <SangoWheel onBack={() => setView('home')} />}
+                {view === 'sango_wheel' && <SangoWheel onBack={() => setView('home')} isStudent={!isPro(userPlan)} />}
 
                 {/* OOGUN HUB COM FUN├ç├âO DE NAVEGA├ç├âO CORRETA */}
                 {view === 'oogun' && <OogunHub onBack={() => setView('home')} onOpenInventory={() => setView('inventory_hub')} onConsultOracle={handleConsultOracle} />}
@@ -1737,9 +1746,9 @@ function App() {
                 {view === 'ebori' && <InteractiveEbori onBack={() => setView('home')} />}
                 {view === 'herb_id' && <HerbIdentifier onBack={() => setView('home')} />}
                 {view === 'dictionary' && <YorubaDictionary onBack={() => setView('home')} />}
-                {view === 'oracle_hub' && <OracleHub onBack={() => setView('home')} />}
+                {view === 'oracle_hub' && <OracleHub onBack={() => setView('home')} isStudent={!isPro(userPlan)} />}
                 {view === 'esoteric_hub' && <EsotericHub onBack={() => setView('home')} />}
-                {view === 'reverse_odu' && <ReverseOdu onBack={() => setView('home')} />}
+                {view === 'reverse_odu' && <ReverseOdu onBack={() => setView('home')} isStudent={!isPro(userPlan)} />}
                 {view === 'door_guardian' && <DoorGuardian onBack={() => setView('home')} />}
 
                 {/* VOICE COMMANDER COM INITIAL PROMPT */}
@@ -1858,8 +1867,8 @@ function App() {
                 </div>
             )}
 
-            {view === 'result' && interpretation && <div className="min-h-screen py-12"><InterpretationView data={interpretation} oduInfo={currentOdu} initialSelections={activeRecord?.selections} language={language} isStudent={userProfile?.plan === 'student_monthly'} onReset={() => { setInterpretation(null); setOpele(INITIAL_OPELE); setCowries(INITIAL_COWRIES); setDivinationMethod(null); setView('input'); }} onEndSession={handleEndSession} onOpenMandala={() => setView('mandala')} /></div>}
-            {view === 'print' && activeRecord && <PrintLayout record={activeRecord} onBack={() => setView('home')} onReturnToSession={interpretation ? () => setView('result') : undefined} />}
+            {view === 'result' && interpretation && <div className="min-h-screen py-12"><InterpretationView data={interpretation} oduInfo={currentOdu} initialSelections={activeRecord?.selections} language={language} isStudent={!isPro(userPlan) || client?.id === 'study'} onReset={() => { setInterpretation(null); setOpele(INITIAL_OPELE); setCowries(INITIAL_COWRIES); setDivinationMethod(null); setView('input'); }} onEndSession={handleEndSession} onOpenMandala={() => setView('mandala')} /></div>}
+            {view === 'print' && activeRecord && <PrintLayout record={activeRecord} onBack={() => setView('home')} onReturnToSession={interpretation ? () => setView('result') : undefined} isStudent={!isPro(userPlan) || activeRecord?.client?.id === 'study'} />}
 
             {showQuickStudyModal && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">

@@ -5,7 +5,7 @@ import EboSelector from './EboSelector';
 import { EboSelectionType, SangoJusticeResult } from '../types';
 import { askSangoJustice } from '../services/geminiService';
 
-const SangoWheel = ({ onBack }: { onBack: () => void }) => {
+const SangoWheel = ({ onBack, isStudent }: { onBack: () => void, isStudent?: boolean }) => {
     const [form, setForm] = useState({
         myName: '',
         opponent: '',
@@ -124,7 +124,7 @@ const SangoWheel = ({ onBack }: { onBack: () => void }) => {
               <div class="value" style="font-size: 14px;">
                 <strong>Nível Selecionado:</strong> ${selection === 'basic' ? 'Básico' : selection === 'medium' ? 'Intermediário' : selection === 'complete' ? 'Completo (Sacerdotal)' : 'A definir'}<br>
                 
-                ${selection !== 'none' ? `
+                ${selection !== 'none' && !isStudent ? `
                   <div style="margin-top: 15px; background: #fdf2f2; padding: 15px; border-radius: 8px; border-left: 5px solid #b91c1c;">
                     <p><strong>Descrição:</strong> ${result.ebos[selection].description}</p>
                     <p><strong>Materiais:</strong> ${result.ebos[selection].ingredients.join(', ')}</p>
@@ -137,7 +137,7 @@ const SangoWheel = ({ onBack }: { onBack: () => void }) => {
                       <p><strong>Instruções ao Consulente:</strong> Siga as orientações do seu Babalawo para a execução deste ritual.</p>
                     `}
                   </div>
-                ` : '<p>Nenhuma seleção de Ebó foi feita no momento da impressão.</p>'}
+                ` : isStudent ? '<p>Rituais indisponíveis no Modo Estudante.</p>' : '<p>Nenhuma seleção de Ebó foi feita no momento da impressão.</p>'}
               </div>
             </div>
 
@@ -320,34 +320,40 @@ const SangoWheel = ({ onBack }: { onBack: () => void }) => {
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left mb-8">
-                                <div className="bg-red-950/20 border border-red-800/30 p-4 rounded-xl">
-                                    <h4 className="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                        <Zap size={12} /> Akose Sugerido
-                                    </h4>
-                                    <p className="text-sm text-gray-300">{result.akose}</p>
+                            {!isStudent && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left mb-8">
+                                    <div className="bg-red-950/20 border border-red-800/30 p-4 rounded-xl">
+                                        <h4 className="text-[10px] font-bold text-red-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                            <Zap size={12} /> Akose Sugerido
+                                        </h4>
+                                        <p className="text-sm text-gray-300">{result.akose}</p>
+                                    </div>
+                                    <div className="bg-amber-950/20 border border-amber-800/30 p-4 rounded-xl">
+                                        <h4 className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                            <MessageCircle size={12} /> Ofó (Reza de Ativação)
+                                        </h4>
+                                        <p className="text-sm text-amber-100 font-serif italic">"{result.ofo}"</p>
+                                    </div>
                                 </div>
-                                <div className="bg-amber-950/20 border border-amber-800/30 p-4 rounded-xl">
-                                    <h4 className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                        <MessageCircle size={12} /> Ofó (Reza de Ativação)
-                                    </h4>
-                                    <p className="text-sm text-amber-100 font-serif italic">"{result.ofo}"</p>
-                                </div>
-                            </div>
+                            )}
 
-                            <div className="mb-8 p-1 bg-gradient-to-r from-transparent via-red-900/50 to-transparent">
-                                <p className="text-[10px] font-bold text-ifa-gold uppercase tracking-[0.3em]">Prescrição de Justiça</p>
-                            </div>
+                            {!isStudent && (
+                                <>
+                                    <div className="mb-8 p-1 bg-gradient-to-r from-transparent via-red-900/50 to-transparent">
+                                        <p className="text-[10px] font-bold text-ifa-gold uppercase tracking-[0.3em]">Prescrição de Justiça</p>
+                                    </div>
 
-                            <EboSelector
-                                basic={result.ebos.basic}
-                                medium={result.ebos.medium}
-                                complete={result.ebos.complete}
-                                currentSelection={selection}
-                                onSelect={setSelection}
-                                oduName={result.name}
-                                context="Tribunal de Xangô"
-                            />
+                                    <EboSelector
+                                        basic={result.ebos.basic}
+                                        medium={result.ebos.medium}
+                                        complete={result.ebos.complete}
+                                        currentSelection={selection}
+                                        onSelect={setSelection}
+                                        oduName={result.name}
+                                        context="Tribunal de Xangô"
+                                    />
+                                </>
+                            )}
 
                             <div className="mt-10 p-4 bg-black/40 rounded-lg border border-red-900/30 text-xs text-red-300 italic flex items-center gap-3">
                                 <Gavel size={16} className="text-red-600 flex-shrink-0" />

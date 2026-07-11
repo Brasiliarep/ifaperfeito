@@ -3,11 +3,10 @@ import React, { useState } from 'react';
 import { ArrowLeft, CircleDot, Hand, GripHorizontal, CheckSquare } from 'lucide-react';
 import ObiDivination from './ObiDivination';
 import IboOracle from './IboOracle';
-import IkinDivination from './IkinDivination';
 import ItaAssistant from './ItaAssistant';
 
-const OracleHub = ({ onBack }: { onBack: () => void }) => {
-    const [activeOracle, setActiveOracle] = useState<'menu' | 'obi' | 'ibo' | 'ikin' | 'ita'>('menu');
+const OracleHub = ({ onBack, isStudent }: { onBack: () => void, isStudent?: boolean }) => {
+    const [activeOracle, setActiveOracle] = useState<'menu' | 'obi' | 'ibo' | 'ita'>('menu');
     const [iboResult, setIboResult] = useState<{ type: 'ire' | 'osogbo', detail: string } | null>(null);
 
     const handleIboComplete = (result: { type: 'ire' | 'osogbo', detail: string }) => {
@@ -17,7 +16,6 @@ const OracleHub = ({ onBack }: { onBack: () => void }) => {
 
     if (activeOracle === 'obi') return <ObiDivination onBack={() => setActiveOracle('menu')} />;
     if (activeOracle === 'ibo') return <IboOracle onBack={() => setActiveOracle('menu')} onComplete={handleIboComplete} />;
-    if (activeOracle === 'ikin') return <IkinDivination onBack={() => setActiveOracle('menu')} />;
     if (activeOracle === 'ita') return <ItaAssistant onBack={() => setActiveOracle('menu')} />;
 
     return (
@@ -55,31 +53,22 @@ const OracleHub = ({ onBack }: { onBack: () => void }) => {
                     </div>
                 </button>
 
-                <button 
-                    onClick={() => setActiveOracle('ikin')}
-                    className="bg-ifa-base border border-ifa-border p-6 rounded-xl flex items-center gap-4 hover:border-ifa-gold transition-all group shadow-lg"
-                >
-                    <div className="bg-[#5D4037]/30 text-[#8D6E63] p-4 rounded-full group-hover:bg-[#5D4037] group-hover:text-white transition-colors">
-                        <GripHorizontal size={32} />
-                    </div>
-                    <div className="text-left">
-                        <h3 className="font-bold text-xl text-ifa-text">Ikin Ifá</h3>
-                        <p className="text-xs text-ifa-neutral mt-1">Os 16 Cocos Sagrados. O método mais antigo e solene.</p>
-                    </div>
-                </button>
 
-                <button 
-                    onClick={() => setActiveOracle('ita')}
-                    className="bg-ifa-base border border-ifa-border p-6 rounded-xl flex items-center gap-4 hover:border-ifa-gold transition-all group shadow-lg"
-                >
-                    <div className="bg-green-900/30 text-green-400 p-4 rounded-full group-hover:bg-green-500 group-hover:text-white transition-colors">
-                        <CheckSquare size={32} />
-                    </div>
-                    <div className="text-left">
-                        <h3 className="font-bold text-xl text-ifa-text">Confirmação de Ebó (Ita)</h3>
-                        <p className="text-xs text-ifa-neutral mt-1">Assistente para verificar se a oferenda foi aceita.</p>
-                    </div>
-                </button>
+
+                {!isStudent && (
+                    <button 
+                        onClick={() => setActiveOracle('ita')}
+                        className="bg-ifa-base border border-ifa-border p-6 rounded-xl flex items-center gap-4 hover:border-ifa-gold transition-all group shadow-lg"
+                    >
+                        <div className="bg-green-900/30 text-green-400 p-4 rounded-full group-hover:bg-green-500 group-hover:text-white transition-colors">
+                            <CheckSquare size={32} />
+                        </div>
+                        <div className="text-left">
+                            <h3 className="font-bold text-xl text-ifa-text">Confirmação de Ebó (Ita)</h3>
+                            <p className="text-xs text-ifa-neutral mt-1">Assistente para verificar se a oferenda foi aceita.</p>
+                        </div>
+                    </button>
+                )}
             </div>
         </div>
     );
