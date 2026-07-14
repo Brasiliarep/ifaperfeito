@@ -12,10 +12,11 @@ const groqBreaker = new CircuitBreaker({
 
 // ─── CONFIGURAÇÃO GROQ ────────────────────────────────────────────────────────
 // Em produção: chave fica server-side na Netlify Function (/api/groq-proxy)
-// Em dev local: fallback para VITE_API_KEY no .env
-const GROQ_DIRECT = "https://api.groq.com";
+// Em dev local: fallback para VITE_API_KEYS no .env
+const GROQ_DIRECT = "https://integrate.api.nvidia.com/v1";
 const GROQ_PROXY = "/api/groq-proxy";
-const GROQ_MODEL = "llama-3.3-70b-versatile";
+const GROQ_MODEL_GROQ = "llama-3.3-70b-versatile";
+const GROQ_MODEL_NVIDIA = "meta/llama-3.3-70b-instruct";
 
 let _apiKey = "";
 
@@ -36,15 +37,18 @@ const getLocalKey = (): string => {
   if (_apiKey) return _apiKey;
   try {
     // @ts-ignore
-    const k = import.meta.env.VITE_API_KEY;
-    if (k && k.startsWith("gsk_")) {
-      _apiKey = k;
-      return _apiKey;
+    const keysRaw = import.meta.env.VITE_API_KEYS || import.meta.env.VITE_API_KEY;
+    if (keysRaw) {
+      const keys = keysRaw.split(',').map((k: string) => k.trim()).filter((k: string) => k.startsWith("gsk_") || k.startsWith("nvapi-"));
+      if (keys.length > 0) {
+        _apiKey = keys[Math.floor(Math.random() * keys.length)];
+        return _apiKey;
+      }
     }
   } catch (_) { }
   try {
     const k = localStorage.getItem("ifa_manual_key") || "";
-    if (k.startsWith("gsk_")) { _apiKey = k; return _apiKey; }
+    if (k.startsWith("gsk_") || k.startsWith("nvapi-")) { _apiKey = k; return _apiKey; }
     if (k.length > 0) localStorage.removeItem("ifa_manual_key");
   } catch (_) { }
   return "proxy_mode";
@@ -55,7 +59,7 @@ export const hasValidKey = (): boolean => {
     return true;
   }
   const key = getLocalKey();
-  return (key !== "" && key !== "proxy_mode" && key.startsWith("gsk_"));
+  return (key !== "" && key !== "proxy_mode" && (key.startsWith("gsk_") || key.startsWith("nvapi-")));
 };
 
 export const initializeAI = (): boolean => true;
@@ -76,8 +80,47 @@ const callGroq = async (
   return groqBreaker.call(
     async () => {
       checkRateLimit();
-      const body: any = {
-        model: GROQ_MODEL,
+
+      // 1) Tenta proxy server-side (Cloudflare Pages Function — produção)
+      if (!import.meta.env.DEV) {
+        const bodyProxy: any = {
+          model: GROQ_MODEL_GROQ,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          temperature: 0.2,
+          max_tokens: 6500,
+        };
+        if (forceJson) bodyProxy.response_format = { type: "json_object" };
+
+        try {
+          const proxyRes = await fetch(GROQ_PROXY, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bodyProxy),
+          });
+          if (proxyRes.ok) {
+            const contentType = proxyRes.headers.get("content-type") || "";
+            if (contentType.includes("application/json")) {
+              const data = await proxyRes.json();
+              const content = data?.choices?.[0]?.message?.content ?? "";
+              console.log("✅ Groq proxy ok (primeiros 200 chars):", content.slice(0, 200));
+              return content;
+            }
+            console.warn("Groq proxy retornou HTML (provável SPA fallback). Pulando.");
+          } else {
+            const errText = await proxyRes.text();
+            console.warn("Groq proxy falhou:", proxyRes.status, errText);
+          }
+        } catch (_) {
+          console.warn("Groq proxy indisponível, caindo para direto");
+        }
+      }
+
+      // 2) Fallback: chamada direta (dev local com VITE_API_KEY)
+      const bodyDirect: any = {
+        model: GROQ_MODEL_NVIDIA,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
@@ -85,38 +128,18 @@ const callGroq = async (
         temperature: 0.2,
         max_tokens: 6500,
       };
-      if (forceJson) body.response_format = { type: "json_object" };
+      if (forceJson) bodyDirect.response_format = { type: "json_object" };
 
-      // 1) Tenta proxy server-side (Netlify Function — produção)
-      try {
-        const proxyRes = await fetch(GROQ_PROXY, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        if (proxyRes.ok) {
-          const data = await proxyRes.json();
-          const content = data?.choices?.[0]?.message?.content ?? "";
-          console.log("✅ Groq proxy ok (primeiros 200 chars):", content.slice(0, 200));
-          return content;
-        }
-        const errText = await proxyRes.text();
-        console.warn("Groq proxy falhou:", proxyRes.status, errText);
-      } catch (_) {
-        console.warn("Groq proxy indisponível (dev local?), caindo para direto");
-      }
-
-      // 2) Fallback: chamada direta (dev local com VITE_API_KEY)
       const key = getLocalKey();
       if (!key || key === "proxy_mode") throw new Error("Chave API não configurada.");
 
-      const res = await fetch(`${GROQ_DIRECT}/openai/v1/chat/completions`, {
+      const res = await fetch(`${GROQ_DIRECT}/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${key}`,
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(bodyDirect),
       });
 
       if (!res.ok) {
@@ -533,8 +556,118 @@ JSON: {
   }
 };
 export const searchYorubaDictionary = async (term: string) => ({ word: term, meaning: "Dicionário offline." });
-export const analyzeOpeleImage = async () => ({ rightLeg: ["open", "open", "open", "open"], leftLeg: ["open", "open", "open", "open"] });
-export const analyzeFace = async (imageBase64: string, lang: string = 'pt-BR') => ({ emotionalState: "...", oriDiagnosis: "...", recommendation: "..." });
+export const analyzeOpeleImage = async (imageBase64: string) => {
+  const key = getLocalKey();
+  if (!key || key === "proxy_mode") {
+    console.warn("Sem chave para visão.");
+    return { rightLeg: ["open", "open", "open", "open"], leftLeg: ["open", "open", "open", "open"] };
+  }
+
+  const prompt = `Você é um Babalawo. Analise esta foto de um Opele (corrente divinatória). Ele tem uma 'perna direita' (rightLeg) e 'perna esquerda' (leftLeg), cada uma com 4 sementes, de cima para baixo. Cada semente pode estar 'open' (aberta/côncava) ou 'closed' (fechada/convexa). Retorne APENAS um JSON válido neste formato: { "rightLeg": ["open", "closed", "open", "open"], "leftLeg": ["closed", "open", "closed", "open"] }`;
+
+  try {
+    const res = await fetch(`${GROQ_DIRECT}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: "meta/llama-3.2-90b-vision-instruct",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: imageBase64 } }
+            ]
+          }
+        ],
+        max_tokens: 150,
+        temperature: 0.1
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("Erro na Vision API:", err);
+      throw new Error("Falha na API de visão");
+    }
+
+    const data = await res.json();
+    const raw = data?.choices?.[0]?.message?.content ?? "{}";
+    const parsed = JSON.parse(cleanJson(raw));
+    
+    if (parsed.rightLeg && parsed.leftLeg && parsed.rightLeg.length === 4) {
+      return parsed;
+    }
+    throw new Error("Formato inválido retornado pela IA");
+  } catch (e) {
+    console.error("Erro ao analisar imagem:", e);
+    return { rightLeg: ["open", "open", "open", "open"], leftLeg: ["open", "open", "open", "open"] };
+  }
+};
+export const analyzeFace = async (imageBase64: string, lang: string = 'pt-BR') => {
+  const key = getLocalKey();
+  if (!key || key === "proxy_mode") {
+    console.warn("Sem chave para visão.");
+    return { emotionalState: "Calmo", oriDiagnosis: "Conexão offline: impossível diagnosticar o Ori no momento.", recommendation: "Aquiete sua mente e reze ao seu Ori." };
+  }
+
+  const prompt = `Você é um Babalawo especialista em leitura facial esotérica (Ori). Analise esta foto de um consulente. Identifique expressões de cansaço, brilho nos olhos ou tensão.
+  Retorne APENAS um JSON válido neste formato em ${lang === 'pt-BR' ? 'Português do Brasil' : 'Inglês'}:
+  {
+    "emotionalState": "[Estado emocional detectado. Ex: Calmo, Estressado, Fatigued, Sereno]",
+    "oriDiagnosis": "[Diagnóstico espiritual do Ori com base nas feições, explicando a energia acumulada na cabeça (Ori). Mínimo 45 palavras. PROIBIDO sincretismo]",
+    "recommendation": "[Recomendação ritualística de Ifá, como banho de folhas específicas Ewe Odundun ou Ewe Tete, ou necessidade de Bori. Mínimo 30 palavras]"
+  }`;
+
+  try {
+    const res = await fetch(`${GROQ_DIRECT}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${key}`,
+      },
+      body: JSON.stringify({
+        model: "meta/llama-3.2-90b-vision-instruct",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: imageBase64 } }
+            ]
+          }
+        ],
+        max_tokens: 250,
+        temperature: 0.3
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error("Erro na Vision API (Face):", err);
+      throw new Error("Falha na API de visão");
+    }
+
+    const data = await res.json();
+    const raw = data?.choices?.[0]?.message?.content ?? "{}";
+    const parsed = JSON.parse(cleanJson(raw));
+    
+    if (parsed.emotionalState && parsed.oriDiagnosis && parsed.recommendation) {
+      return parsed;
+    }
+    throw new Error("Formato inválido retornado pela IA de Face");
+  } catch (e) {
+    console.error("Erro ao analisar face:", e);
+    return { 
+      emotionalState: "Análise Indisponível", 
+      oriDiagnosis: "Ocorreu uma interferência espiritual ao ler a foto. O seu Ori está protegido contra leituras externas no momento.", 
+      recommendation: "Realize uma reza curta ao seu Ori e lave a cabeça com Omi Tutu (água fria)." 
+    };
+  }
+};
 export const compareAncestry = async (image1: string, image2: string, lang: string = 'pt-BR') => ({ similarityScore: 0, facialAnalysis: "...", spiritualConnection: "...", ancestralAdvice: "..." });
 export const searchAjogunRemedy = async (symptom: string, lang: string = 'pt-BR') => {
   const defaultResult = {
@@ -693,3 +826,93 @@ export const fetchAjogunFullEbo = async (
     return { ...fallback, ...JSON.parse(cleanJson(raw)) };
   } catch (e) { return fallback; }
 };
+
+// ─── ESTÚDIO DE CRIAÇÃO (REDES SOCIAIS) ─────────────────────────────────────────
+
+export interface SocialMediaContent {
+  reelsScript?: {
+    hook: string;
+    body: string;
+    callToAction: string;
+    visualSuggestions: string[];
+  };
+  carouselSlides?: {
+    slideNumber: number;
+    text: string;
+    imagePrompt: string;
+  }[];
+  storySequence?: {
+    part: number;
+    text: string;
+    interactionIdea: string; // Ex: Enquete, Caixinha de perguntas
+  }[];
+  caption: string;
+  hashtags: string[];
+}
+
+export const generateSocialMediaContent = async (
+  topic: string,
+  contentType: 'reels' | 'carousel' | 'story',
+  tone: string = 'Pedagógico'
+): Promise<SocialMediaContent> => {
+  const fallback: SocialMediaContent = {
+    caption: `Conhecimento ancestral sobre ${topic}...`,
+    hashtags: ['#Ifa', '#CulturaYoruba', '#SabedoriaAncestral'],
+  };
+
+  if (!getLocalKey()) return fallback;
+  try {
+    const systemPrompt = `Você é um Social Media Manager e Sacerdote de Ifá especialista em criar conteúdo viral, ético e engajador para o Instagram e TikTok sobre a cultura Yorùbá e Ifá.
+Regras:
+1. O Tom de voz escolhido é: ${tone}.
+2. Use nomenclatura Yorubá correta sem sincretismo.
+3. Seja direto e crie forte retenção de atenção (Hooks).
+4. Retorne APENAS um JSON válido.`;
+
+    let userPrompt = '';
+    
+    if (contentType === 'reels') {
+      userPrompt = `Crie um roteiro de Reels/TikTok de 30-60 segundos sobre o tema: "${topic}".
+JSON esperado:
+{
+  "reelsScript": {
+    "hook": "Frase de impacto para os primeiros 3 segundos",
+    "body": "Texto principal do roteiro",
+    "callToAction": "Chamada para ação final (curtir, seguir, comentar)",
+    "visualSuggestions": ["Sugestão visual 1", "Sugestão visual 2"]
+  },
+  "caption": "Legenda para o post",
+  "hashtags": ["#tag1", "#tag2"]
+}`;
+    } else if (contentType === 'carousel') {
+      userPrompt = `Crie um Carrossel de 4 a 6 slides sobre o tema: "${topic}".
+JSON esperado:
+{
+  "carouselSlides": [
+    { "slideNumber": 1, "text": "Título chamativo", "imagePrompt": "Ideia visual do slide" },
+    { "slideNumber": 2, "text": "Desenvolvimento", "imagePrompt": "Ideia visual do slide" }
+  ],
+  "caption": "Legenda profunda com chamada para salvar",
+  "hashtags": ["#tag1", "#tag2"]
+}`;
+    } else {
+      userPrompt = `Crie uma sequência de Stories (3 a 5 partes) engajadora sobre o tema: "${topic}".
+JSON esperado:
+{
+  "storySequence": [
+    { "part": 1, "text": "Pergunta ou gancho inicial", "interactionIdea": "Enquete: Sim/Não" },
+    { "part": 2, "text": "Explicação", "interactionIdea": "Nenhuma" },
+    { "part": 3, "text": "Conclusão e CTA", "interactionIdea": "Caixinha de perguntas" }
+  ],
+  "caption": "Resumo para uso se necessário",
+  "hashtags": ["#tag1", "#tag2"]
+}`;
+    }
+
+    const raw = await callGroq(systemPrompt, userPrompt, false);
+    return { ...fallback, ...JSON.parse(cleanJson(raw)) };
+  } catch (e) {
+    console.error("Erro ao gerar roteiro (Estúdio):", e);
+    return fallback;
+  }
+};
