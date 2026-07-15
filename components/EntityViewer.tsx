@@ -112,7 +112,7 @@ export function EntityViewer({ entityId, onBack }: Props) {
     : { "@context": "https://schema.org", "@graph": [articleSchema, breadcrumbSchema] };
 
   const allKeywords = useMemo(() => {
-    let kw = [...entity.palavrasChaveSEO];
+    let kw = [...(entity.palavrasChaveSEO || [])];
     if (entity.palavrasChaveMultiIdiomas) {
       kw = [
         ...kw,

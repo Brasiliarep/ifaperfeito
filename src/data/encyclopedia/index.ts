@@ -27,7 +27,7 @@ import { ORIXAS_RESTANTES_DATA } from './orixas-restantes';
 import { VODUN_LOA_DATA } from './vodun-loa';
 import { ROLES_TERREIRO_DATA } from './roles-terreiro';
 import { ENTIDADES_MESA_DATA } from './entidades-mesa';
-
+import { IMPORTED_ORIXAS_DATA } from './imported';
 export type { EncyclopediaEntity, CategoriaEntidade };
 
 export const ENCYCLOPEDIA_DATA: EncyclopediaEntity[] = [
@@ -76,4 +76,6 @@ export const ENCYCLOPEDIA_DATA: EncyclopediaEntity[] = [
   ...ROLES_TERREIRO_DATA,
   // Entidades de Mesa (Umbanda)
   ...ENTIDADES_MESA_DATA,
+  // Entidades Importadas (Dossiês Completos)
+  ...IMPORTED_ORIXAS_DATA
 ];

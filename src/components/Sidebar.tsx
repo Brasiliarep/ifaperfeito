@@ -41,11 +41,10 @@ import {
   Share2,
   Coins,
   LogOut
-} from "lucide-react";
-// @ts-ignore
-import brandLogo from "../assets/images/ifa_oluwo_brand_logo_1782582718348.jpg";
+// Removido import do brandLogo pesado
 
 interface SidebarProps {
+
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onOpenChat: () => void;
@@ -167,7 +166,10 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenChat, onSelectD
       <div className="p-4 border-b border-[#c19a4d]/15 flex items-center justify-between gap-2">
         {!collapsed && (
           <div className="flex items-center gap-2">
-             <img src={brandLogo} alt="IFÁ OLUWO" className="object-contain h-10 drop-shadow-[0_0_8px_rgba(193,154,77,0.5)]" />
+             <img src="/logo.png" alt="IFÁ OLUWO" className="object-contain h-10 drop-shadow-[0_0_8px_rgba(193,154,77,0.5)]" />
+             <span className="font-serif font-bold text-lg text-[#C49E30] tracking-wider drop-shadow-[0_0_8px_rgba(193,154,77,0.3)]">
+               IFÁ OLUWO
+             </span>
           </div>
         )}
         {collapsed && (
