@@ -13,10 +13,12 @@ import { EXUS_DATA } from './exus';
 import { EXUS_NOVOS_DATA } from './exus-novos';
 import { EXUS_BATCH3_DATA } from './exus-batch3';
 import { EXUS_BATCH4_DATA } from './exus-batch4';
+import { EXUS_BATCH5_DATA } from './exus-batch5';
 import { POMBAGIRAS_DATA } from './pombagiras';
 import { POMBAGIRAS_NOVAS_DATA } from './pombagiras-novas';
 import { POMBAGIRAS_BATCH3_DATA } from './pombagiras-batch3';
 import { POMBAGIRAS_BATCH4_DATA } from './pombagiras-batch4';
+import { POMBAGIRAS_BATCH5_DATA } from './pombagiras-batch5';
 import { VODUNS_DATA } from './voduns';
 import { NKISIS_DATA } from './nkisis';
 import { ANCESTRAIS_EGUNS_DATA } from './ancestrais-eguns';
@@ -51,11 +53,13 @@ export const ENCYCLOPEDIA_DATA: EncyclopediaEntity[] = [
   ...EXUS_NOVOS_DATA,
   ...EXUS_BATCH3_DATA,
   ...EXUS_BATCH4_DATA,
+  ...EXUS_BATCH5_DATA,
   // Pombagiras
   ...POMBAGIRAS_DATA,
   ...POMBAGIRAS_NOVAS_DATA,
   ...POMBAGIRAS_BATCH3_DATA,
   ...POMBAGIRAS_BATCH4_DATA,
+  ...POMBAGIRAS_BATCH5_DATA,
   // Voduns (Fon/Dahomey)
   ...VODUNS_DATA,
   // Nkisis (Kongo/Bantu)

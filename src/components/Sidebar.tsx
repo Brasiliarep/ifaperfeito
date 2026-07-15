@@ -42,8 +42,7 @@ import {
   Coins,
   LogOut
 } from "lucide-react";
-// @ts-ignore
-import brandLogo from "../assets/images/ifa_oluwo_brand_logo_1782582718348.jpg";
+// (import do brandLogo removido pois usamos logo.png direto do public)
 
 interface SidebarProps {
   activeTab: string;
@@ -166,29 +165,19 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenChat, onSelectD
       {/* Brand Header */}
       <div className="p-4 border-b border-[#c19a4d]/15 flex items-center justify-between gap-2">
         {!collapsed && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center w-full">
             <img 
-              src={brandLogo} 
+              src="/logo_tree.jpg" 
               alt="Ifá Oluwo Logo" 
-              className="w-8 h-8 rounded-full border border-[#c19a4d]/30 shrink-0"
-              referrerPolicy="no-referrer"
+              className="w-[140px] h-auto object-contain drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]"
             />
-            <div className="flex flex-col">
-              <span className="font-cinzel text-xs font-bold tracking-widest text-[#e2b963] uppercase leading-none">
-                Ifá Oluwo
-              </span>
-              <span className="font-sans text-[8.5px] tracking-[0.2em] text-[#a88e5d] uppercase font-semibold mt-1">
-                Códex Sagrado
-              </span>
-            </div>
           </div>
         )}
         {collapsed && (
           <img 
-            src={brandLogo} 
+            src="/logo_tree.jpg" 
             alt="Ifá Oluwo Logo" 
-            className="w-8 h-8 rounded-full border border-[#c19a4d]/30 mx-auto"
-            referrerPolicy="no-referrer"
+            className="w-10 h-10 object-cover object-left rounded-full border border-[#c19a4d]/30 mx-auto drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]"
           />
         )}
         <button
