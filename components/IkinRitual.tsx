@@ -1,6 +1,7 @@
-
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { OpeleState } from '../types';
+import { Hand, RefreshCcw, Sparkles } from 'lucide-react';
+import CameraButtons from './CameraButtons';
 
 interface Props {
     opele: OpeleState;
@@ -9,296 +10,280 @@ interface Props {
     oduName?: string;
 }
 
-type Phase = 'start' | 'animating' | 'revealed' | 'idle' | 'complete';
-type Mark = 1 | 2;
-type HandPose = 'open' | 'closing' | 'release' | 'rest';
-
-// ─── SOUND ──────────────────────────────────────────────────────────────────
-
-const audioCtx = { current: null as AudioContext | null };
-
-function getAudio() {
-    if (!audioCtx.current) audioCtx.current = new AudioContext();
-    const ctx = audioCtx.current;
-    if (ctx.state === 'suspended') ctx.resume();
-    return ctx;
-}
-
-function somQueda() {
-    try {
-        const ctx = getAudio();
-        for (let i = 0; i < 3; i++) {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(300 + Math.random() * 120, ctx.currentTime + i * 0.08);
-            osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + i * 0.08 + 0.12);
-            gain.gain.setValueAtTime(0.10, ctx.currentTime + i * 0.08);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.15);
-            osc.start(ctx.currentTime + i * 0.08);
-            osc.stop(ctx.currentTime + i * 0.08 + 0.15);
-        }
-    } catch {}
-}
-
-function somRevelacao() {
-    try {
-        const ctx = getAudio();
-        [260, 330, 390].forEach((f, i) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(f, ctx.currentTime + i * 0.12);
-            gain.gain.setValueAtTime(0.06, ctx.currentTime + i * 0.12);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.5);
-            osc.start(ctx.currentTime + i * 0.12);
-            osc.stop(ctx.currentTime + i * 0.12 + 0.6);
-        });
-    } catch {}
-}
-
-function somCompleto() {
-    try {
-        const ctx = getAudio();
-        [220, 277, 330, 440, 554].forEach((f, i) => {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(f, ctx.currentTime + i * 0.1);
-            gain.gain.setValueAtTime(0.07, ctx.currentTime + i * 0.1);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.6);
-            osc.start(ctx.currentTime + i * 0.1);
-            osc.stop(ctx.currentTime + i * 0.1 + 0.7);
-        });
-    } catch {}
-}
-
-// ─── MAIN ───────────────────────────────────────────────────────────────────
+type Mark = 'I' | 'II' | null;
 
 const IkinRitual: React.FC<Props> = ({ opele, onToggle, onReset, oduName }) => {
-    const [phase, setPhase] = useState<Phase>('start');
     const [marks, setMarks] = useState<Mark[]>([]);
-    const [revealedMark, setRevealedMark] = useState<Mark | null>(null);
-    const [handPose, setHandPose] = useState<HandPose>('open');
+    const [message, setMessage] = useState("Segure os 16 Ikins na mão esquerda.");
+    const [animating, setAnimating] = useState(false);
 
-    const iniciarLancamento = () => {
-        if (marks.length >= 8) return;
-        setPhase('animating');
-        somQueda();
-
-        // Animation sequence: closing → release → rest
-        setHandPose('closing');
-        setTimeout(() => setHandPose('release'), 280);
-        setTimeout(() => setHandPose('rest'), 560);
-
-        const mark: Mark = Math.random() < 0.5 ? 1 : 2;
-
-        // Reveal result at 750ms
-        setTimeout(() => {
-            setRevealedMark(mark);
-            setPhase('revealed');
-            somRevelacao();
-        }, 750);
-
-        // Back to idle at 750+1200ms
-        setTimeout(() => {
-            setMarks(prev => {
-                const next = [...prev, mark];
-                const leg = prev.length < 4 ? 'right' : 'left';
-                const idx = prev.length < 4 ? prev.length : prev.length - 4;
-                if (mark === 2) onToggle(leg, idx);
-                if (next.length >= 8) {
-                    setTimeout(() => {
-                        setPhase('complete');
-                        somCompleto();
-                    }, 1000);
-                }
-                return next;
-            });
-            setHandPose('open');
-            setPhase('idle');
-        }, 750 + 1200);
+    // Audio Synthesis for "Shaking Nuts" sound
+    const playShakeSound = () => {
+        try {
+            const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+            const ctx = new AudioContext();
+            const bufferSize = ctx.sampleRate * 1.5;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 1000;
+            filter.Q.value = 1;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            for(let i=0; i<8; i++) {
+                const time = ctx.currentTime + (i * 0.15);
+                gain.gain.linearRampToValueAtTime(0.8, time);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+            }
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            noise.start();
+        } catch(e) {}
     };
 
-    const count = marks.length >= 8 ? 8 : marks.length;
+    const graspIkin = () => {
+        if (marks.length >= 8) return;
+        
+        playShakeSound();
+        setAnimating(true);
+        setMessage("Ifá n lu! (Batendo os Ikins)...");
 
-    const poseSrc = `/ikin/hand-${handPose}.webp`;
+        setTimeout(() => {
+            const rand = Math.random();
+            let remainder = 0;
+            let resultMark: Mark = null;
+            let resultText = "";
+
+            if (rand < 0.25) {
+                remainder = 1;
+                resultMark = 'II';
+                resultText = "1 Ikin restou: Marca-se II (Oyeku).";
+            } else if (rand < 0.5) {
+                remainder = 2;
+                resultMark = 'I';
+                resultText = "2 Ikins restaram: Marca-se I (Ogbe).";
+            } else {
+                remainder = Math.floor(Math.random() * 5) + 3; // 0, 3, 4+
+                resultMark = null;
+                resultText = `${remainder} Ikins restaram. Nada se marca. Tente novamente.`;
+            }
+
+            setAnimating(false);
+            setMessage(resultText);
+
+            if (resultMark) {
+                const newLength = marks.length + 1;
+                setMarks(prev => [...prev, resultMark]);
+                
+                // Atualizar o state global do App
+                const leg = (newLength - 1) < 4 ? 'right' : 'left';
+                const idx = (newLength - 1) < 4 ? (newLength - 1) : (newLength - 1) - 4;
+                if (resultMark === 'II') {
+                    onToggle(leg, idx);
+                }
+            }
+        }, 1500);
+    };
+
+    const reset = () => {
+        setMarks([]);
+        setMessage("Segure os 16 Ikins na mão esquerda.");
+        onReset(); // Avisa o App.tsx para limpar o state global
+    };
 
     return (
-        <div className="w-full flex flex-col items-center py-8 px-4" style={{ animation: 'fadeIn 0.6s ease' }}>
-            <div className="w-full max-w-sm">
-
-                {/* ===== START ===== */}
-                {phase === 'start' && (
-                    <>
-                        <div className="text-center mb-10">
-                            <p className="text-[9px] uppercase tracking-[4px] text-ifa-neutral/35 mb-3">Ifá — Oráculo Supremo</p>
-                            <h1 className="font-serif text-[28px] font-bold text-ifa-gold tracking-wide leading-tight">
-                                Ikin Ifá
-                            </h1>
-                            <p className="text-xs text-ifa-neutral/45 tracking-[3px] uppercase mt-2 font-sans">Lançamento Sacerdotal</p>
-                        </div>
-
-                        {/* Hand image — 35% of viewport */}
-                        <div className="w-full max-w-[260px] mx-auto mb-10 flex items-center justify-center" style={{ height: '35vh', maxHeight: 320 }}>
-                            <img src={poseSrc} alt="Mão segurando Ikin" className="w-full h-full object-contain drop-shadow-[0_8px_32px_rgba(0,0,0,0.5)]" style={{ animation: 'fadeIn 0.6s ease' }} />
-                        </div>
-
-                        <div className="text-center mb-10">
-                            <p className="text-sm text-ifa-neutral/60 leading-relaxed">
-                                Segure simbolicamente os 16 Ikin na mão esquerda.<br />
-                                <span className="text-ifa-neutral/40 text-xs">A cada lançamento, o sistema registrará automaticamente o resultado.</span>
-                            </p>
-                        </div>
-
-                        <button
-                            type="button"
-                            onClick={iniciarLancamento}
-                            className="w-full py-[18px] bg-ifa-gold text-black font-bold text-sm uppercase tracking-[4px] rounded-2xl hover:brightness-110 transition-all duration-300 shadow-lg shadow-ifa-gold/15"
-                        >
-                            Iniciar Lançamento
-                        </button>
-                    </>
-                )}
-
-                {/* ===== THROWING / REVEALED / IDLE ===== */}
-                {(phase === 'animating' || phase === 'revealed' || phase === 'idle') && (
-                    <>
-                        {/* Progress */}
-                        <div className="text-center mb-10">
-                            <p className="text-[10px] uppercase tracking-[3px] text-ifa-neutral/45">
-                                Lançamento <span className="text-ifa-gold font-bold">{Math.min(count + 1, 8)}</span> de 8
-                            </p>
-                            <div className="w-full h-[2px] bg-white/5 rounded-full mt-3 overflow-hidden">
-                                <div className="h-full bg-ifa-gold/50 rounded-full transition-all duration-500 ease-out" style={{ width: `${(count / 8) * 100}%` }} />
-                            </div>
-                        </div>
-
-                        {/* Hand image */}
-                        <div className="w-full max-w-[220px] mx-auto mb-8 flex items-center justify-center" style={{ height: '30vh', maxHeight: 260 }}>
-                            <img
-                                key={`${handPose}-${count}`}
-                                src={poseSrc}
-                                alt="Mão segurando Ikin"
-                                className="w-full h-full object-contain drop-shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
-                                style={{ animation: 'fadeIn 0.35s ease' }}
-                            />
-                        </div>
-
-                        {/* Revealed result */}
-                        {phase === 'revealed' && revealedMark && (
-                            <div className="text-center mb-8" style={{ animation: 'fadeIn 0.4s ease' }} key={`r-${count}`}>
-                                <p className="text-[10px] uppercase tracking-[3px] text-ifa-neutral/40 mb-2">
-                                    {revealedMark === 2 ? 'Restaram' : 'Restou'}
-                                </p>
-                                <span className="font-mono text-[32px] font-bold text-ifa-gold tracking-[4px]">
-                                    {revealedMark === 2 ? 'II' : 'I'}
-                                </span>
-                                <p className="text-[10px] text-ifa-neutral/30 mt-2 italic">
-                                    {revealedMark === 2
-                                        ? '2 Ikins restaram — marcam-se II'
-                                        : '1 Ikin restou — marca-se I'}
-                                </p>
-                            </div>
-                        )}
-
-                        {/* ODU EM FORMAÇÃO */}
-                        <div className="mb-8">
-                            <p className="text-[9px] uppercase tracking-[3px] text-ifa-neutral/30 text-center mb-3">Odù em Formação</p>
-                            <div className="flex justify-center gap-2.5">
-                                {Array.from({ length: 8 }, (_, i) => (
-                                    <div
-                                        key={i}
-                                        className="w-9 h-9 rounded-xl border flex items-center justify-center transition-all duration-500"
-                                        style={{
-                                            borderColor: marks[i] ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.05)',
-                                            background: marks[i] ? 'rgba(212,175,55,0.06)' : 'rgba(0,0,0,0.15)',
-                                            opacity: marks[i] ? 1 : 0.25,
-                                        }}
-                                    >
-                                        {marks[i] ? (
-                                            <span className={`font-mono text-sm font-bold tracking-wider ${marks[i] === 2 ? 'text-ifa-gold' : 'text-amber-300/80'}`}>
-                                                {marks[i] === 2 ? 'II' : 'I'}
-                                            </span>
-                                        ) : null}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Action button */}
-                        {phase === 'idle' && count < 8 && (
-                            <button
-                                type="button"
-                                onClick={iniciarLancamento}
-                                className="w-full py-[18px] bg-ifa-gold text-black font-bold text-sm uppercase tracking-[4px] rounded-2xl hover:brightness-110 transition-all duration-300 shadow-lg shadow-ifa-gold/15"
-                            >
-                                Próximo Lançamento
-                            </button>
-                        )}
-                    </>
-                )}
-
-                {/* ===== COMPLETE ===== */}
-                {phase === 'complete' && (
-                    <>
-                        <div className="text-center mb-8">
-                            <div className="w-12 h-12 mx-auto mb-4 rounded-full border border-ifa-gold/20 flex items-center justify-center" style={{ animation: 'fadeIn 0.6s ease' }}>
-                                <span className="text-ifa-gold/60 text-lg">✦</span>
-                            </div>
-                            <p className="text-[9px] uppercase tracking-[4px] text-green-400/40 mb-2">Odù Revelado</p>
-                            <h2 className="font-serif text-[28px] font-bold text-ifa-gold tracking-wide">{oduName || '...'}</h2>
-                        </div>
-
-                        {/* Complete grid */}
-                        <div className="bg-black/20 border border-ifa-gold/10 rounded-2xl p-5 mb-8">
-                            <div className="grid grid-cols-2 gap-2 max-w-[200px] mx-auto">
-                                {[0, 1, 2, 3].map(i => (
-                                    <div key={i} className="flex justify-center gap-4">
-                                        <div className="w-14 h-9 rounded-lg bg-black/20 border border-ifa-border/10 flex items-center justify-center">
-                                            <span className="font-mono text-sm font-bold tracking-wider text-white/80">
-                                                {marks[i] === 2 ? 'II' : marks[i] === 1 ? 'I' : ''}
-                                            </span>
-                                        </div>
-                                        <div className="w-14 h-9 rounded-lg bg-black/20 border border-ifa-border/10 flex items-center justify-center">
-                                            <span className="font-mono text-sm font-bold tracking-wider text-white/80">
-                                                {marks[i + 4] === 2 ? 'II' : marks[i + 4] === 1 ? 'I' : ''}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* History */}
-                        <div className="mb-8">
-                            <p className="text-[9px] uppercase tracking-[3px] text-ifa-neutral/30 text-center mb-3">Lançamentos</p>
-                            <div className="flex justify-center gap-2.5">
-                                {marks.map((m, i) => (
-                                    <div key={i} className="w-9 h-9 rounded-xl border border-ifa-gold/20 flex items-center justify-center bg-ifa-gold/5">
-                                        <span className="font-mono text-xs font-bold text-ifa-gold">{m === 2 ? 'II' : 'I'}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        <button
-                            type="button"
-                            onClick={onReset}
-                            className="w-full py-[18px] border-2 border-ifa-gold/25 text-ifa-gold font-bold text-sm uppercase tracking-[4px] rounded-2xl hover:bg-ifa-gold/5 transition-all duration-300"
-                        >
-                            Nova Consulta
-                        </button>
-                    </>
-                )}
+        <div className="flex flex-col items-center h-full animate-fade-in pt-4 w-full max-w-lg mx-auto pb-8">
+            <div className="w-full flex justify-center items-center mb-4 px-4">
+                <h2 className="text-xl font-serif text-ifa-gold flex items-center gap-2"><Sparkles size={18}/> Ikin Ifá</h2>
             </div>
 
-            <style>{`
-                @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-            `}</style>
+            {/* === CONTADOR DE IKINS NA MÃO === */}
+            <div className="w-full max-w-md px-4 mb-5">
+                <div
+                    style={{
+                        background: 'radial-gradient(ellipse at 30% 25%, #3d2410 0%, #1e0e05 100%)',
+                        border: '2px solid rgba(180,130,40,0.35)',
+                        borderRadius: '18px',
+                        padding: '16px 20px',
+                        boxShadow: 'inset 0 0 30px rgba(0,0,0,0.6), 0 4px 20px rgba(0,0,0,0.5)',
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Hand size={28} style={{ color: '#C49E30' }} />
+                            <div>
+                                <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '2px', color: 'rgba(180,140,50,0.7)', margin: 0 }}>Ikins na Mão</p>
+                                <p style={{ fontSize: '28px', fontFamily: 'serif', fontWeight: 700, color: '#e2b84a', lineHeight: 1, margin: 0 }}>
+                                    {16 - marks.length}
+                                    <span style={{ fontSize: '14px', color: 'rgba(180,140,50,0.5)', marginLeft: '4px' }}>/ 16</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                            <p style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '2px', color: 'rgba(180,140,50,0.7)', margin: 0 }}>Jogadas</p>
+                            <p style={{ fontSize: '28px', fontFamily: 'serif', fontWeight: 700, color: '#e2b84a', lineHeight: 1, margin: 0 }}>{marks.length}<span style={{ fontSize: '14px', color: 'rgba(180,140,50,0.5)', marginLeft: '4px' }}>/8</span></p>
+                        </div>
+                    </div>
+
+                    {/* Grade visual de nozes */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
+                        {Array.from({ length: 16 }).map((_, i) => {
+                            const used = i < marks.length; 
+                            return (
+                                <div
+                                    key={i}
+                                    style={{
+                                        width: '26px',
+                                        height: '26px',
+                                        borderRadius: '50%',
+                                        background: used
+                                            ? 'radial-gradient(circle at 35% 30%, #3a2010 0%, #1a0c04 100%)'
+                                            : 'radial-gradient(circle at 35% 30%, #6b4220 0%, #3e2210 60%, #1e0e05 100%)',
+                                        border: used
+                                            ? '1.5px solid rgba(80,50,15,0.4)'
+                                            : '1.5px solid rgba(160,110,40,0.6)',
+                                        boxShadow: used
+                                            ? 'none'
+                                            : 'inset 0 2px 4px rgba(255,200,100,0.15), 0 2px 4px rgba(0,0,0,0.5)',
+                                        opacity: used ? 0.25 : 1,
+                                        transition: 'all 0.3s ease',
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                    {!used && (
+                                        <div style={{
+                                            position: 'absolute', top: '15%', left: '20%',
+                                            width: '30%', height: '25%',
+                                            background: 'rgba(255,220,150,0.3)',
+                                            borderRadius: '50%',
+                                        }} />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* === OPON (TABULEIRO DE MARCAS) === */}
+            <div
+                style={{
+                    width: 'min(320px, 88vw)',
+                    height: 'min(320px, 88vw)',
+                    borderRadius: '50%',
+                    background: 'radial-gradient(ellipse at 32% 28%, #5c2e14 0%, #2a1008 45%, #130703 100%)',
+                    boxShadow: '0 16px 48px rgba(0,0,0,0.9), inset 0 0 50px rgba(0,0,0,0.7)',
+                    border: '3px solid rgba(100,60,20,0.4)',
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '20px',
+                }}
+            >
+                <div style={{
+                    position: 'absolute', inset: '8px', borderRadius: '50%',
+                    border: '2px solid rgba(150,95,35,0.2)',
+                    boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)',
+                }} />
+                <div style={{
+                    position: 'absolute', inset: '20%', borderRadius: '50%',
+                    background: 'radial-gradient(ellipse, rgba(210,170,85,0.12) 0%, transparent 75%)',
+                    filter: 'blur(10px)',
+                    pointerEvents: 'none',
+                }} />
+
+                {/* Marks Grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 32px', zIndex: 10 }}>
+                    {/* Leg Esquerda (marks 0-3) -> Ọtún (Direita do Ifá, que pra gente aparece na direita ou esquerda dependendo da convenção. Vou manter do IkinDivination) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                        <p style={{ fontSize: '8px', textTransform: 'uppercase', letterSpacing: '2px', color: 'rgba(180,140,50,0.4)', textAlign: 'right', margin: '0 0 2px 0' }}>Ọtún</p>
+                        {[0, 1, 2, 3].map(i => (
+                            <div key={i} style={{ width: '52px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                                {marks[i] ? (
+                                    <div style={{ display: 'flex', gap: marks[i] === 'II' ? '8px' : '0', alignItems: 'center' }}>
+                                        <div style={{
+                                            width: '11px', height: '44px', borderRadius: '6px',
+                                            background: 'linear-gradient(180deg, #c8a428 0%, #f0d060 40%, #fae880 55%, #d4aa30 80%, #8a6010 100%)',
+                                            boxShadow: '0 0 10px rgba(220,180,50,0.6), inset 0 2px 5px rgba(255,255,200,0.3)',
+                                            border: '1.5px solid rgba(100,72,8,0.6)',
+                                        }} />
+                                        {marks[i] === 'II' && <div style={{
+                                            width: '11px', height: '44px', borderRadius: '6px',
+                                            background: 'linear-gradient(180deg, #c8a428 0%, #f0d060 40%, #fae880 55%, #d4aa30 80%, #8a6010 100%)',
+                                            boxShadow: '0 0 10px rgba(220,180,50,0.6), inset 0 2px 5px rgba(255,255,200,0.3)',
+                                            border: '1.5px solid rgba(100,72,8,0.6)',
+                                        }} />}
+                                    </div>
+                                ) : (
+                                    <div style={{ width: '28px', height: '44px', borderRadius: '4px', border: '1px dashed rgba(150,110,40,0.2)', opacity: 0.5 }} />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                    {/* Leg Direita (marks 4-7) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+                        <p style={{ fontSize: '8px', textTransform: 'uppercase', letterSpacing: '2px', color: 'rgba(180,140,50,0.4)', margin: '0 0 2px 0' }}>Òsì</p>
+                        {[4, 5, 6, 7].map(i => (
+                            <div key={i} style={{ width: '52px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+                                {marks[i] ? (
+                                    <div style={{ display: 'flex', gap: marks[i] === 'II' ? '8px' : '0', alignItems: 'center' }}>
+                                        <div style={{
+                                            width: '11px', height: '44px', borderRadius: '6px',
+                                            background: 'linear-gradient(180deg, #c8a428 0%, #f0d060 40%, #fae880 55%, #d4aa30 80%, #8a6010 100%)',
+                                            boxShadow: '0 0 10px rgba(220,180,50,0.6), inset 0 2px 5px rgba(255,255,200,0.3)',
+                                            border: '1.5px solid rgba(100,72,8,0.6)',
+                                        }} />
+                                        {marks[i] === 'II' && <div style={{
+                                            width: '11px', height: '44px', borderRadius: '6px',
+                                            background: 'linear-gradient(180deg, #c8a428 0%, #f0d060 40%, #fae880 55%, #d4aa30 80%, #8a6010 100%)',
+                                            boxShadow: '0 0 10px rgba(220,180,50,0.6), inset 0 2px 5px rgba(255,255,200,0.3)',
+                                            border: '1.5px solid rgba(100,72,8,0.6)',
+                                        }} />}
+                                    </div>
+                                ) : (
+                                    <div style={{ width: '28px', height: '44px', borderRadius: '4px', border: '1px dashed rgba(150,110,40,0.2)', opacity: 0.5 }} />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <div className={`text-center mb-8 h-16 flex items-center justify-center px-4 rounded-lg transition-all ${animating ? 'bg-ifa-gold/10 border border-ifa-gold/30' : ''}`}>
+                <p className={`text-sm font-bold uppercase tracking-wide ${animating ? 'animate-pulse text-ifa-gold' : 'text-ifa-neutral'}`}>
+                    {message}
+                </p>
+            </div>
+
+            {marks.length < 8 ? (
+                <button 
+                    onClick={graspIkin}
+                    disabled={animating}
+                    className={`w-32 h-32 rounded-full bg-ifa-wood border-4 border-ifa-gold flex flex-col items-center justify-center shadow-[0_0_30px_rgba(212,175,55,0.4)] active:scale-95 transition-transform hover:bg-[#4E342E] ${animating ? 'animate-shake cursor-wait' : ''}`}
+                >
+                    <Hand size={48} className="text-white mb-2" />
+                    <span className="text-xs font-bold uppercase text-ifa-gold">Dá'Fa</span>
+                </button>
+            ) : (
+                <div className="text-center animate-scale-in w-full px-4">
+                    <div className="bg-green-900/20 border border-green-500 p-4 rounded-xl mb-6">
+                        <p className="text-green-400 font-bold text-xl uppercase">Odu Revelado!</p>
+                        <p className="text-xs text-green-200 mt-1">{oduName ? `Odù: ${oduName}` : 'A assinatura vibracional está completa.'}</p>
+                    </div>
+                    <button onClick={reset} className="w-full py-4 border border-ifa-gold text-ifa-gold rounded-xl flex items-center justify-center gap-2 hover:bg-ifa-gold hover:text-black transition-colors font-bold uppercase">
+                        <RefreshCcw size={18} /> Nova Consulta
+                    </button>
+                </div>
+            )}
+            
+            <CameraButtons />
         </div>
     );
 };

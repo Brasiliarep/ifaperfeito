@@ -7,6 +7,15 @@ export default defineConfig(() => ({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('src/data/encyclopedia')) {
+            return 'encyclopedia';
+          }
+        }
+      }
+    }
   },
   define: {
     'process.env': {},
@@ -14,9 +23,10 @@ export default defineConfig(() => ({
   server: {
     port: 3001,
     proxy: {
-      '/api/': {
-        target: 'http://localhost:3000',
+      '/api/nvidia': {
+        target: 'https://integrate.api.nvidia.com',
         changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/nvidia/, '')
       },
     },
     headers: {

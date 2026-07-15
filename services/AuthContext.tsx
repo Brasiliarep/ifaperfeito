@@ -68,8 +68,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 const docRef = doc(db, 'users', u.uid);
                 const docSnap = await getDoc(docRef);
                 const VIP_EMAILS = ['safffnb@gmail.com', 'raquel.rafen@gmail.com', 'babaifalore@gmail.com', 'babaifalote@gmail.com'];
-                const isAdmin = VIP_EMAILS.includes(u.email || '');
-                const isVip = VIP_EMAILS.includes(u.email || '');
+                const safeEmail = u.email?.toLowerCase().trim() || '';
+                const isAdmin = VIP_EMAILS.includes(safeEmail);
+                const isVip = VIP_EMAILS.includes(safeEmail);
 
                 let profile: UserProfile | null = null;
 

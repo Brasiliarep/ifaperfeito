@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+Sitemap: https://ifaoluwo.com/sitemap.xml
+
+# Ifá Oluwo - Codex Sacerdotal
+# Encyclopedia of African-Derived Religions
+# 300+ sacred entities documented

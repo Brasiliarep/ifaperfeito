@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "prebuild": "node scripts/generate-sw-version.js",
+    "prebuild": "node scripts/generate-sw-version.js && node scripts/generate-sitemap.js",
     "build": "vite build",
     "build:full": "tsc && vite build",
     "preview": "vite preview",

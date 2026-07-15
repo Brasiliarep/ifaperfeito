@@ -1,12 +1,14 @@
-
 import React, { useState, useRef } from 'react';
 import { OpeleState } from '../types';
-import { Hand, Sparkles, Wind, ArrowDown, User, ArrowUp, CheckCircle2 } from 'lucide-react';
+import { Hand, Sparkles, Wind, ArrowDown, User, ArrowUp, CheckCircle2, Shell, Loader2, Image, Camera, FastForward } from 'lucide-react';
+import CameraButtons from './CameraButtons';
 import TextReader from './TextReader';
+import { analyzeOpeleImage } from '../services/geminiService';
 
 interface Props {
     opele: OpeleState;
     onToggle: (leg: 'right' | 'left', index: number) => void;
+    onSetState?: (state: OpeleState) => void;
 }
 
 type RitualStep = 0 | 1 | 2 | 3 | 4 | 5; 
@@ -59,10 +61,37 @@ const RITUAL_DATA = [
     }
 ];
 
-const OponIfaBoard: React.FC<Props> = ({ opele, onToggle }) => {
-    const [step, setStep] = useState<RitualStep>(0);
+const OponIfaBoard: React.FC<Props> = ({ opele, onToggle, onSetState }) => {
+    const [step, setStep] = useState<RitualStep>(5);
     const [progressCount, setProgressCount] = useState(0); 
     const [isAnimating, setIsAnimating] = useState(false);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !onSetState) return;
+
+        setIsAnalyzing(true);
+        try {
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const base64 = event.target?.result as string;
+                try {
+                    const result = await analyzeOpeleImage(base64);
+                    onSetState(result);
+                    playSound('rattle');
+                } catch(err) {
+                    alert('Erro ao analisar a imagem. Tente novamente.');
+                } finally {
+                    setIsAnalyzing(false);
+                }
+            };
+            reader.readAsDataURL(file);
+        } catch(err) {
+            console.error(err);
+            setIsAnalyzing(false);
+        }
+    };
     
     // Audio Context Ref
     const audioCtxRef = useRef<AudioContext | null>(null);
@@ -197,17 +226,61 @@ const OponIfaBoard: React.FC<Props> = ({ opele, onToggle }) => {
       }
     }
 
-    // Helper to render the mark (I or II)
+    // Iyerosun Mark — traço no pó sagrado (I = 1 traço, II = 2 traços)
+    // state='open' → II (2 traços, Ogbe), state='closed' → I (1 traço, Oyeku)
+    const Traco = () => (
+        <div
+            style={{
+                width: '8px',
+                height: '22px',
+                borderRadius: '4px',
+                background: 'linear-gradient(180deg, #c8a428 0%, #f0d060 30%, #fae880 50%, #d4aa30 80%, #8a6010 100%)',
+                boxShadow:
+                    '0 0 8px rgba(220,180,50,0.9), ' +
+                    'inset 0 1px 3px rgba(255,255,200,0.5), ' +
+                    'inset 0 -1px 3px rgba(0,0,0,0.5), ' +
+                    '1px 0 3px rgba(0,0,0,0.4)',
+                border: '1px solid rgba(100,72,8,0.7)',
+                position: 'relative',
+                flexShrink: 0,
+            }}
+        >
+            <div style={{
+                position: 'absolute', top: '10%', left: '15%',
+                width: '35%', height: '28%',
+                background: 'rgba(255,255,200,0.4)',
+                borderRadius: '50%',
+                filter: 'blur(0.5px)',
+            }} />
+        </div>
+    );
+
     const RenderMark = ({ state, markKey }: { state: 'open' | 'closed'; markKey: string }) => (
-        <div className="marca-odu flex flex-col items-center justify-center h-full w-full" key={markKey}>
-            {state === 'open' ? (
-                <div className="w-3 h-12 md:w-4 md:h-16 bg-[#D4AF37] rounded-full shadow-[0_0_10px_rgba(212,175,55,0.6)] border border-yellow-600"></div>
-            ) : (
-                <div className="flex gap-2 md:gap-3">
-                    <div className="w-3 h-12 md:w-4 md:h-16 bg-[#D4AF37] rounded-full shadow-[0_0_10px_rgba(212,175,55,0.6)] border border-yellow-600"></div>
-                    <div className="w-3 h-12 md:w-4 md:h-16 bg-[#D4AF37] rounded-full shadow-[0_0_10px_rgba(212,175,55,0.6)] border border-yellow-600"></div>
-                </div>
-            )}
+        <div
+            key={markKey}
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                height: '100%',
+            }}
+        >
+            <div style={{ display: 'flex', gap: state === 'closed' ? '0px' : '7px', alignItems: 'center' }}>
+                <Traco />
+                {state === 'open' && <Traco />}
+            </div>
+            <div style={{
+                marginTop: '2px',
+                fontSize: '7px',
+                fontWeight: 'bold',
+                letterSpacing: '1px',
+                color: 'rgba(220,180,50,0.65)',
+                fontFamily: 'serif',
+            }}>
+                {state === 'open' ? 'II' : 'I'}
+            </div>
         </div>
     );
 
@@ -281,8 +354,14 @@ const OponIfaBoard: React.FC<Props> = ({ opele, onToggle }) => {
                         <p className="text-xs text-ifa-neutral">{currentData.translation}</p>
                     </div>
 
-                    <div className="text-center text-[10px] text-gray-500 uppercase tracking-widest">
-                        Passo {step + 1} de 5
+                    <div className="text-center text-[10px] text-gray-500 uppercase tracking-widest mt-2 flex justify-between items-center px-4">
+                        <span>Passo {step + 1} de 5</span>
+                        <button 
+                            onClick={() => setStep(5)}
+                            className="text-ifa-gold opacity-60 hover:opacity-100 flex items-center gap-1 transition-opacity cursor-pointer z-50"
+                        >
+                            <FastForward size={12} /> Pular Ritual
+                        </button>
                     </div>
                 </div>
             </div>
@@ -298,55 +377,111 @@ const OponIfaBoard: React.FC<Props> = ({ opele, onToggle }) => {
                 <span className="text-xs font-bold uppercase">Sọ̀rọ̀ s'emi, Ifá! (Fale, Ifá!)</span>
             </div>
 
-            {/* THE OPON (Circular Tray) */}
-            <div ref={oponRef} id="opon-container" className="relative w-[340px] h-[340px] md:w-[400px] md:h-[400px] rounded-full bg-[#3E2723] border-[12px] border-[#2E150F] shadow-2xl flex items-center justify-center overflow-hidden">
-                
-                {/* Wood Texture Overlay */}
-                <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/wood-pattern.png')] rounded-full pointer-events-none"></div>
-                
-                {/* Inner Recessed Area */}
-                <div className="absolute inset-4 rounded-full bg-[#5D4037] shadow-[inset_0_0_40px_rgba(0,0,0,0.8)] border border-[#3E2723]/50"></div>
-
-                {/* Eshu Carving (Top Center) */}
-                <div className="absolute top-2 left-1/2 transform -translate-x-1/2 w-16 h-12 opacity-40 pointer-events-none">
-                    <div className="w-10 h-10 mx-auto border-2 border-[#2E150F] rounded-full flex items-center justify-center">
-                        <div className="w-2 h-2 bg-[#2E150F] rounded-full mr-2"></div>
-                        <div className="w-2 h-2 bg-[#2E150F] rounded-full ml-2"></div>
-                    </div>
-                    <div className="w-12 h-4 border-b-4 border-[#2E150F] rounded-[50%] mx-auto mt-[-4px]"></div>
+            {/* THE OPON IFÁ — Real carved wood board photo */}
+            <div
+                ref={oponRef}
+                id="opon-container"
+                className="relative flex items-center justify-center"
+                style={{
+                    width: 'min(400px, 97vw)',
+                    height: 'min(400px, 97vw)',
+                }}
+            >
+                {/* ── REAL OPON PHOTO as circular background ── */}
+                <div
+                    className="absolute inset-0 rounded-full overflow-hidden"
+                    style={{
+                        boxShadow: '0 16px 50px rgba(0,0,0,0.92), 0 4px 16px rgba(0,0,0,0.7), inset 0 0 30px rgba(0,0,0,0.5)',
+                    }}
+                >
+                    <img
+                        src="/opon_real.png"
+                        alt="Opon Ifá"
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            objectPosition: 'center',
+                            display: 'block',
+                        }}
+                        onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = 'none';
+                        }}
+                    />
+                    {/* Fallback gradient behind image */}
+                    <div
+                        className="absolute inset-0"
+                        style={{
+                            background: 'radial-gradient(ellipse at 30% 25%, #6b3a22 0%, #2e1208 55%, #1a0a04 100%)',
+                            zIndex: -1,
+                        }}
+                    />
                 </div>
 
-                {/* Powder/Dust Texture (Iyerosun effect) */}
-                <div className="absolute inset-8 rounded-full bg-[#D2B48C] opacity-10 blur-xl pointer-events-none"></div>
+                {/* ── DARK VIGNETTE over border to deepen 3D feel ── */}
+                <div
+                    className="absolute inset-0 rounded-full pointer-events-none"
+                    style={{
+                        background: 'radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.28) 65%, rgba(0,0,0,0.55) 100%)',
+                    }}
+                />
 
-                {/* The Chains Container */}
-                <div className="relative z-10 flex gap-16 md:gap-24 h-3/4 items-center">
-                    
-                    {/* Right Leg */}
-                    <div className="flex flex-col justify-between h-full py-4">
-                        <h3 className="absolute top-[15%] right-[60%] text-[8px] md:text-[10px] text-[#D2B48C]/50 font-bold uppercase tracking-widest -rotate-90 origin-bottom-right">Otun (Dir)</h3>
+                {/* ── INNER PLAYING SURFACE tint (Iyerosun dust) ── */}
+                <div
+                    className="absolute rounded-full pointer-events-none"
+                    style={{
+                        inset: '22%',
+                        background: 'radial-gradient(ellipse, rgba(210,175,95,0.08) 0%, transparent 70%)',
+                        filter: 'blur(6px)',
+                    }}
+                />
+
+                {/* ── CENTRAL SACRED GROOVE (Divider between legs) ── */}
+                <div
+                    className="absolute z-10 pointer-events-none"
+                    style={{
+                        left: '50%',
+                        top: '24%',
+                        bottom: '24%',
+                        width: '1.5px',
+                        transform: 'translateX(-50%)',
+                        background: 'linear-gradient(180deg, transparent, rgba(0,0,0,0.3) 20%, rgba(0,0,0,0.3) 80%, transparent)',
+                    }}
+                />
+
+                {/* ── THE MARKS CONTAINER ── */}
+                <div className="relative z-20 flex items-center justify-center" style={{ gap: 'clamp(20px, 5vw, 36px)', height: '33%' }}>
+
+                    {/* Right Leg — Ọtún */}
+                    <div className="flex flex-col justify-between h-full py-1">
+                        <span
+                            className="absolute font-bold uppercase tracking-widest"
+                            style={{ fontSize: '8px', color: 'rgba(210,180,100,0.5)', top: '26%', right: '56%', transform: 'rotate(-90deg)', transformOrigin: 'bottom right' }}
+                        >Ọtún</span>
                         {opele.rightLeg.map((state, idx) => (
                             <button
                                 key={`r-${idx}`}
                                 onClick={() => handleToggle('right', idx)}
-                                className="w-14 h-12 md:w-16 md:h-14 flex items-center justify-center hover:scale-110 transition-transform active:scale-95 cursor-pointer"
+                                className="flex items-center justify-center hover:scale-105 transition-transform active:scale-95 cursor-pointer"
+                                style={{ width: '68px', height: '80px' }}
                             >
                                 <RenderMark state={state} markKey={`r-${idx}-${state}`} />
                             </button>
                         ))}
                     </div>
 
-                    {/* Divider Line (Visual only, subtle) */}
-                    <div className="absolute left-1/2 top-10 bottom-10 w-0.5 bg-black/20 blur-[1px]"></div>
-
-                    {/* Left Leg */}
-                    <div className="flex flex-col justify-between h-full py-4">
-                        <h3 className="absolute top-[15%] left-[60%] text-[8px] md:text-[10px] text-[#D2B48C]/50 font-bold uppercase tracking-widest rotate-90 origin-bottom-left">Osi (Esq)</h3>
+                    {/* Left Leg — Òsì */}
+                    <div className="flex flex-col justify-between h-full py-1">
+                        <span
+                            className="absolute font-bold uppercase tracking-widest"
+                            style={{ fontSize: '8px', color: 'rgba(210,180,100,0.5)', top: '26%', left: '56%', transform: 'rotate(90deg)', transformOrigin: 'bottom left' }}
+                        >Òsì</span>
                         {opele.leftLeg.map((state, idx) => (
                             <button
                                 key={`l-${idx}`}
                                 onClick={() => handleToggle('left', idx)}
-                                className="w-14 h-12 md:w-16 md:h-14 flex items-center justify-center hover:scale-110 transition-transform active:scale-95 cursor-pointer"
+                                className="flex items-center justify-center hover:scale-105 transition-transform active:scale-95 cursor-pointer"
+                                style={{ width: '38px', height: '32px' }}
                             >
                                 <RenderMark state={state} markKey={`l-${idx}-${state}`} />
                             </button>
@@ -354,11 +489,30 @@ const OponIfaBoard: React.FC<Props> = ({ opele, onToggle }) => {
                     </div>
                 </div>
 
-                {/* Bottom Decor */}
-                <div className="absolute bottom-4 text-[#2E150F] opacity-30 text-[10px] font-serif font-bold">
-                    IFA
+                {/* ── BOTTOM SACRED TEXT ── */}
+                <div
+                    className="absolute bottom-[10%] left-1/2 -translate-x-1/2 pointer-events-none z-20"
+                    style={{
+                        fontFamily: 'serif',
+                        fontSize: '10px',
+                        fontWeight: 'bold',
+                        letterSpacing: '0.2em',
+                        color: 'rgba(210,175,95,0.5)',
+                        textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+                    }}
+                >
+                    ÒRÚNMÌLÀ
                 </div>
             </div>
+
+            {onSetState && (
+                <div className="w-full max-w-md mt-12 flex flex-col items-center">
+                    <CameraButtons />
+                    <span className="text-[10px] text-ifa-neutral uppercase tracking-widest text-center max-w-xs leading-relaxed">
+                        Tire uma foto nítida da caída ou selecione uma imagem para o oráculo interpretar.
+                    </span>
+                </div>
+            )}
         </div>
     );
 };

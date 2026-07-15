@@ -1,0 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-cinzel: "Cinzel", serif;
+
+  --color-gold-50: #fdfaf2;
+  --color-gold-100: #fcf3db;
+  --color-gold-200: #f7e2af;
+  --color-gold-300: #ecc67d;
+  --color-gold-400: #dca34b;
+  --color-gold-500: #c9842a;
+  --color-gold-600: #b46b1f;
+  --color-gold-700: #96501a;
+  --color-gold-800: #7c4017;
+  --color-gold-900: #663415;
+  --color-gold-950: #49210c;
+
+  --color-gold-accent: #d4af37;
+  --color-gold-glow: rgba(212, 175, 55, 0.15);
+
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-spin-slow: spin 45s linear infinite;
+  --animate-float: float 8s ease-in-out infinite;
+  --animate-breathe: breathe 6s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #090807;
+}
+::-webkit-scrollbar-thumb {
+  background: #3a3225;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #544935;
+}
+
+/* Base styles */
+body {
+  background-color: #090807;
+  color: #f3eee3;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+.glow-box {
+  box-shadow: 0 0 25px var(--color-gold-glow);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #f7e2af 0%, #dca34b 50%, #b46b1f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.border-gold-subtle {
+  border-color: rgba(212, 175, 55, 0.12);
+}
+
+/* Animation classes */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}

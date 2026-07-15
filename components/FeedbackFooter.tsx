@@ -17,14 +17,14 @@ const FeedbackFooter = () => {
 
     if (!isOpen) {
         return (
-            <div className="fixed bottom-4 left-4 z-40 flex flex-col gap-2">
+            <div className="fixed bottom-[72px] right-6 md:bottom-[80px] md:right-8 z-40 flex flex-col items-end gap-1">
                 <button 
                     onClick={() => setIsOpen(true)}
                     className="bg-ifa-wood text-white px-4 py-2 rounded-full shadow-lg hover:bg-ifa-gold transition-colors flex items-center gap-2 text-xs font-bold uppercase"
                 >
                     <MessageSquare size={16} /> Contato e Sugestões
                 </button>
-                <div className="flex gap-2 text-[10px] text-ifa-neutral ml-2">
+                <div className="flex gap-2 text-[10px] text-ifa-neutral">
                     <button onClick={() => window.dispatchEvent(new CustomEvent('open-legal', { detail: 'terms' }))} className="hover:text-ifa-gold underline transition-colors">
                         Termos
                     </button>
@@ -37,7 +37,7 @@ const FeedbackFooter = () => {
     }
 
     return (
-        <div className="fixed bottom-4 left-4 z-50 animate-fade-in w-full max-w-sm">
+        <div className="fixed bottom-[72px] right-6 md:bottom-[80px] md:right-8 z-50 animate-fade-in w-full max-w-sm">
             <div className="bg-ifa-base border border-ifa-border rounded-xl shadow-2xl p-4 relative">
                 <button onClick={() => setIsOpen(false)} className="absolute top-2 right-2 text-ifa-neutral hover:text-white">
                     <X size={20} />

@@ -63,11 +63,20 @@ import VirtualRoom from './components/VirtualRoom';
 import CookieConsentBanner from './components/CookieConsentBanner';
 import CameraButtons from './components/CameraButtons';
 import { AIAssistant } from './components/AIAssistant';
+import { SocialMediaStudio } from './components/SocialMediaStudio';
+import { ArticlesList } from './components/ArticlesList';
+import { ArticleViewer } from './components/ArticleViewer';
+import OrixaQuiz from './components/OrixaQuiz';
+import { EncyclopediaHub } from './components/EncyclopediaHub';
+import { EntityViewer } from './components/EntityViewer';
+import { CategoryPage } from './components/CategoryPage';
+import SEO from './components/SEO';
+import { auth } from './services/firebaseConfig';
 
 import { getTranslation } from './utils/i18n';
 import { checkDomainLock } from './utils/security';
 import { canUseFeature, incrementAnonUsage, getAnonRemaining } from './utils/anonymousTracker';
-import { Activity, Feather, Loader2, Users, History, GraduationCap, X, Check, Settings, Globe, Camera, Book, Shuffle, FileText, FlaskConical, BarChart3, Package, Music, Hammer, Leaf, CircleDot, Move, GripHorizontal, Baby, UserCheck, ArrowLeft, Database, Sparkles, Mic, Scale, BookOpen, PenTool, Gamepad2, Stars, Star, ShoppingBag, Crown, Moon, MapPin, Truck, GitBranch, LayoutGrid, Search, Sun, Sunset, CloudMoon, Quote, CalendarDays, Lock, Stethoscope, Zap, Video, Shield, Home, Bell, ChevronRight, HelpCircle, RefreshCw, Flame } from 'lucide-react';
+import { Activity, Feather, Loader2, Users, History, GraduationCap, X, Check, Settings, Globe, Camera, Book, Shuffle, FileText, FlaskConical, BarChart3, Package, Music, Hammer, Leaf, CircleDot, Move, GripHorizontal, Baby, UserCheck, ArrowLeft, Database, Sparkles, Mic, Scale, BookOpen, PenTool, Gamepad2, Stars, Star, ShoppingBag, Crown, Moon, MapPin, Truck, GitBranch, LayoutGrid, Search, Sun, Sunset, CloudMoon, Quote, CalendarDays, Lock, Stethoscope, Zap, Video, Shield, Home, Bell, ChevronRight, HelpCircle, RefreshCw, Flame, Share2, LogOut } from 'lucide-react';
 
 const INITIAL_OPELE: OpeleState = {
     rightLeg: ['open', 'open', 'open', 'open'],
@@ -87,7 +96,7 @@ const PROVERBS = [
 import AdminPanel from './components/AdminPanel';
 import { useAuth } from './services/AuthContext';
 
-type AppView = 'home' | 'history' | 'register' | 'input' | 'result' | 'print' | 'prayers' | 'manual' | 'oogun' | 'analytics' | 'inventory_hub' | 'sound_hub' | 'study' | 'dream_journal' | 'face_reading' | 'geo_herbs' | 'lineage_tree' | 'igbadu' | 'oracle_hub' | 'ajogun' | 'assentamentos' | 'herb_id' | 'ebo_sim' | 'mandala' | 'amutorunwa' | 'ebori' | 'dictionary' | 'sango_wheel' | 'reverse_odu' | 'esoteric_hub' | 'door_guardian' | 'voice_commander' | 'treatise' | 'story_mode' | 'mojuba' | 'constellation' | 'delivery' | 'agenda' | 'verse_builder' | 'odu_library' | 'virtual_room' | 'admin_panel';
+type AppView = 'home' | 'history' | 'register' | 'input' | 'result' | 'print' | 'prayers' | 'manual' | 'oogun' | 'analytics' | 'inventory_hub' | 'sound_hub' | 'study' | 'dream_journal' | 'face_reading' | 'geo_herbs' | 'lineage_tree' | 'igbadu' | 'oracle_hub' | 'ajogun' | 'assentamentos' | 'herb_id' | 'ebo_sim' | 'mandala' | 'amutorunwa' | 'ebori' | 'dictionary' | 'sango_wheel' | 'reverse_odu' | 'esoteric_hub' | 'door_guardian' | 'voice_commander' | 'treatise' | 'story_mode' | 'mojuba' | 'constellation' | 'delivery' | 'agenda' | 'verse_builder' | 'odu_library' | 'virtual_room' | 'admin_panel' | 'social_studio' | 'articles' | 'article' | 'orixa_quiz' | 'encyclopedia_hub' | 'encyclopedia_entity' | 'encyclopedia_category';
 import LoginScreen from './components/LoginScreen';
 
 function App() {
@@ -103,7 +112,9 @@ function App() {
     }, []);
 
     const { user, userProfile, loading: authLoading, updateUsageCounters, refreshProfile } = useAuth();
-    const userPlan = (user?.email === 'babaifalore@gmail.com' || user?.email === 'babaifalote@gmail.com') ? 'pro_annual' : (userProfile?.plan || 'free');
+    const safeEmail = user?.email?.toLowerCase().trim() || '';
+    const isBaba = safeEmail === 'babaifalore@gmail.com' || safeEmail === 'babaifalote@gmail.com' || safeEmail === 'safffnb@gmail.com' || safeEmail === 'raquel.rafen@gmail.com';
+    const userPlan = isBaba ? 'pro_annual' : (userProfile?.plan || 'free');
     const [isLocked, setIsLocked] = useState(false);
     const [isKeyMissing, setIsKeyMissing] = useState(false);
     const [view, setView] = useState<AppView>('home');
@@ -138,10 +149,35 @@ function App() {
     const [showPreparation, setShowPreparation] = useState(false);
     const [pendingMethod, setPendingMethod] = useState<DivinationMethod | null>(null);
     const [chatInitialQuery, setChatInitialQuery] = useState("");
+    const [articleSlug, setArticleSlug] = useState("");
 
 
     const [homeSearch, setHomeSearch] = useState('');
     const [dailyWisdom, setDailyWisdom] = useState(PROVERBS[0]);
+
+    // Listen for open-article custom event (from browser nav)
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const slug = (e as CustomEvent).detail;
+            if (slug) { setArticleSlug(slug); setView('article'); }
+        };
+        window.addEventListener('open-article', handler);
+        return () => window.removeEventListener('open-article', handler);
+    }, []);
+
+    const [encyclopediaEntityId, setEncyclopediaEntityId] = useState("");
+    const [encyclopediaCategory, setEncyclopediaCategory] = useState("");
+    
+    // Listen for open-entity custom event
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const id = (e as CustomEvent).detail;
+            if (id) { setEncyclopediaEntityId(id); setView('encyclopedia_entity'); }
+        };
+        window.addEventListener('open-entity', handler);
+        return () => window.removeEventListener('open-entity', handler);
+    }, []);
+
     const [legalModalType, setLegalModalType] = useState<'terms' | 'privacy' | null>(null);
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [virtualRoomData, setVirtualRoomData] = useState<{ mode: 'babalawo' | 'consulente', room: string }>({ mode: 'babalawo', room: 'SalaIfaOluwo' });
@@ -255,7 +291,8 @@ function App() {
 
     // —— isPro: true somente para planos pro_monthly e pro_annual ——
     const isPro = (plan?: string) => {
-        if (user?.email === 'babaifalore@gmail.com' || user?.email === 'babaifalote@gmail.com') return true;
+        const safeEmail = user?.email?.toLowerCase().trim() || '';
+        if (safeEmail === 'babaifalore@gmail.com' || safeEmail === 'babaifalote@gmail.com' || safeEmail === 'safffnb@gmail.com' || safeEmail === 'raquel.rafen@gmail.com') return true;
         return plan !== 'free' && plan !== 'student_monthly' && plan !== 'estudante' && plan !== undefined;
     };
 
@@ -349,6 +386,11 @@ function App() {
     };
 
     // --- NAVEGA├ç├âO PARA CHAT VIA BUSCA ---
+    const handleOpenArticle = (slug: string) => {
+        setArticleSlug(slug);
+        setView('article');
+    };
+
     const handleConsultOracle = (query: string) => {
         setChatInitialQuery(query);
         setView('voice_commander');
@@ -631,6 +673,12 @@ function App() {
                         <span>Painel Principal</span>
                     </button>
 
+                    {/* ARTIGOS EM DESTAQUE */}
+                    <button className={`ds-sidebar-slim-item ${view === 'articles' ? 'active' : ''}`} onClick={() => nav('articles')} style={{ border: '1px solid rgba(196,158,48,0.2)', borderRadius: 8, marginBottom: 8 }}>
+                        <BookOpen size={13} style={{ color: '#C49E30' }} /> <span style={{ color: '#C49E30', fontWeight: 600 }}>Artigos</span>
+                        <span className="item-badge-new">Novo</span>
+                    </button>
+
                     {/* DIVINA├ç├âO */}
                     <div className="ds-sidebar-slim-group">Divinação</div>
                     <button className={`ds-sidebar-slim-item ${view === 'oracle_hub' ? 'active' : ''}`} onClick={() => handleStudentOrProFeature(t.featureAdvancedOracles, () => nav('oracle_hub'))}>
@@ -766,11 +814,17 @@ function App() {
                     <button className="ds-sidebar-slim-item" onClick={() => nav('verse_builder')}>
                         <PenTool size={13} /> <span>Construtor de Versos</span>
                     </button>
+                    <button className="ds-sidebar-slim-item" onClick={() => nav('social_studio')}>
+                        <Share2 size={13} /> <span>Social Media Studio</span>
+                    </button>
 
                     <div className="ds-sidebar-divider" style={{ margin: '12px 16px' }} />
 
                     <button className="ds-sidebar-slim-item" onClick={() => setShowSettings(true)}>
                         <Settings size={13} /> <span>Configurações</span>
+                    </button>
+                    <button className="ds-sidebar-slim-item" style={{ color: '#d44a4a' }} onClick={() => auth.signOut()}>
+                        <LogOut size={13} /> <span>Sair</span>
                     </button>
                 </div>
 
@@ -817,6 +871,11 @@ function App() {
                 <div style={{ flex: 1, overflowY: 'auto' }} className="scrollbar-hide">
                     <button className={`ds-sidebar-item ${view === 'home' ? 'active' : ''}`} onClick={() => nav('home')}>
                         <Home size={16} /> <span>Início</span>
+                    </button>
+
+                    <button className={`ds-sidebar-item ${view === 'articles' ? 'active' : ''}`} onClick={() => nav('articles')} style={{ border: '1px solid rgba(196,158,48,0.2)', borderRadius: 8, margin: '4px 0' }}>
+                        <BookOpen size={16} style={{ color: '#C49E30' }} /> <span style={{ color: '#C49E30', fontWeight: 600 }}>Artigos</span>
+                        <span className="item-badge-new" style={{ marginLeft: 'auto' }}>Novo</span>
                     </button>
                     
                     <button className="ds-sidebar-item mt-2" onClick={startNewSession}>
@@ -872,8 +931,8 @@ function App() {
                     <button className="ds-sidebar-item" onClick={() => setShowSettings(true)}>
                         <Settings size={16} /> <span>Configurações</span>
                     </button>
-                    <button className="ds-sidebar-item">
-                        <HelpCircle size={16} /> <span>Ajuda & Suporte</span>
+                    <button className="ds-sidebar-item" style={{ color: '#d44a4a' }} onClick={() => auth.signOut()}>
+                        <LogOut size={16} /> <span>Sair</span>
                     </button>
                 </div>
 
@@ -952,6 +1011,10 @@ function App() {
 
         return (
         <div className="neo-dashboard-layout">
+            <SEO 
+                title="Ifá Oluwo - Codex Sacerdotal | Oráculo e Inteligência Artificial" 
+                description="A maior e mais avançada plataforma do mundo para Babalawos e praticantes de Ifá. Divinação com IA, 256 Odus, calendário litúrgico e muito mais." 
+            />
 
             {/* ===== SIDEBAR ESQUERDA ===== */}
             <aside className="ds-sidebar-slim hidden md:flex md:flex-col">
@@ -1044,7 +1107,7 @@ function App() {
                 {/* END TOPBAR */}
 
                 {/* ── CENTER + RIGHT ROW ── */}
-                <div style={{ display: 'flex', flex: 1, alignItems: 'flex-start' }}>
+                <div className="flex flex-col xl:flex-row flex-1 items-start w-full">
 
                 {/* ===== COLUNA CENTRAL ===== */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -1063,7 +1126,6 @@ function App() {
                                     </React.Fragment>
                                 ))}
                             </h2>
-                            <div className="neo-odu-subtitle">Regente: {dailyOduData.regente} · {dailyOduData.energia}</div>
                             <p className="neo-odu-desc">{dailyOduData.desc}</p>
                             <button onClick={() => handleStudentOrProFeature('Igbadu Virtual', () => nav('igbadu'))}
                                 style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 6, background: '#07090d', border: '1px solid rgba(196,158,48,0.5)', cursor: 'pointer', color: '#C49E30', fontSize: 9, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>
@@ -1075,50 +1137,55 @@ function App() {
                         <div className="neo-odu-mandala-slot">
                             <style>{`
                                 .neo-odu-mandala-img {
-                                    width: 260px;
-                                    height: 260px;
+                                    width: 280px !important;
+                                    height: 280px !important;
+                                    min-width: 280px !important;
+                                    min-height: 280px !important;
+                                    max-width: 280px !important;
+                                    max-height: 280px !important;
                                     border-radius: 50%;
+                                    border: 2px solid rgba(196,158,48,0.6);
+                                    box-shadow: 0 0 25px rgba(196,158,48,0.25);
                                     object-fit: cover;
-                                    border: 3px solid rgba(196,158,48,0.7);
-                                    box-shadow: 0 0 30px rgba(196,158,48,0.3);
                                     position: relative;
                                     z-index: 1;
                                     transition: all 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+                                    flex-shrink: 0;
                                 }
                                 .neo-odu-mandala-img:hover {
-                                    transform: scale(1.08);
+                                    transform: scale(1.06);
                                     border-color: rgba(196,158,48,1);
                                     box-shadow: 0 0 50px rgba(196,158,48,0.6);
                                 }
                                 .neo-odu-mandala-slot::before {
-                                    width: 260px !important;
-                                    height: 260px !important;
+                                    width: 320px !important;
+                                    height: 320px !important;
                                 }
                             `}</style>
                             <img src="/opon_ifa_hero.png" alt="Mandala" className="neo-odu-mandala-img" />
                         </div>
 
-                        {/* COL 3 — Atributos */}
-                        <div className="neo-odu-attrs-col">
-                            {[
-                                { icon: Flame, label: 'Elemento', value: 'Ferro' },
-                                { icon: Crown, label: 'Regente', value: 'Ògún' },
-                                { icon: Zap, label: 'Energia', value: 'Expansão' },
-                                { icon: CircleDot, label: 'Símbolo', value: 'Movimento' },
-                            ].map((a, i) => (
-                                <div key={i} className="neo-odu-attr-row">
-                                    <div className="neo-odu-attr-icon"><a.icon size={14} /></div>
-                                    <div className="neo-odu-attr-info">
-                                        <span className="neo-odu-attr-info-label">{a.label}</span>
-                                        <span className="neo-odu-attr-info-value">{a.value}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-
-                        {/* COL 4 — Calendário Litúrgico */}
-                        <div className="neo-odu-calendar-col" style={{ width: '100%', flexShrink: 0 }}>
+                        {/* COL 3 — Calendário Litúrgico e Atributos */}
+                        <div className="neo-odu-calendar-col" style={{ width: '100%', flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
                             <YorubaCalendarWidget onOpenIgbadu={() => handleStudentOrProFeature('Igbadu Virtual', () => nav('igbadu'))} />
+                            
+                            {/* Atributos (agora embaixo do calendário) */}
+                            <div className="neo-odu-attrs-col">
+                                {[
+                                    { icon: Flame, label: 'Elemento', value: dailyOduData.elemento },
+                                    { icon: Crown, label: 'Regente', value: dailyOduData.regente },
+                                    { icon: Zap, label: 'Energia', value: dailyOduData.energia },
+                                    { icon: CircleDot, label: 'Símbolo', value: dailyOduData.simbolo },
+                                ].map((a, i) => (
+                                    <div key={i} className="neo-odu-attr-row">
+                                        <div className="neo-odu-attr-icon"><a.icon size={14} /></div>
+                                        <div className="neo-odu-attr-info">
+                                            <span className="neo-odu-attr-info-label">{a.label}</span>
+                                            <span className="neo-odu-attr-info-value">{a.value}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
@@ -1165,7 +1232,7 @@ function App() {
                     </div>
 
                     {/* ── ATENDIMENTO A CONSULENTE + MODO DE ESTUDO ── */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 24 }}>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
 
                         {/* ATENDIMENTO A CONSULENTE */}
                         <div style={{ background: 'linear-gradient(135deg, rgba(196,158,48,0.05) 0%, rgba(10,11,15,0.8) 100%)', border: '1px solid rgba(196,158,48,0.18)', borderRadius: 14, padding: '18px 20px', position: 'relative', overflow: 'hidden' }}>
@@ -1176,7 +1243,7 @@ function App() {
                                 </div>
                                 <span style={{ fontSize: 11, fontWeight: 700, color: '#E8DCC2', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>Atendimento a Consulente</span>
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                                 {[
                                     { icon: Users, label: 'Nova Consulta', sub: 'Iniciar atendimento', color: '#4ab87a', action: startNewSession },
                                     { icon: Video, label: 'Sala Virtual', sub: 'Consulta online', color: '#50a0e0', action: () => handleProFeature(t.featureVirtualRoom, () => nav('virtual_room')) },
@@ -1207,7 +1274,7 @@ function App() {
                                 </div>
                                 <span style={{ fontSize: 11, fontWeight: 700, color: '#E8DCC2', letterSpacing: '1px', textTransform: 'uppercase', fontFamily: 'Inter, sans-serif' }}>Modo de Estudo</span>
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                                 {[
                                     { icon: Book, label: 'Biblioteca de Odus', sub: 'Estudo do 256 Odus', color: '#4ab87a', action: () => nav('odu_library') },
                                     { icon: BookOpen, label: 'Modo de Estudo', sub: 'Jogo educativo', color: '#4ab87a', action: handleStudyStart },
@@ -1258,12 +1325,13 @@ function App() {
                     </div>
 
                     {/* ── CONHECIMENTO / ESOTÉRICO / MAGIA / VOZ & SOM ── */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-6">
                         {[
                             {
                                 title: 'Conhecimento', color: '#C49E30', icon: Book,
                                 items: [
                                     { icon: Book, label: 'Biblioteca de Odus', sub: '256 Odus', color: '#C49E30', action: () => nav('odu_library') },
+                                    { icon: BookOpen, label: 'Enciclopédia Sagrada', sub: 'Orixás e Entidades', color: '#C49E30', action: () => nav('encyclopedia_hub') },
                                     { icon: BookOpen, label: 'Tratados & Textos', sub: 'Mais de 50 textos', color: '#C49E30', action: () => handleStudentOrProFeature(t.featureTreatise, () => nav('treatise')) },
                                     { icon: Book, label: 'Orikis & Orações', sub: 'Rezas e cânticos', color: '#C49E30', action: () => handleStudentOrProFeature(t.featurePrayers, () => nav('prayers')) },
                                     { icon: Search, label: 'Dicionário Yorubá', sub: 'Mais de 70 verbetes', color: '#C49E30', action: () => nav('dictionary') },
@@ -1296,12 +1364,18 @@ function App() {
                             {
                                 title: 'Voz & Som', color: '#4ab8d4', icon: Mic,
                                 items: [
-                                    { icon: Mic, label: 'Comandante de Voz', sub: 'Assistente de voz', color: '#4ab8d4', action: () => handleProFeature(t.featureVoiceCommand, () => nav('voice_commander')) },
+                                    { icon: Mic, label: 'Comandante de Voz', sub: 'Assistente de voz', color: '#4ab8d4', action: () => handleProFeature(t.featureVoiceCommand, () => setView('voice_commander')) },
                                     { icon: Music, label: 'Central de Sons', sub: 'Todos os sons', color: '#4ab8d4', action: () => handleStudentOrProFeature(t.featureSacredSounds, () => nav('sound_hub')) },
                                     { icon: Stars, label: 'Cânticos de Ifá', sub: 'Cânticos com síntese', color: '#4ab8d4', action: () => handleStudentOrProFeature(t.featureSacredSounds, () => nav('sound_hub')) },
                                     { icon: CircleDot, label: 'Sons dos Odus', sub: 'Frequência 432Hz', color: '#4ab8d4', action: () => nav('constellation') },
                                     { icon: Activity, label: 'Misturador Natural', sub: 'Chuva, vento, rio, fogo', color: 'rgba(74,184,212,0.6)', action: () => handleStudentOrProFeature(t.featureSacredSounds, () => nav('sound_hub')) },
                                     { icon: CircleDot, label: 'Mais Sons', sub: 'E muito mais...', color: 'rgba(74,184,212,0.4)', action: () => handleStudentOrProFeature(t.featureSacredSounds, () => nav('sound_hub')) },
+                                ]
+                            },
+                            {
+                                title: 'Marketing & Criação', color: '#8b5cf6', icon: Sparkles,
+                                items: [
+                                    { icon: Video, label: 'Estúdio de Redes', sub: 'Roteiros de IA', color: '#8b5cf6', action: () => handleProFeature('Social Media Studio', () => nav('social_studio')) },
                                 ]
                             },
                         ].map((section, si) => (
@@ -1338,7 +1412,7 @@ function App() {
                         <span className="neo-section-title" style={{ color: 'rgba(196,158,48,0.85)', fontSize: 10 }}>⊕ Centro Operacional do Sacerdote</span>
                         <div className="neo-section-line" />
                     </div>
-                    <div className="neo-op-metrics" style={{ marginBottom: 20 }}>
+                    <div className="neo-op-metrics flex flex-wrap gap-3" style={{ marginBottom: 20 }}>
                         {[
                             { img: '/babalawo_consulta.png', label: 'Consultas', value: heroStats.totalCount || '06', color: '#C49E30', action: () => nav('history') },
                             { img: '/ebo_ritual.png', label: 'Ebós', value: '02', color: '#e2b84a', action: () => handleProFeature(t.featureEboSim, () => nav('ebo_sim')) },
@@ -1501,7 +1575,7 @@ function App() {
                         <span style={{ fontSize: 9, letterSpacing: '3px', color: 'rgba(196,158,48,0.6)', textTransform: 'uppercase', fontWeight: 700 }}>⊕ Inteligência Artificial — Sugestões do Assistente</span>
                         <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, rgba(196,158,48,0.25), transparent)' }} />
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 24 }}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
                         {[
                             { icon: Sparkles, iconBg: 'rgba(196,158,48,0.15)', iconColor: '#C49E30', title: 'Hoje é um bom dia para...', body: 'Realizar ebó de prosperidade e iniciar novos projetos. Ogum abre os caminhos nesta fase lunar.', accent: '#C49E30', action: () => handleProFeature(t.featureEboSim, () => nav('ebo_sim')) },
                             { icon: Users, iconBg: 'rgba(74,184,122,0.15)', iconColor: '#4ab87a', title: 'Consulente João', body: 'Está há 30 dias sem retorno. Considere um acompanhamento ou novo agendamento.', accent: '#4ab87a', action: () => nav('history') },
@@ -1527,7 +1601,7 @@ function App() {
                         <span style={{ fontSize: 9, letterSpacing: '3px', color: 'rgba(196,158,48,0.6)', textTransform: 'uppercase', fontWeight: 700 }}>⊕ Odus Relacionados • Biblioteca Inteligente • Calendário Yorubá</span>
                         <div style={{ flex: 1, height: 1, background: 'linear-gradient(90deg, rgba(196,158,48,0.25), transparent)' }} />
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 32 }}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
 
                         {/* ODUS RELACIONADOS */}
                         <div style={{ background: 'linear-gradient(160deg, rgba(196,158,48,0.05), rgba(10,11,15,0.95))', border: '1px solid rgba(196,158,48,0.14)', borderRadius: 14, overflow: 'hidden' }}>
@@ -1604,6 +1678,24 @@ function App() {
                     </div>
 
 
+
+
+                    {/* NOVO QUIZ BANNER */}
+                    <div className="neo-widget" style={{ padding: '0', border: '1px solid rgba(196,158,48,0.3)', borderRadius: 14, marginBottom: 12, background: 'linear-gradient(135deg, #0c0e14 0%, #1a1608 100%)', overflow: 'hidden', position: 'relative', cursor: 'pointer' }} onClick={() => nav('orixa_quiz')}>
+                        <div style={{ position: 'absolute', top: 0, right: 0, width: '150px', height: '150px', background: 'radial-gradient(circle, rgba(196,158,48,0.15) 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
+                        <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, position: 'relative', zIndex: 1 }}>
+                            <div>
+                                <div style={{ fontSize: 9, letterSpacing: '2px', color: '#C49E30', textTransform: 'uppercase', marginBottom: 4, fontWeight: 800 }}>Novo Oráculo</div>
+                                <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', fontFamily: 'Georgia, serif', lineHeight: 1.2, marginBottom: 4 }}>Qual seria seu Orixá?</div>
+                                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)' }}>O oráculo revelará a possibilidade de quem rege seu caminho.</div>
+                            </div>
+                            <div style={{ fontSize: 40, filter: 'drop-shadow(0 0 15px rgba(196,158,48,0.4))' }}>🔮</div>
+                        </div>
+                        <div style={{ background: 'rgba(196,158,48,0.1)', padding: '8px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid rgba(196,158,48,0.15)' }}>
+                            <span style={{ fontSize: 10, color: '#C49E30', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>Fazer Quiz Grátis</span>
+                            <ChevronRight size={14} color="#C49E30" />
+                        </div>
+                    </div>
 
                     {/* 3. PRÓXIMO EVENTO */}
                     <div className="neo-widget" style={{ padding: '12px 14px', border: '1px solid rgba(196,158,48,0.15)', borderRadius: 14, marginBottom: 12, background: 'linear-gradient(160deg, #0c0e14 0%, #08090d 100%)' }}>
@@ -1778,12 +1870,37 @@ function App() {
 
                 {view === 'virtual_room' && <VirtualRoom mode={virtualRoomData.mode} roomName={virtualRoomData.room} onBack={() => setView('home')} />}
 
+                {view === 'encyclopedia_hub' && (
+                  <EncyclopediaHub 
+                    onBack={() => setView('home')} 
+                    onSelectCategory={(cat) => { setEncyclopediaCategory(cat); setView('encyclopedia_category'); }}
+                  />
+                )}
+                {view === 'encyclopedia_entity' && <EntityViewer entityId={encyclopediaEntityId} onBack={() => setView('encyclopedia_hub')} />}
+                {view === 'encyclopedia_category' && (
+                  <CategoryPage 
+                    category={encyclopediaCategory as any} 
+                    onBack={() => setView('encyclopedia_hub')} 
+                    onSelectEntity={(id) => { setEncyclopediaEntityId(id); setView('encyclopedia_entity'); }}
+                  />
+                )}
+
+                {view === 'articles' && <ArticlesList onBack={() => setView('home')} onOpen={handleOpenArticle} />}
+                {view === 'article' && <ArticleViewer slug={articleSlug} onBack={() => setView('articles')} />}
                 {view === 'mandala' && <OduMandala odu={currentOdu} onBack={() => setView('result')} />}
                 {view === 'history' && <ConsultationHistory onBack={() => setView('home')} onView={(r) => { setActiveRecord(r); setView('print'); }} />}
                 {view === 'register' && <div className="min-h-screen flex items-center justify-center p-4"><ClientRegistration onRegister={handleRegister} onCancel={() => setView('home')} /></div>}
                 {view === 'study' && <StudyMode onBack={() => setView('home')} />}
                 {view === 'odu_library' && <OduLibraryTable onBack={() => setView('home')} />}
                 {view === 'admin_panel' && <AdminPanel onBack={() => setView('home')} />}
+                {view === 'social_studio' && (
+                    <div className="pt-20 px-4 min-h-screen">
+                        <button onClick={() => setView('home')} className="mb-4 text-slate-400 hover:text-white flex items-center gap-2">
+                            <ArrowLeft className="w-5 h-5" /> Voltar
+                        </button>
+                        <SocialMediaStudio />
+                    </div>
+                )}
             </div>
 
             {showLoginModal && (
@@ -1896,6 +2013,13 @@ function App() {
                     onComplete={handlePreparationComplete}
                     onBack={() => { setShowPreparation(false); setPendingMethod(null); }}
                 />
+            )}
+
+
+            {view === 'orixa_quiz' && (
+                <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <OrixaQuiz onBack={() => setView('home')} />
+                </div>
             )}
 
             <CookieConsentBanner />

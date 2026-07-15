@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ifa-guia-mr9or6ej';
+const CACHE_NAME = 'ifa-guia-mrl33amv';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

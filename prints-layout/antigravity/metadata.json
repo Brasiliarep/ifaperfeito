@@ -1,0 +1,6 @@
+{
+  "name": "Ifá Oluwo - Códex Sagrado",
+  "description": "Plataforma Premium de Divinação, Conhecimento Litúrgico e Inteligência Espiritual do Ifá Oluwo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
