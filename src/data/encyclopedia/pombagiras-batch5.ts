@@ -4,7 +4,7 @@ export const POMBAGIRAS_BATCH5_DATA: EncyclopediaEntity[] = [
   {
     id: 'pombagira-maria-quiteria',
     nome: 'Maria Quitéria',
-    categoria: 'Pomba Gira',
+    categoria: 'Pombagira',
     linha: 'Esquerda / Batalha / Defesa',
     reino: 'Calunga / Encruzilhadas / Campos de Batalha',
     historiaTradicional: 'Maria Quitéria é uma das Pomba Giras mais respeitadas e valentes das cortes de Quimbanda e Umbanda. Reza a tradição que seu espírito é forjado na luta e na defesa implacável daqueles que sofrem injustiças ou abusos de poder. Nas lendas, Maria Quitéria foi em vida uma guerreira, muitas vezes associada à figura histórica homônima que lutou disfarçada de homem pela independência, embora a entidade transcenda a biografia terrena. Como Pomba Gira, ela carrega o punhal não apenas como enfeite, mas como arma espiritual de corte de demandas. Em um famoso itan de terreiro, uma mulher sofria com a violência do marido; ao pedir socorro numa encruzilhada de terra, Maria Quitéria apareceu com sua gargalhada estrondosa, cravou seu punhal no chão e determinou que a partir daquele momento quem levantasse a mão contra a protegida perderia a força do próprio braço. Ela é invocada para vitórias em embates judiciais, proteção contra violência doméstica, corte de feitiçaria pesada e fortalecimento da autoestima feminina. Seu porte é militar, sério e de olhar fulminante.',
@@ -36,7 +36,7 @@ export const POMBAGIRAS_BATCH5_DATA: EncyclopediaEntity[] = [
   {
     id: 'pombagira-menina',
     nome: 'Pomba Gira Menina',
-    categoria: 'Pomba Gira',
+    categoria: 'Pombagira',
     linha: 'Esquerda / Alegria / Sedução Jovem',
     reino: 'Jardins / Cabarés / Praças',
     historiaTradicional: 'Pomba Gira Menina é a personificação da juventude, da alegria e da sedução inocente, porém perigosa. Embora traga "Menina" no nome, não é um espírito infantil; é uma entidade feminina que desencarnou muito jovem ou que domina a energia da adolescência e do primeiro amor. Nas histórias dos terreiros, a Pomba Gira Menina costuma usar roupas mais curtas ou rodadas, enfeites no cabelo e sorri constantemente, escondendo por trás do seu sorriso uma magia antiquíssima e poderosa. Conta a lenda que uma jovem moça de um cabaré antigo foi envenenada por inveja. No plano espiritual, ela não quis vingança com ódio, mas decidiu que seu axé seria encantar e confundir a mente de quem faz o mal através da beleza e do riso. A Pomba Gira Menina atua fortemente na cura de corações partidos, na restauração da alegria de viver, na atração amorosa jovial e na cura da depressão. Ela mostra que o riso pode ser a arma mais letal contra as trevas.',
@@ -68,7 +68,7 @@ export const POMBAGIRAS_BATCH5_DATA: EncyclopediaEntity[] = [
   {
     id: 'pombagira-da-encruzilhada',
     nome: 'Pomba Gira da Encruzilhada',
-    categoria: 'Pomba Gira',
+    categoria: 'Pombagira',
     linha: 'Esquerda / Caminhos / Decisões',
     reino: 'Encruzilhadas / Ruas / Destino',
     historiaTradicional: 'A Pomba Gira da Encruzilhada é a senhora absoluta das direções e do destino. Enquanto outras Pombagiras atuam no cemitério ou na praia, ela é a rainha do ponto onde os caminhos se cruzam, governando o livre-arbítrio humano. Na mística africana e brasileira, a encruzilhada (Orita) é o local onde o mundo dos vivos toca o mundo dos espíritos. A história desta entidade diz que ela foi a primeira a receber de Exu Rei a chave para abrir e fechar as portas materiais. Diz a lenda que um homem completamente perdido na vida parou em uma encruzilhada de X, chorando e sem saber para onde ir: se voltava para casa e aceitava a miséria, ou se ia para o desconhecido. Uma mulher envolta em névoa vermelha e preta apareceu, rodou sua saia e os quatro caminhos se iluminaram, mostrando o futuro de cada escolha. O homem tomou o caminho certo e enriqueceu. A Pomba Gira da Encruzilhada não toma decisões por ninguém, mas abre a clarividência e afasta os obstáculos do caminho que a pessoa escolher.',
@@ -100,7 +100,7 @@ export const POMBAGIRAS_BATCH5_DATA: EncyclopediaEntity[] = [
   {
     id: 'rainha-sete-encruzilhadas',
     nome: 'Pomba Gira Rainha das Sete Encruzilhadas',
-    categoria: 'Pomba Gira',
+    categoria: 'Pombagira',
     linha: 'Esquerda / Realeza / Chefia de Legião',
     reino: 'Todas as Encruzilhadas / Reinos da Quimbanda',
     historiaTradicional: 'A Rainha das Sete Encruzilhadas é considerada uma das supremas entidades da linha de Esquerda. Ela não rege apenas uma encruzilhada, mas o domínio de sete pontos de poder no mundo espiritual, sendo a entidade coroada e par vibratório do Exu Rei das Sete Encruzilhadas. Segundo a mitologia umbandista e quimbandista, ela é a grande juíza do astral. Quando os espíritos da esquerda não entram em consenso ou quando um caso na terra parece impossível de ser resolvido, é a Rainha que dá o veredito final. O seu itan narra que Oxalá lhe deu a coroa para que ela fosse a diplomata entre a luz e as trevas, permitindo que as entidades da esquerda pudessem evoluir e trabalhar na caridade sob seu comando. Seus trabalhos são extremamente caros do ponto de vista energético; ela cobra muita lealdade, ética e firmeza moral de seus filhos e adeptos. Quando a Rainha baixa no terreiro, todas as outras Pomba Giras prestam reverência.',
@@ -132,7 +132,7 @@ export const POMBAGIRAS_BATCH5_DATA: EncyclopediaEntity[] = [
   {
     id: 'pombagira-cigana-sete-saias',
     nome: 'Pomba Gira Cigana das Sete Saias',
-    categoria: 'Pomba Gira',
+    categoria: 'Pombagira',
     linha: 'Esquerda / Povo Cigano / Magia do Oriente',
     reino: 'Acampamentos / Estradas / Destino',
     historiaTradicional: 'Cigana Sete Saias é a ponte perfeita entre a linha do Oriente (Povo Cigano) e a linhagem de Exu (Esquerda). Ela trabalha com as energias vibrantes das danças flamencas e árabes, das moedas de ouro, do fogo das fogueiras e da leitura do destino. Reza a lenda que Sete Saias foi a maior cartomante de sua tribo Kalon, tendo cada uma de suas sete saias uma cor diferente, correspondendo aos sete domínios da vida: amor, dinheiro, saúde, família, proteção, sabedoria e espiritualidade. Quando dançava e girava suas sete saias, ela embriagava a percepção das pessoas e era capaz de reescrever o destino daquele que lhe pedisse ajuda com fé. Em uma história antiga, um rei perdeu sua fortuna para um usurpador. Sete Saias atirou uma moeda de cobre no fogo, leu as cinzas e lhe indicou uma trilha nas montanhas; o rei recuperou seu trono. Ela ensina que o destino não é fixo; ele é tão móvel quanto a saia de uma cigana rodando na fogueira.',

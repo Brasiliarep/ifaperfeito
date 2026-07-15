@@ -79,7 +79,7 @@ export function EntityViewer({ entityId, onBack }: Props) {
       "description": entity.historiaTradicional.substring(0, 200)
     },
     "inLanguage": ["pt", "en", "es", "yo"],
-    "keywords": allKeywords.slice(0, 20).join(', ')
+    "keywords": (entity.palavrasChaveSEO || []).slice(0, 20).join(', ')
   };
 
   const breadcrumbSchema = {
@@ -265,7 +265,7 @@ export function EntityViewer({ entityId, onBack }: Props) {
                 <section className="bg-[#111] p-6 rounded-2xl border border-[#222]">
                   <h3 className="text-lg font-bold text-[#C49E30] mb-4">Características</h3>
                   <ul className="space-y-3">
-                    {entity.caracteristicas.map((c, i) => (
+                    {(entity.caracteristicas || entity.personalidade || []).map((c, i) => (
                       <li key={i} className="flex items-start gap-2 text-gray-300">
                         <Star size={16} className="mt-1 flex-shrink-0 text-[#C49E30]/50" />
                         <span>{c}</span>
