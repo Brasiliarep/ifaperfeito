@@ -1,6 +1,7 @@
 import React from 'react';
 import { ARTICLES, Article } from '../src/data/articles';
 import { ArrowLeft, BookOpen, Clock, Tag } from 'lucide-react';
+import SEO from './SEO';
 
 interface Props {
   onBack: () => void;
@@ -10,6 +11,39 @@ interface Props {
 export function ArticlesList({ onBack, onOpen }: Props) {
   return (
     <div className="min-h-screen pt-20 px-4 pb-12" style={{ maxWidth: 800, margin: '0 auto' }}>
+      <SEO
+        title="Artigos sobre Ifá e Tradição Yorubá | Ifá Oluwo"
+        description="Artigos aprofundados sobre Ifá, Odus, rituais, orixás, ervas sagradas e a tradição Yorubá. Enciclopédia completa com 90+ artigos sobre espiritualidade africana."
+        keywords={['Ifá', 'artigos', 'Yorubá', 'Orixás', 'Odus', 'rituais', 'espiritualidade', 'candomblé', 'umbanda', 'Ifá Oluwo']}
+        canonical="https://ifaoluwo.com/artigos"
+        url="https://ifaoluwo.com/artigos"
+        hreflang={[
+          { lang: 'pt', url: 'https://ifaoluwo.com/artigos?lang=pt' },
+          { lang: 'x-default', url: 'https://ifaoluwo.com/artigos' }
+        ]}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": "Artigos sobre Ifá e Tradição Yorubá",
+          "description": "Artigos aprofundados sobre Ifá, Odus, rituais, orixás e a tradição Yorubá.",
+          "url": "https://ifaoluwo.com/artigos",
+          "isPartOf": {
+            "@type": "WebSite",
+            "name": "Ifá Oluwo",
+            "url": "https://ifaoluwo.com"
+          },
+          "mainEntity": {
+            "@type": "ItemList",
+            "numberOfItems": ARTICLES.length,
+            "itemListElement": ARTICLES.slice(0, 20).map((a, i) => ({
+              "@type": "ListItem",
+              "position": i + 1,
+              "url": `https://ifaoluwo.com/artigos/${a.slug}`,
+              "name": a.title
+            }))
+          }
+        }}
+      />
       <button onClick={onBack} className="flex items-center gap-2 text-sm mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>
         <ArrowLeft size={16} /> Voltar
       </button>

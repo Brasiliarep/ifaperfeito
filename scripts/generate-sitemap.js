@@ -1,4 +1,4 @@
-import { writeFileSync } from 'fs';
+import { writeFileSync, readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -14,30 +14,21 @@ function encodeOduName(name) {
   return encodeURIComponent(name);
 }
 
-const ARTICLE_SLUGS = [
-  '16-odus-meji-significados',
-  'o-que-e-ifa-guia-completo',
-  '256-odus-estrutura-significados',
-  'orixas-sistema-ifa',
-  'ervas-sagradas-ewe-osanyin',
-  'opele-ifa-guia-completo',
-  'ikin-16-carocos-dende',
-  'obi-adivinhacao-coco-yoruba',
-  'ebo-tipos-rituais-ifa',
-  'iyami-aje-poder-feminino-yoruba',
-  'itans-lendas-sagradas-ifa',
-  'babalawo-sacerdote-ifa',
-  'ori-orixa-cabeca-destino-ifa',
-  'ossaim-folhas-medicina-ifa',
-  'candomble-umbanda-ifa-diferencas',
-  'yoruba-lingua-historia-cultura',
-  'diferenca-entidade-divindade-umbanda-candomble',
-  'diferenca-ifa-candomble-umbanda-quimbanda',
-  'todos-os-orixas-lista-completa',
-  'exus-pombas-giras-umbanda',
-  'entidades-umbanda-caboclos-pretos-velhos-boideiros-ciganos',
-  'quimbanda-entidades-exus-espiritualidade'
-];
+// Dynamically extract all article slugs from articles.ts
+function getArticleSlugs() {
+  const articlesPath = resolve(__dirname, '..', 'src', 'data', 'articles.ts');
+  const content = readFileSync(articlesPath, 'utf-8');
+  const slugRegex = /slug:\s*['"]([^'"]+)['"]/g;
+  const slugs = [];
+  let match;
+  while ((match = slugRegex.exec(content)) !== null) {
+    slugs.push(match[1]);
+  }
+  return slugs;
+}
+
+const ARTICLE_SLUGS = getArticleSlugs();
+console.log(`Sitemap: found ${ARTICLE_SLUGS.length} article slugs`);
 
 const STATIC_PAGES = [
   { loc: '/', priority: '1.0', changefreq: 'weekly' },
@@ -85,11 +76,11 @@ for (const p of STATIC_PAGES) {
 }
 
 for (const path of ODU_URLS) {
-  urls.push(`  <url>\n    <loc>${B}${path}</loc>\n    <lastmod>${now}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>`);
+  urls.push(`  <url>\n    <loc>${B}${path}</loc>\n    <lastmod>${now}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n    <xhtml:link rel="alternate" hreflang="pt" href="${B}${path}?lang=pt" />\n    <xhtml:link rel="alternate" hreflang="en" href="${B}${path}?lang=en" />\n    <xhtml:link rel="alternate" hreflang="es" href="${B}${path}?lang=es" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="${B}${path}" />\n  </url>`);
 }
 
 for (const path of ARTICLE_URLS) {
-  urls.push(`  <url>\n    <loc>${B}${path}</loc>\n    <lastmod>${now}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.8</priority>\n  </url>`);
+  urls.push(`  <url>\n    <loc>${B}${path}</loc>\n    <lastmod>${now}</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.85</priority>\n    <xhtml:link rel="alternate" hreflang="pt" href="${B}${path}?lang=pt" />\n    <xhtml:link rel="alternate" hreflang="en" href="${B}${path}?lang=en" />\n    <xhtml:link rel="alternate" hreflang="es" href="${B}${path}?lang=es" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="${B}${path}" />\n  </url>`);
 }
 
 // Try to load encyclopedia data and add entity URLs
@@ -99,10 +90,10 @@ try {
   console.log(`Sitemap: adding ${ENCYCLOPEDIA_DATA.length} encyclopedia entities`);
   for (const entity of ENCYCLOPEDIA_DATA) {
     const priority = ENTITY_PRIORITY[entity.categoria] || '0.75';
-    urls.push(`  <url>\n    <loc>${B}/enciclopedia/${entity.id}</loc>\n    <lastmod>${now}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${priority}</priority>\n    <xhtml:link rel="alternate" hreflang="pt" href="${B}/enciclopedia/${entity.id}?lang=pt" />\n    <xhtml:link rel="alternate" hreflang="en" href="${B}/encyclopedia/${entity.id}?lang=en" />\n    <xhtml:link rel="alternate" hreflang="es" href="${B}/enciclopedia/${entity.id}?lang=es" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="${B}/enciclopedia/${entity.id}" />\n  </url>`);
+    urls.push(`  <url>\n    <loc>${B}/enciclopedia/${entity.id}</loc>\n    <lastmod>${now}</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>${priority}</priority>\n    <xhtml:link rel="alternate" hreflang="pt" href="${B}/enciclopedia/${entity.id}?lang=pt" />\n    <xhtml:link rel="alternate" hreflang="en" href="${B}/encyclopedia/${entity.id}?lang=en" />\n    <xhtml:link rel="alternate" hreflang="es" href="${B}/encyclopedia/${entity.id}?lang=es" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="${B}/enciclopedia/${entity.id}" />\n  </url>`);
   }
 } catch (e) {
-  console.warn('Could not load encyclopedia entities for sitemap (TS not compiled yet):', e.message);
+  console.warn('Could not load encyclopedia entities for sitemap:', e.message);
 }
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"\n        xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.join('\n')}\n</urlset>`;

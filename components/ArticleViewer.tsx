@@ -29,19 +29,53 @@ export function ArticleViewer({ slug, onBack }: Props) {
 
   return (
     <div className="min-h-screen pt-20 px-4 pb-16" style={{ maxWidth: 800, margin: '0 auto' }}>
-      <SEO 
-        title={`${article.title} | Ifá Oluwo Artigos`}
+      <SEO
+        title={`${article.title} | Ifá Oluwo`}
         description={article.description}
+        keywords={[...article.tags, 'Ifá', 'Yorubá', 'Ifá Oluwo', article.title]}
+        canonical={`https://ifaoluwo.com/artigos/${article.slug}`}
+        url={`https://ifaoluwo.com/artigos/${article.slug}`}
+        image={article.image || 'https://ifaoluwo.com/logo.png'}
+        hreflang={[
+          { lang: 'pt', url: `https://ifaoluwo.com/artigos/${article.slug}?lang=pt` },
+          { lang: 'x-default', url: `https://ifaoluwo.com/artigos/${article.slug}` }
+        ]}
+        article={{
+          publishedTime: article.publishedAt,
+          modifiedTime: article.updatedAt || article.publishedAt,
+          author: 'Ifá Oluwo',
+          section: article.tags[0] || 'Ifá',
+          tags: article.tags
+        }}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Article",
           "headline": article.title,
           "description": article.description,
+          "image": article.image || 'https://ifaoluwo.com/logo.png',
           "author": {
             "@type": "Organization",
-            "name": "Ifá Oluwo"
+            "name": "Ifá Oluwo",
+            "url": "https://ifaoluwo.com"
           },
-          "datePublished": article.publishedAt
+          "publisher": {
+            "@type": "Organization",
+            "name": "Ifá Oluwo",
+            "url": "https://ifaoluwo.com",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://ifaoluwo.com/logo.png"
+            }
+          },
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": `https://ifaoluwo.com/artigos/${article.slug}`
+          },
+          "datePublished": article.publishedAt,
+          "dateModified": article.updatedAt || article.publishedAt,
+          "keywords": article.tags.join(', '),
+          "inLanguage": "pt-BR",
+          "wordCount": article.content.replace(/<[^>]+>/g, '').split(/\s+/).length
         }}
       />
       <button onClick={onBack} className="flex items-center gap-2 text-sm mb-6" style={{ color: 'rgba(255,255,255,0.5)' }}>

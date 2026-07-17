@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 
+const SITE = 'https://ifaoluwo.com';
+
 interface SEOProps {
   title: string;
   description: string;
@@ -20,11 +22,41 @@ interface SEOProps {
   noindex?: boolean;
 }
 
-export default function SEO({ 
-  title, 
-  description, 
-  image = 'https://ifaoluwo.com/logo.png', 
-  url = 'https://ifaoluwo.com',
+function setMeta(name: string, content: string, property = false) {
+  const attr = property ? 'property' : 'name';
+  let tag = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement;
+  if (tag) {
+    tag.setAttribute('content', content);
+  } else {
+    tag = document.createElement('meta');
+    tag.setAttribute(attr, name);
+    tag.setAttribute('content', content);
+    document.head.appendChild(tag);
+  }
+}
+
+function setLink(rel: string, href: string, extra?: Record<string, string>) {
+  const selector = extra
+    ? `link[rel="${rel}"][${Object.keys(extra)[0]}="${Object.values(extra)[0]}"]`
+    : `link[rel="${rel}"]`;
+  let tag = document.querySelector(selector) as HTMLLinkElement;
+  if (tag) {
+    tag.setAttribute('href', href);
+    if (extra) Object.entries(extra).forEach(([k, v]) => tag.setAttribute(k, v));
+  } else {
+    tag = document.createElement('link');
+    tag.setAttribute('rel', rel);
+    tag.setAttribute('href', href);
+    if (extra) Object.entries(extra).forEach(([k, v]) => tag.setAttribute(k, v));
+    document.head.appendChild(tag);
+  }
+}
+
+export default function SEO({
+  title,
+  description,
+  image = `${SITE}/logo.png`,
+  url = SITE,
   type = 'website',
   keywords = [],
   jsonLd,
@@ -33,78 +65,38 @@ export default function SEO({
   article,
   noindex = false
 }: SEOProps) {
-  
+
   useEffect(() => {
-    // 1. Title
     document.title = title;
 
-    // 2. Meta Description
-    let metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute('content', description);
-    } else {
-      metaDescription = document.createElement('meta');
-      metaDescription.setAttribute('name', 'description');
-      metaDescription.setAttribute('content', description);
-      document.head.appendChild(metaDescription);
+    // Meta Description
+    let metaDesc = document.querySelector('meta[name="description"]') as HTMLMetaElement;
+    if (metaDesc) metaDesc.setAttribute('content', description);
+    else {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      metaDesc.setAttribute('content', description);
+      document.head.appendChild(metaDesc);
     }
 
-    // 3. Meta Keywords
-    if (keywords.length > 0) {
-      let metaKeywords = document.querySelector('meta[name="keywords"]');
-      if (metaKeywords) {
-        metaKeywords.setAttribute('content', keywords.join(', '));
-      } else {
-        metaKeywords = document.createElement('meta');
-        metaKeywords.setAttribute('name', 'keywords');
-        metaKeywords.setAttribute('content', keywords.join(', '));
-        document.head.appendChild(metaKeywords);
-      }
-    }
+    // Meta Keywords
+    if (keywords.length > 0) setMeta('keywords', keywords.join(', '));
 
-    // 4. Canonical URL
+    // Canonical
     const canonicalUrl = canonical || url;
-    let canonicalTag = document.querySelector('link[rel="canonical"]');
-    if (canonicalTag) {
-      canonicalTag.setAttribute('href', canonicalUrl);
-    } else {
+    let canonicalTag = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (canonicalTag) canonicalTag.setAttribute('href', canonicalUrl);
+    else {
       canonicalTag = document.createElement('link');
       canonicalTag.setAttribute('rel', 'canonical');
       canonicalTag.setAttribute('href', canonicalUrl);
       document.head.appendChild(canonicalTag);
     }
 
-    // 5. Robots
-    let robotsTag = document.querySelector('meta[name="robots"]');
-    if (noindex) {
-      if (robotsTag) {
-        robotsTag.setAttribute('content', 'noindex, nofollow');
-      } else {
-        robotsTag = document.createElement('meta');
-        robotsTag.setAttribute('name', 'robots');
-        robotsTag.setAttribute('content', 'noindex, nofollow');
-        document.head.appendChild(robotsTag);
-      }
-    } else {
-      if (robotsTag) {
-        robotsTag.setAttribute('content', 'index, follow');
-      }
-    }
+    // Robots
+    setMeta('robots', noindex ? 'noindex, nofollow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1');
 
-    // 6. Open Graph
-    const setMeta = (name: string, content: string, property = false) => {
-      const attr = property ? 'property' : 'name';
-      let tag = document.querySelector(`meta[${attr}="${name}"]`);
-      if (tag) {
-        tag.setAttribute('content', content);
-      } else {
-        tag = document.createElement('meta');
-        tag.setAttribute(attr, name);
-        tag.setAttribute('content', content);
-        document.head.appendChild(tag);
-      }
-    };
-
+    // Open Graph
     setMeta('og:title', title, true);
     setMeta('og:description', description, true);
     setMeta('og:image', image, true);
@@ -113,7 +105,7 @@ export default function SEO({
     setMeta('og:site_name', 'Ifá Oluwo - Enciclopédia Sagrada', true);
     setMeta('og:locale', 'pt_BR', true);
 
-    // 7. Twitter Card
+    // Twitter Card
     setMeta('twitter:card', 'summary_large_image');
     setMeta('twitter:title', title);
     setMeta('twitter:description', description);
@@ -121,19 +113,22 @@ export default function SEO({
     setMeta('twitter:site', '@ifaluwo');
     setMeta('twitter:creator', '@ifaluwo');
 
-    // 8. Article meta (if article)
+    // Article meta
     if (article) {
       if (article.publishedTime) setMeta('article:published_time', article.publishedTime, true);
       if (article.modifiedTime) setMeta('article:modified_time', article.modifiedTime, true);
       if (article.author) setMeta('article:author', article.author, true);
       if (article.section) setMeta('article:section', article.section, true);
-      if (article.tags) {
-        article.tags.forEach(tag => setMeta('article:tag', tag, true));
-      }
+      if (article.tags) article.tags.forEach(tag => setMeta('article:tag', tag, true));
     }
 
-    // 9. JSON-LD
-    let jsonLdScript = document.getElementById('page-json-ld');
+    // Hreflang
+    hreflang.forEach(h => {
+      setLink('alternate', h.url, { hreflang: h.lang });
+    });
+
+    // JSON-LD
+    let jsonLdScript = document.getElementById('page-json-ld') as HTMLScriptElement;
     if (jsonLd) {
       if (!jsonLdScript) {
         jsonLdScript = document.createElement('script');
