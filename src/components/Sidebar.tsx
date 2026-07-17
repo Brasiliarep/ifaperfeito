@@ -163,20 +163,26 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenChat, onSelectD
       }`}
     >
       {/* Brand Header */}
-      <div className="p-4 border-b border-[#c19a4d]/15 flex items-center justify-between gap-2">
+      <div className="p-3 border-b border-[#c19a4d]/15 flex items-center justify-between gap-2">
         {!collapsed && (
-          <div className="flex items-center gap-2">
-             <img src="/logo.png" alt="IFÁ OLUWO" className="object-contain h-10 drop-shadow-[0_0_8px_rgba(193,154,77,0.5)]" />
-             <span className="font-serif font-bold text-lg text-[#C49E30] tracking-wider drop-shadow-[0_0_8px_rgba(193,154,77,0.3)]">
-               IFÁ OLUWO
-             </span>
+          <div className="flex flex-col gap-0.5 cursor-pointer" onClick={() => setActiveTab('painel')}>
+            {/* Logo com IFÁ OLUWO embutido */}
+            <img
+              src="/logo.png"
+              alt="IFÁ OLUWO"
+              className="h-8 w-auto object-contain object-left drop-shadow-[0_0_10px_rgba(193,154,77,0.6)]"
+            />
+            {/* Subtítulo CÓDEX SACERDOTAL */}
+            <span className="text-[9px] font-semibold tracking-[0.25em] uppercase text-[#c19a4d] opacity-90 pl-0.5">
+              Códex Sacerdotal
+            </span>
           </div>
         )}
         {collapsed && (
-          <img 
-            src="/logo_tree.jpg" 
-            alt="Ifá Oluwo Logo" 
-            className="w-10 h-10 object-cover object-left rounded-full border border-[#c19a4d]/30 mx-auto drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]"
+          <img
+            src="/logo_tree.jpg"
+            alt="Ifá Oluwo"
+            className="w-9 h-9 object-cover object-left rounded-full border border-[#c19a4d]/30 mx-auto drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]"
           />
         )}
         <button
