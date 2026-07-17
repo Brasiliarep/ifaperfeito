@@ -30,7 +30,7 @@ import { ENTIDADES_MESA_DATA } from './entidades-mesa';
 import { IMPORTED_ORIXAS_DATA } from './imported';
 export type { EncyclopediaEntity, CategoriaEntidade };
 
-export const ENCYCLOPEDIA_DATA: EncyclopediaEntity[] = [
+const RAW_ENCYCLOPEDIA_DATA: EncyclopediaEntity[] = [
   // Divindades Supremas
   ...DIVINDADES_DATA,
   // Dossiês Completos (27 blocos)
@@ -79,3 +79,7 @@ export const ENCYCLOPEDIA_DATA: EncyclopediaEntity[] = [
   // Entidades Importadas (Dossiês Completos)
   ...IMPORTED_ORIXAS_DATA
 ];
+
+export const ENCYCLOPEDIA_DATA: EncyclopediaEntity[] = Array.from(
+  new Map(RAW_ENCYCLOPEDIA_DATA.map(item => [item.id, item])).values()
+);

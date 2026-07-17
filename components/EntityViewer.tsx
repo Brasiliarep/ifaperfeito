@@ -575,12 +575,15 @@ export function EntityViewer({ entityId, onBack }: Props) {
 
               {(() => {
                 const related = ENCYCLOPEDIA_DATA
-                  .filter(e => e.id !== entity.id && (
-                    e.categoria === entity.categoria ||
-                    (entity.pesquisasRelacionadas && entity.pesquisasRelacionadas.some(p => e.nome.toLowerCase().includes(p.toLowerCase()))) ||
-                    (entity.correspondencias?.animais && e.correspondencias?.animais?.some(a => entity.correspondencias!.animais!.includes(a))) ||
-                    (entity.dominios && e.dominios && entity.dominios.some(d => e.dominios!.includes(d)))
-                  ))
+                  .filter(e => {
+                    const eNome = e.nome || (e as any).name || '';
+                    return e.id !== entity.id && (
+                      (e.categoria || (e as any).category) === (entity.categoria || (entity as any).category) ||
+                      (entity.pesquisasRelacionadas && entity.pesquisasRelacionadas.some(p => eNome.toLowerCase().includes(p.toLowerCase()))) ||
+                      (entity.correspondencias?.animais && e.correspondencias?.animais?.some(a => entity.correspondencias!.animais!.includes(a))) ||
+                      (entity.dominios && e.dominios && entity.dominios.some(d => e.dominios!.includes(d)))
+                    );
+                  })
                   .slice(0, 6);
                 
                 if (related.length === 0) return null;

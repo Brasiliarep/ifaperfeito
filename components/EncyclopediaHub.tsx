@@ -16,9 +16,12 @@ export function EncyclopediaHub({ onBack, onSelectCategory }: Props) {
 
   const filteredEntities = useMemo(() => {
     return ENCYCLOPEDIA_DATA.filter(entity => {
-      const matchesSearch = entity.nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            entity.historiaTradicional.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === 'Todos' || entity.categoria === selectedCategory;
+      const nome = entity.nome || (entity as any).name || '';
+      const historia = entity.historiaTradicional || (entity as any).identification?.description || '';
+      const matchesSearch = nome.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                            historia.toLowerCase().includes(searchTerm.toLowerCase());
+      const category = entity.categoria || (entity as any).category;
+      const matchesCategory = selectedCategory === 'Todos' || category === selectedCategory || (entity as any).category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
   }, [searchTerm, selectedCategory]);
@@ -30,7 +33,12 @@ export function EncyclopediaHub({ onBack, onSelectCategory }: Props) {
       'religiões de matriz africana', 'dossiê completo', 'enciclopedia orixás',
       'sacred encyclopedia', 'orisha', 'african diaspora religions',
       'enciclopedia sagrada orixás', 'dicionário yorubá', 'panteão africano',
-      ...ENCYCLOPEDIA_DATA.flatMap(e => [e.nome, e.nomeYoruba, e.nomeIngles, e.nomeEspanhol].filter(Boolean))
+      ...ENCYCLOPEDIA_DATA.flatMap(e => [
+        e.nome || (e as any).name, 
+        e.nomeYoruba || (e as any).metadata?.yorubaName, 
+        e.nomeIngles || (e as any).metadata?.englishName, 
+        e.nomeEspanhol || (e as any).metadata?.spanishName
+      ].filter(Boolean))
     ];
     return Array.from(new Set(base)).slice(0, 50);
   }, []);
@@ -116,7 +124,7 @@ export function EncyclopediaHub({ onBack, onSelectCategory }: Props) {
         {/* Category Quick Access */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mb-8">
           {categories.filter(c => c !== 'Todos').map(cat => {
-            const count = ENCYCLOPEDIA_DATA.filter(e => e.categoria === cat).length;
+            const count = ENCYCLOPEDIA_DATA.filter(e => e.categoria === cat || (e as any).category === cat).length;
             if (count === 0) return null;
             return (
               <button
@@ -138,14 +146,14 @@ export function EncyclopediaHub({ onBack, onSelectCategory }: Props) {
           </div>
         ) : (
           <div className="space-y-8">
-            {Array.from(new Set(filteredEntities.map(e => e.categoria))).map(cat => (
-              <div key={cat}>
+            {Array.from(new Set(filteredEntities.map(e => e.categoria || (e as any).category))).map(cat => (
+              <div key={cat as string}>
                 <h2 className="text-xl font-serif text-[#E8DCC2] mb-4 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#C49E30]"></span>
                   {cat}s
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredEntities.filter(e => e.categoria === cat).map(entity => (
+                  {filteredEntities.filter(e => (e.categoria || (e as any).category) === cat).map(entity => (
                     <button
                       key={entity.id}
                       onClick={() => {
@@ -156,14 +164,14 @@ export function EncyclopediaHub({ onBack, onSelectCategory }: Props) {
                     >
                       <div className="flex justify-between items-start mb-3">
                         <div>
-                          <h3 className="text-lg font-bold text-white group-hover:text-[#C49E30] transition-colors">{entity.nome}</h3>
+                          <h3 className="text-lg font-bold text-white group-hover:text-[#C49E30] transition-colors">{entity.nome || (entity as any).name}</h3>
                           <span className="text-xs font-semibold px-2 py-0.5 rounded bg-[#222] text-[#C49E30]">
-                            {entity.categoria}
+                            {entity.categoria || (entity as any).category}
                           </span>
                         </div>
                       </div>
                       <p className="text-sm text-gray-400 line-clamp-2 leading-relaxed mb-4">
-                        {entity.historiaTradicional}
+                        {entity.historiaTradicional || (entity as any).identification?.description}
                       </p>
                       <div className="mt-auto flex items-center justify-between text-xs text-gray-500">
                         <span>{entity.reino || entity.linha}</span>
