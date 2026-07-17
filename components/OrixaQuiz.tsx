@@ -244,7 +244,7 @@ const QUESTIONS: QuizQuestion[] = [
       { text: 'Estar com pessoas que amo', scores: { oxum: 3, iemanja: 1 } },
       { text: 'Superar desafios e provações', scores: { ogum: 3, omolu: 1 } },
       { text: 'Criar algo — arte, música, projetos', scores: { iansa: 3, ibeji: 1 } },
-      { text: 'Meditar e连接ar com o espiritual', scores: { oxala: 3, olokun: 1 } },
+      { text: 'Meditar e conectar com o espiritual', scores: { oxala: 3, olokun: 1 } },
     ]
   },
   {
