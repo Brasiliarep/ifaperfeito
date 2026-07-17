@@ -165,15 +165,15 @@ export default function Sidebar({ activeTab, setActiveTab, onOpenChat, onSelectD
       {/* Brand Header */}
       <div className="p-3 border-b border-[#c19a4d]/15 flex items-center justify-between gap-2">
         {!collapsed && (
-          <div className="flex flex-col gap-0.5 cursor-pointer" onClick={() => setActiveTab('painel')}>
+          <div className="flex flex-col gap-0.5 cursor-pointer min-w-0 flex-1" onClick={() => setActiveTab('painel')}>
             {/* Logo com IFÁ OLUWO embutido */}
             <img
               src="/logo.png"
               alt="IFÁ OLUWO"
-              className="h-8 w-auto object-contain object-left drop-shadow-[0_0_10px_rgba(193,154,77,0.6)]"
+              className="h-10 w-auto object-contain object-left drop-shadow-[0_0_12px_rgba(193,154,77,0.8)] brightness-125"
             />
             {/* Subtítulo CÓDEX SACERDOTAL */}
-            <span className="text-[9px] font-semibold tracking-[0.25em] uppercase text-[#c19a4d] opacity-90 pl-0.5">
+            <span style={{ fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#e2b84a', fontWeight: 700, paddingLeft: 2, opacity: 1, textShadow: '0 0 8px rgba(226,184,74,0.5)' }}>
               Códex Sacerdotal
             </span>
           </div>
