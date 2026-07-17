@@ -1809,52 +1809,52 @@ function App() {
                 {/* END CENTER+RIGHT ROW */}
 
                 {/* Majestic Footer and spiritual quote banner */}
-                <footer className="mt-12 mb-8 mx-4 md:mx-8 bg-[#0c0a08]/90 border border-[#c19a4d]/25 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative">
-                    {/* Left side: Yoruba Bronze heads decorative image */}
-                    <div className="w-full md:w-44 h-24 overflow-hidden rounded-xl border border-[#c19a4d]/20 bg-[#12100e] relative shrink-0">
-                        <img 
-                            src="/yoruba_elder.png" 
-                            alt="Yoruba classical art" 
-                            className="w-full h-full object-cover grayscale contrast-125 hover:grayscale-0 hover:brightness-110 transition-all duration-700"
-                            referrerPolicy="no-referrer"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/60 pointer-events-none" />
-                    </div>
-
-                    {/* Central content */}
-                    <div className="flex-1 text-center space-y-4 px-2">
-                        <p className="font-serif italic text-base sm:text-lg text-[#f7e2af] leading-relaxed tracking-wide text-center uppercase">
-                            &ldquo;IFÁ KÍ ÍS SẸ FÁ ITÀN, Ó GẸ KÓ IẸ KÓÓTÍTÓ.&rdquo;
-                        </p>
-                        <p className="text-[10px] text-[#a88e5d] uppercase tracking-[0.15em] font-semibold -mt-1">
-                            Ifá não é para contar histórias, é para ter a verdade certa. — Provérbio Yorùbá
-                        </p>
-
-                        {/* Status footer list */}
-                        <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 text-[8.5px] uppercase tracking-widest font-bold text-[#8b754e] border-t border-[#c19a4d]/10 pt-3">
-                            <span>Versão 4.0.0</span>
-                            <span className="text-[#c19a4d]/40">•</span>
-                            <span>Desenvolvido por Babalawo Ifálore</span>
-                            <span className="text-[#c19a4d]/40">•</span>
-                            <span>Todos os direitos reservados</span>
-                            <span className="text-[#c19a4d]/40">•</span>
-                            <button onClick={() => window.dispatchEvent(new CustomEvent('open-legal', { detail: 'terms' }))} className="hover:text-[#c19a4d] transition-colors">Termos de Uso</button>
-                            <span className="text-[#c19a4d]/40">•</span>
-                            <button onClick={() => window.dispatchEvent(new CustomEvent('open-legal', { detail: 'privacy' }))} className="hover:text-[#c19a4d] transition-colors">LGPD</button>
-                            <span className="text-[#c19a4d]/40">•</span>
-                            <button onClick={() => window.dispatchEvent(new CustomEvent('open-legal', { detail: 'privacy' }))} className="hover:text-[#c19a4d] transition-colors">Política de Privacidade</button>
+                <footer className="mt-16 mb-8 mx-auto max-w-5xl flex flex-col items-center justify-center relative">
+                    <div className="flex items-center justify-center gap-6 w-full">
+                        {/* Left Bronze Head */}
+                        <div className="hidden md:block w-24 h-24 opacity-60">
+                            <img 
+                                src="/yoruba_elder.png" 
+                                alt="Yoruba classical art" 
+                                className="w-full h-full object-cover rounded-xl border border-[#c19a4d]/10 mix-blend-luminosity"
+                                referrerPolicy="no-referrer"
+                            />
                         </div>
-                    </div>
 
-                    {/* Right side: Yoruba Bronze heads decorative image */}
-                    <div className="w-full md:w-44 h-24 overflow-hidden rounded-xl border border-[#c19a4d]/20 bg-[#12100e] relative shrink-0">
-                        <img 
-                            src="/yoruba_elder.png" 
-                            alt="Yoruba sacred art" 
-                            className="w-full h-full object-cover scale-x-[-1] grayscale contrast-125 hover:grayscale-0 hover:brightness-110 transition-all duration-700"
-                            referrerPolicy="no-referrer"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-l from-black/20 via-transparent to-black/60 pointer-events-none" />
+                        {/* Central text */}
+                        <div className="flex-1 text-center space-y-3">
+                            <p className="font-serif italic text-sm sm:text-lg text-[#c19a4d] leading-relaxed tracking-wide text-center uppercase font-medium">
+                                &ldquo;IFÁ KÍ ÍS SẸ FÁ ITÀN, Ó GẸ KÓ IẸ KÓÓTÍTÓ.&rdquo;
+                            </p>
+                            <p className="text-[10px] sm:text-xs text-[#8b754e] uppercase tracking-[0.1em] font-medium -mt-1">
+                                Ifá não é para contar histórias, é para ter a verdade certa. — Provérbio Yorùbá
+                            </p>
+
+                            {/* Status footer list */}
+                            <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 text-[9px] uppercase tracking-wider text-[#8b754e]/80 pt-2">
+                                <span>Versão 4.0.0</span>
+                                <span className="text-[#c19a4d]/30">•</span>
+                                <span>Desenvolvido por Babalawo Ifálore</span>
+                                <span className="text-[#c19a4d]/30">•</span>
+                                <span>Todos os direitos reservados</span>
+                                <span className="text-[#c19a4d]/30">•</span>
+                                <button onClick={() => window.dispatchEvent(new CustomEvent('open-legal', { detail: 'terms' }))} className="hover:text-[#c19a4d] transition-colors">Termos de Uso</button>
+                                <span className="text-[#c19a4d]/30">•</span>
+                                <button onClick={() => window.dispatchEvent(new CustomEvent('open-legal', { detail: 'privacy' }))} className="hover:text-[#c19a4d] transition-colors">LGPD</button>
+                                <span className="text-[#c19a4d]/30">•</span>
+                                <button onClick={() => window.dispatchEvent(new CustomEvent('open-legal', { detail: 'privacy' }))} className="hover:text-[#c19a4d] transition-colors">Política de Privacidade</button>
+                            </div>
+                        </div>
+
+                        {/* Right Bronze Head */}
+                        <div className="hidden md:block w-24 h-24 opacity-60">
+                            <img 
+                                src="/yoruba_elder.png" 
+                                alt="Yoruba sacred art" 
+                                className="w-full h-full object-cover scale-x-[-1] rounded-xl border border-[#c19a4d]/10 mix-blend-luminosity"
+                                referrerPolicy="no-referrer"
+                            />
+                        </div>
                     </div>
                 </footer>
 
