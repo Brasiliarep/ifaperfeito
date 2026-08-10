@@ -91,9 +91,16 @@ export async function onRequest(context) {
     return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), { status: 429, headers });
   }
 
+  let firebasePayload;
   try {
     const authHeader = request.headers.get('Authorization');
-    await verifyFirebaseToken(authHeader);
+    firebasePayload = await verifyFirebaseToken(authHeader);
+  } catch (error) {
+    console.error('groq-proxy auth error:', error.message);
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
+  }
+
+  try {
 
     const body = await request.json();
     if (!validateInput(body)) {
@@ -130,9 +137,6 @@ export async function onRequest(context) {
 
   } catch (error) {
     console.error('groq-proxy error:', error.message);
-    if (error.message.includes('authorization') || error.message.includes('token')) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
-    }
     return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers });
   }
 }
