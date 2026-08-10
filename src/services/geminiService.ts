@@ -1,6 +1,7 @@
 
 import { AIInterpretation, OduInfo, AkoseV4, SangoJusticeResult, EboDetail } from "../types";
 import { CircuitBreaker } from "./circuitBreaker";
+import { auth } from "./firebaseConfig";
 
 // ─── CIRCUIT BREAKER ──────────────────────────────────────────────────────────
 const groqBreaker = new CircuitBreaker({
@@ -71,6 +72,17 @@ export const setManualKey = (k: string) => {
 };
 
 // ─── CHAMADA CENTRAL GROQ ─────────────────────────────────────────────────────
+const getFirebaseToken = async (): Promise<string> => {
+  try {
+    const user = auth?.currentUser;
+    if (!user) return "";
+    return await user.getIdToken();
+  } catch (e) {
+    console.warn("getFirebaseToken falhou:", e);
+    return "";
+  }
+};
+
 const callGroq = async (
   systemPrompt: string,
   userPrompt: string,
@@ -93,64 +105,72 @@ const callGroq = async (
         };
         if (forceJson) bodyProxy.response_format = { type: "json_object" };
 
-        try {
-          const proxyRes = await fetch(GROQ_PROXY, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(bodyProxy),
-          });
-          if (proxyRes.ok) {
-            const contentType = proxyRes.headers.get("content-type") || "";
-            if (contentType.includes("application/json")) {
-              const data = await proxyRes.json();
-              const content = data?.choices?.[0]?.message?.content ?? "";
-              console.log("✅ Groq proxy ok (primeiros 200 chars):", content.slice(0, 200));
-              return content;
-            }
-            console.warn("Groq proxy retornou HTML (provável SPA fallback). Pulando.");
-          } else {
-            const errText = await proxyRes.text();
-            console.warn("Groq proxy falhou:", proxyRes.status, errText);
+        const token = await getFirebaseToken();
+        if (!token) throw new Error("Usuário não autenticado. Faça login para consultar.");
+
+        const proxyRes = await fetch(GROQ_PROXY, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(bodyProxy),
+        });
+        if (proxyRes.ok) {
+          const contentType = proxyRes.headers.get("content-type") || "";
+          if (contentType.includes("application/json")) {
+            const data = await proxyRes.json();
+            const content = data?.choices?.[0]?.message?.content ?? "";
+            console.log("✅ Groq proxy ok (primeiros 200 chars):", content.slice(0, 200));
+            return content;
           }
-        } catch (_) {
-          console.warn("Groq proxy indisponível, caindo para direto");
+          console.warn("Groq proxy retornou HTML (provável SPA fallback). Pulando.");
+        } else {
+          const errText = await proxyRes.text();
+          console.warn("Groq proxy falhou:", proxyRes.status, errText);
+          throw new Error(`Proxy falhou (${proxyRes.status}): ${errText.slice(0, 200)}`);
         }
       }
 
-      // 2) Fallback: chamada direta (dev local com VITE_API_KEY)
-      const bodyDirect: any = {
-        model: GROQ_MODEL_NVIDIA,
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.2,
-        max_tokens: 6500,
-      };
-      if (forceJson) bodyDirect.response_format = { type: "json_object" };
+      // 2) Fallback direto (APENAS dev local com VITE_API_KEY)
+      // Em produção o proxy é obrigatório: chamada direta é bloqueada pela CSP e expõe a chave.
+      if (import.meta.env.DEV) {
+        const bodyDirect: any = {
+          model: GROQ_MODEL_NVIDIA,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+          temperature: 0.2,
+          max_tokens: 6500,
+        };
+        if (forceJson) bodyDirect.response_format = { type: "json_object" };
 
-      const key = getLocalKey();
-      if (!key || key === "proxy_mode") throw new Error("Chave API não configurada.");
+        const key = getLocalKey();
+        if (!key || key === "proxy_mode") throw new Error("Chave API não configurada.");
 
-      const res = await fetch(`${GROQ_DIRECT}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${key}`,
-        },
-        body: JSON.stringify(bodyDirect),
-      });
+        const res = await fetch(`${GROQ_DIRECT}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${key}`,
+          },
+          body: JSON.stringify(bodyDirect),
+        });
 
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error("Groq HTTP error:", res.status, errText);
-        throw new Error(`Groq API erro ${res.status}: ${errText}`);
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error("Groq HTTP error:", res.status, errText);
+          throw new Error(`Groq API erro ${res.status}: ${errText}`);
+        }
+
+        const data = await res.json();
+        const content = data?.choices?.[0]?.message?.content ?? "";
+        console.log("✅ Groq direto ok (primeiros 200 chars):", content.slice(0, 200));
+        return content;
       }
 
-      const data = await res.json();
-      const content = data?.choices?.[0]?.message?.content ?? "";
-      console.log("✅ Groq direto ok (primeiros 200 chars):", content.slice(0, 200));
-      return content;
+      throw new Error("Sem conexão com o servidor de IA.");
     },
     () => {
       throw new Error("Circuito aberto: Groq API temporariamente indisponível.");

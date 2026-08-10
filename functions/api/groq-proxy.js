@@ -2,7 +2,7 @@ import { jwtVerify, importPKCS8 } from 'jose';
 
 const FIREBASE_PROJECT_ID = 'ifa-oluwo';
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions';
-const MAX_TOKENS = 4096;
+const MAX_TOKENS = 8192;
 const RATE_LIMIT_WINDOW = 60000;
 const RATE_LIMIT_MAX = 30;
 
@@ -116,6 +116,7 @@ export async function onRequest(context) {
         messages: body.messages,
         max_tokens: body.max_tokens || 2048,
         temperature: body.temperature || 0.7,
+        ...(body.response_format ? { response_format: body.response_format } : {}),
       }),
     });
 
