@@ -123,9 +123,13 @@ const callGroq = async (
           } else {
             const errText = await proxyRes.text();
             console.warn("Groq proxy falhou:", proxyRes.status, errText);
+            throw new Error(`Proxy Backend falhou com status ${proxyRes.status}: ${errText}`);
           }
-        } catch (_) {
-          console.warn("Groq proxy indisponível, caindo para direto");
+        } catch (err: any) {
+          console.warn("Groq proxy indisponível, caindo para direto", err.message);
+          if (!import.meta.env.DEV) {
+            throw new Error(`Erro na comunicação segura: ${err.message}`);
+          }
         }
       }
 
