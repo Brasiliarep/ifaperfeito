@@ -69,7 +69,8 @@ function validateInput(body) {
   for (const msg of body.messages) {
     if (!msg.role || !['system', 'user', 'assistant'].includes(msg.role)) return false;
     if (!msg.content || typeof msg.content !== 'string') return false;
-    if (msg.content.length > 10000) return false;
+    // System prompts for IFA can be huge, increasing limit to 50000
+    if (msg.content.length > 50000) return false;
   }
   if (body.max_tokens && (typeof body.max_tokens !== 'number' || body.max_tokens > MAX_TOKENS)) {
     return false;
