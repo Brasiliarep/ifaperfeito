@@ -1,4 +1,4 @@
-import { SignJWT, importPKCS8, jwtVerify } from 'jose';
+import { SignJWT, importX509, jwtVerify } from 'jose';
 
 const PAYPAL_API = 'https://api-m.paypal.com';
 const SCOPE = 'https://www.googleapis.com/auth/datastore';
@@ -46,7 +46,7 @@ async function verifyFirebaseToken(authHeader) {
       const kid = header.kid;
       const publicKey = publicKeys[kid];
       if (!publicKey) throw new Error('Invalid token kid');
-      return await importPKCS8(publicKey, 'RS256');
+      return await importX509(publicKey, 'RS256');
     },
     { issuer: `https://securetoken.google.com/${FIREBASE_PROJECT_ID}` }
   );

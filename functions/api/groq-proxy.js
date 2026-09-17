@@ -1,4 +1,4 @@
-import { jwtVerify, importPKCS8 } from 'jose';
+import { jwtVerify, importX509 } from 'jose';
 
 const FIREBASE_PROJECT_ID = 'ifa-oluwo';
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions';
@@ -54,7 +54,7 @@ async function verifyFirebaseToken(authHeader) {
       const kid = header.kid;
       const publicKey = publicKeys[kid];
       if (!publicKey) throw new Error('Invalid token kid');
-      return await importPKCS8(publicKey, 'RS256');
+      return await importX509(publicKey, 'RS256');
     },
     { issuer: `https://securetoken.google.com/${FIREBASE_PROJECT_ID}` }
   );
