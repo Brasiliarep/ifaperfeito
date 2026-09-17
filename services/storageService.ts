@@ -174,7 +174,7 @@ export const downloadSourceCode = async (): Promise<void> => {
         // Use Vite's glob import to get all source files
         // We use query: '?raw' to get the file content as string
         // @ts-ignore
-        const modules = import.meta.glob(['/src/**/*', '/public/**/*', '/index.html', '/package.json', '/tsconfig.json', '/vite.config.ts', '/tailwind.config.js', '/postcss.config.js', '/.env.example'], { query: '?raw', import: 'default' });
+        const modules = import.meta.glob(['../src/**/*', '../public/**/*', '../index.html', '../package.json', '../tsconfig.json', '../vite.config.ts', '../tailwind.config.js', '../postcss.config.js'], { query: '?raw', import: 'default' });
         
         let count = 0;
         

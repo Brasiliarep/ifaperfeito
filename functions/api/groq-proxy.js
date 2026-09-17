@@ -1,4 +1,4 @@
-import { jwtVerify, importX509 } from 'jose';
+import { jwtVerify, createRemoteJWKSet } from 'jose';
 
 const FIREBASE_PROJECT_ID = 'ifa-oluwo';
 const GROQ_API = 'https://api.groq.com/openai/v1/chat/completions';
@@ -39,25 +39,19 @@ function checkRateLimit(ip) {
   return true;
 }
 
+const JWKS = createRemoteJWKSet(
+  new URL('https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com')
+);
+
 async function verifyFirebaseToken(authHeader) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new Error('No valid authorization header');
   }
   const token = authHeader.split('Bearer ')[1];
-  const publicKeyResponse = await fetch(
-    `https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com`
-  );
-  const publicKeys = await publicKeyResponse.json();
-  const { payload } = await jwtVerify(
-    token,
-    async (header) => {
-      const kid = header.kid;
-      const publicKey = publicKeys[kid];
-      if (!publicKey) throw new Error('Invalid token kid');
-      return await importX509(publicKey, 'RS256');
-    },
-    { issuer: `https://securetoken.google.com/${FIREBASE_PROJECT_ID}` }
-  );
+  const { payload } = await jwtVerify(token, JWKS, {
+    issuer: `https://securetoken.google.com/${FIREBASE_PROJECT_ID}`,
+    audience: FIREBASE_PROJECT_ID,
+  });
   return payload;
 }
 

@@ -87,9 +87,22 @@ const callGroq = async (
         // 🔐 Obtém Firebase ID Token para autenticar no backend
         let idToken = '';
         try {
-          const currentUser = auth.currentUser;
+          if (!auth?.currentUser) {
+            await new Promise<void>((resolve) => {
+              const unsubscribe = auth?.onAuthStateChanged(() => {
+                if (unsubscribe) unsubscribe();
+                resolve();
+              });
+              setTimeout(resolve, 2000);
+            });
+          }
+          const currentUser = auth?.currentUser;
           if (currentUser) idToken = await currentUser.getIdToken();
         } catch (_) {}
+
+        if (!idToken) {
+          throw new Error("Sessão não autenticada. Por favor, faça login para consultar o Oráculo.");
+        }
 
         const bodyProxy: any = {
           model: GROQ_MODEL_GROQ,
@@ -107,7 +120,7 @@ const callGroq = async (
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              ...(idToken ? { "Authorization": `Bearer ${idToken}` } : {}),
+              "Authorization": `Bearer ${idToken}`,
             },
             body: JSON.stringify(bodyProxy),
           });

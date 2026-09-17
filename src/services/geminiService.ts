@@ -74,6 +74,15 @@ export const setManualKey = (k: string) => {
 // ─── CHAMADA CENTRAL GROQ ─────────────────────────────────────────────────────
 const getFirebaseToken = async (): Promise<string> => {
   try {
+    if (!auth?.currentUser) {
+      await new Promise<void>((resolve) => {
+        const unsubscribe = auth?.onAuthStateChanged(() => {
+          if (unsubscribe) unsubscribe();
+          resolve();
+        });
+        setTimeout(resolve, 2000);
+      });
+    }
     const user = auth?.currentUser;
     if (!user) return "";
     return await user.getIdToken();
@@ -106,7 +115,7 @@ const callGroq = async (
         if (forceJson) bodyProxy.response_format = { type: "json_object" };
 
         const token = await getFirebaseToken();
-        if (!token) throw new Error("Usuário não autenticado. Faça login para consultar.");
+        if (!token) throw new Error("Sessão não autenticada. Por favor, faça login para consultar o Oráculo.");
 
         const proxyRes = await fetch(GROQ_PROXY, {
           method: "POST",
