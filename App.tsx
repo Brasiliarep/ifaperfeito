@@ -360,12 +360,17 @@ function App() {
         setSubscribeError('');
         try {
             const currentUid = user?.uid;
-            if (!currentUid) {
+            if (!currentUid || !user) {
                 throw new Error('Usuário não autenticado. Faça login novamente.');
             }
+            // 🔐 Obter Firebase ID Token para autenticar no backend
+            const idToken = await user.getIdToken();
             const res = await fetch('/api/activate-subscription', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`,
+                },
                 body: JSON.stringify({ subscriptionId, uid: currentUid, planKey }),
             });
             const data = await res.json();

@@ -2,6 +2,7 @@
 import { AIInterpretation, OduInfo, AkoseV4, SangoJusticeResult, EboDetail } from "../types";
 import { CircuitBreaker } from "./circuitBreaker";
 import { searchLibrary } from "../utils/librarySearch";
+import { auth } from "./firebaseConfig";
 
 // ─── CIRCUIT BREAKER ──────────────────────────────────────────────────────────
 const groqBreaker = new CircuitBreaker({
@@ -13,7 +14,7 @@ const groqBreaker = new CircuitBreaker({
 // ─── CONFIGURAÇÃO GROQ ────────────────────────────────────────────────────────
 // Em produção: chave fica server-side na Netlify Function (/api/groq-proxy)
 // Em dev local: fallback para VITE_API_KEYS no .env
-const GROQ_DIRECT = "https://integrate.api.nvidia.com/v1";
+const GROQ_DIRECT = import.meta.env.DEV ? "/api/nvidia/v1" : "https://integrate.api.nvidia.com/v1";
 const GROQ_PROXY = "/api/groq-proxy";
 const GROQ_MODEL_GROQ = "llama-3.3-70b-versatile";
 const GROQ_MODEL_NVIDIA = "meta/llama-3.3-70b-instruct";
@@ -83,6 +84,13 @@ const callGroq = async (
 
       // 1) Tenta proxy server-side (Cloudflare Pages Function — produção)
       if (!import.meta.env.DEV) {
+        // 🔐 Obtém Firebase ID Token para autenticar no backend
+        let idToken = '';
+        try {
+          const currentUser = auth.currentUser;
+          if (currentUser) idToken = await currentUser.getIdToken();
+        } catch (_) {}
+
         const bodyProxy: any = {
           model: GROQ_MODEL_GROQ,
           messages: [
@@ -97,7 +105,10 @@ const callGroq = async (
         try {
           const proxyRes = await fetch(GROQ_PROXY, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...(idToken ? { "Authorization": `Bearer ${idToken}` } : {}),
+            },
             body: JSON.stringify(bodyProxy),
           });
           if (proxyRes.ok) {
