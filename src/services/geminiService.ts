@@ -15,7 +15,7 @@ const groqBreaker = new CircuitBreaker({
 // Em dev local: fallback para VITE_API_KEY no .env
 const GROQ_DIRECT = "https://integrate.api.nvidia.com/v1";
 const GROQ_PROXY = "/api/groq-proxy";
-const GROQ_MODEL_GROQ = "llama-3.3-70b-versatile";
+const GROQ_MODEL_GROQ = "openai/gpt-oss-120b";
 const GROQ_MODEL_NVIDIA = "meta/llama-3.3-70b-instruct";
 
 let _apiKey = "";

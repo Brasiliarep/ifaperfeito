@@ -108,6 +108,8 @@ export async function onRequest(context) {
       return new Response(JSON.stringify({ error: 'Service unavailable' }), { status: 503, headers });
     }
 
+    const targetModel = (body.model && body.model.includes('llama')) ? 'openai/gpt-oss-120b' : (body.model || 'openai/gpt-oss-120b');
+
     const groqResponse = await fetch(GROQ_API, {
       method: 'POST',
       headers: {
@@ -115,7 +117,7 @@ export async function onRequest(context) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: body.model,
+        model: targetModel,
         messages: body.messages,
         max_tokens: body.max_tokens || 2048,
         temperature: body.temperature || 0.7,
@@ -124,8 +126,9 @@ export async function onRequest(context) {
     });
 
     if (!groqResponse.ok) {
-      console.error('Groq API error:', groqResponse.status);
-      return new Response(JSON.stringify({ error: 'AI service error' }), { status: 502, headers });
+      const errText = await groqResponse.text();
+      console.error('Groq API error:', groqResponse.status, errText);
+      return new Response(JSON.stringify({ error: `Groq AI error (${groqResponse.status}): ${errText}` }), { status: groqResponse.status, headers });
     }
 
     const data = await groqResponse.json();
@@ -133,6 +136,6 @@ export async function onRequest(context) {
 
   } catch (error) {
     console.error('groq-proxy error:', error.message);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers });
+    return new Response(JSON.stringify({ error: `Internal server error: ${error.message}` }), { status: 500, headers });
   }
 }
