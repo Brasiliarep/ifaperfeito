@@ -119,9 +119,8 @@ export async function onRequest(context) {
       body: JSON.stringify({
         model: targetModel,
         messages: body.messages,
-        max_tokens: body.max_tokens || 2048,
-        temperature: body.temperature || 0.7,
-        ...(body.response_format ? { response_format: body.response_format } : {}),
+        max_tokens: Math.min(body.max_tokens || 3500, 4000),
+        temperature: body.temperature || 0.2,
       }),
     });
 

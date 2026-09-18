@@ -110,9 +110,8 @@ const callGroq = async (
             { role: "user", content: userPrompt },
           ],
           temperature: 0.2,
-          max_tokens: 6500,
+          max_tokens: 3500,
         };
-        if (forceJson) bodyProxy.response_format = { type: "json_object" };
 
         const token = await getFirebaseToken();
         if (!token) throw new Error("Sessão não autenticada. Por favor, faça login para consultar o Oráculo.");
