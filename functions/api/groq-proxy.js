@@ -102,13 +102,28 @@ export async function onRequest(context) {
       return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400, headers });
     }
 
-    const defaultKey = ['gsk_', 'w7WtPNqOLYw', 'IGkyrNDGQWG', 'dyb3FYdd6MN0X', 'chEJJBRKZhD0pDTB4'].join('');
-    const apiKey = env.GROQ_API_KEY || defaultKey;
+    const apiKey = env.GROQ_API_KEY;
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'Service unavailable' }), { status: 503, headers });
     }
 
     const targetModel = (body.model && body.model.includes('llama')) ? 'openai/gpt-oss-120b' : (body.model || 'openai/gpt-oss-120b');
+
+    // O prompt do Oráculo Ifá é muito grande (todos os campos 60+ palavras).
+    // 3500-4000 tokens trunca o JSON no meio -> "Unterminated string in JSON".
+    // Sobe o teto para 8000 (MAX_TOKENS=8192 já validado acima).
+    const requestedTokens = Math.min(body.max_tokens || 8000, 8000);
+    const groqBody = {
+      model: targetModel,
+      messages: body.messages,
+      max_tokens: requestedTokens,
+      temperature: body.temperature ?? 0.2,
+    };
+    // Repassa response_format json_object quando o frontend pedir (forceJson).
+    // Sem isso o modelo retorna markdown/texto e o JSON.parse quebra.
+    if (body.response_format) {
+      groqBody.response_format = body.response_format;
+    }
 
     const groqResponse = await fetch(GROQ_API, {
       method: 'POST',
@@ -116,12 +131,7 @@ export async function onRequest(context) {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
       },
-      body: JSON.stringify({
-        model: targetModel,
-        messages: body.messages,
-        max_tokens: Math.min(body.max_tokens || 3500, 4000),
-        temperature: body.temperature || 0.2,
-      }),
+      body: JSON.stringify(groqBody),
     });
 
     if (!groqResponse.ok) {

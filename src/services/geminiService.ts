@@ -110,8 +110,11 @@ const callGroq = async (
             { role: "user", content: userPrompt },
           ],
           temperature: 0.2,
-          max_tokens: 3500,
+          // O JSON do oráculo é gigante (60+ palavras por campo). 3500 trunca
+          // no meio -> "Unterminated string in JSON". Usa 8000 (teto do proxy).
+          max_tokens: 8000,
         };
+        if (forceJson) bodyProxy.response_format = { type: "json_object" };
 
         const token = await getFirebaseToken();
         if (!token) throw new Error("Sessão não autenticada. Por favor, faça login para consultar o Oráculo.");
@@ -189,10 +192,78 @@ const callGroq = async (
 // ─── UTILIDADES ───────────────────────────────────────────────────────────────
 const cleanJson = (str: string): string => {
   if (!str) return "{}";
-  let s = str.trim().replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/\s*```$/, "");
-  const a = s.indexOf("{"), b = s.lastIndexOf("}");
-  if (a !== -1 && b > a) s = s.slice(a, b + 1);
+  let s = str.trim()
+    .replace(/^```json\s*/i, "").replace(/^```\s*/, "").replace(/\s*```$/, "")
+    .replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  const a = s.indexOf("{");
+  if (a === -1) return s;
+  // Se o JSON foi truncado (sem "}" final), NÃO corta no último "}" interno —
+  // isso gera "Unterminated string". Deixa o reparo para parseJsonRobust.
+  const b = s.lastIndexOf("}");
+  if (b > a && b === s.length - 1) s = s.slice(a, b + 1);
+  else if (b > a) {
+    const tail = s.slice(b + 1).trim();
+    if (tail.length < 20 || /^```/.test(tail)) s = s.slice(a, b + 1);
+    else s = s.slice(a);
+  } else {
+    s = s.slice(a);
+  }
   return s;
+};
+
+// Fecha JSON truncado: escapa quebras literais dentro de strings,
+// fecha aspas abertas e completa chaves/colchetes faltantes.
+const closeTruncatedJson = (s: string): string => {
+  let out = "";
+  let inString = false;
+  let escaped = false;
+  const stack: string[] = [];
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    if (inString) {
+      if (escaped) { out += ch; escaped = false; }
+      else if (ch === "\\") { out += ch; escaped = true; }
+      else if (ch === '"') { out += ch; inString = false; }
+      else if (ch === "\n") { out += "\\n"; }
+      else if (ch === "\r") { out += "\\r"; }
+      else if (ch === "\t") { out += "\\t"; }
+      else { out += ch; }
+    } else {
+      if (ch === '"') { out += ch; inString = true; }
+      else if (ch === "{") { out += ch; stack.push("}"); }
+      else if (ch === "[") { out += ch; stack.push("]"); }
+      else if (ch === "}" || ch === "]") {
+        if (stack.length && stack[stack.length - 1] === ch) { out += ch; stack.pop(); }
+        else { out += ch; }
+      }
+      else { out += ch; }
+    }
+  }
+  if (inString) out += '"';
+  out = out.replace(/,\s*$/, "");
+  while (stack.length) out += stack.pop();
+  return out;
+};
+
+const parseJsonRobust = (raw: string): any => {
+  const cleaned = cleanJson(raw);
+  try {
+    return JSON.parse(cleaned);
+  } catch (e1: any) {
+    const msg = e1?.message ?? "";
+    const isTruncated = /Unterminated|Unexpected end|Lone string|Bad control/i.test(msg);
+    if (!isTruncated) throw e1;
+    try {
+      return JSON.parse(closeTruncatedJson(cleaned));
+    } catch (_) { /* continua */ }
+    const cut = cleaned.lastIndexOf('",');
+    if (cut > 100) {
+      try {
+        return JSON.parse(closeTruncatedJson(cleaned.slice(0, cut + 1)));
+      } catch (_) { /* continua */ }
+    }
+    throw e1;
+  }
 };
 
 const handleError = (e: any, ctx: string): string => {
@@ -332,7 +403,7 @@ Retorne APENAS este JSON:
 
   try {
     const raw = await callGroq(ORACLE_SYSTEM, userPrompt, true);
-    const parsed = JSON.parse(cleanJson(raw));
+    const parsed = parseJsonRobust(raw);
     console.log("✅ fetchInterpretation ok, odu =", parsed.oduName);
     return { ...fallback, ...parsed };
   } catch (e) {
@@ -397,7 +468,7 @@ export const fetchAkose = async (oduName: string, category: string, problem: str
       JSON: { "tipo": "akose", "titulo_yoruba": "", "finalidade": "", "materiais": [], "modo_preparo_sacerdotal": "", "oduReference": "${oduName}", "category": "${category}", "ofo_ativacao": { "yoruba": "", "portugues": "", "fonetica": "" }, "visualizacao_consulente": { "orcamento": true, "finalidade": true, "preparo": false } } `,
       true
     );
-    return JSON.parse(cleanJson(raw));
+    return parseJsonRobust(raw);
   } catch (e) { fallback.finalidade = handleError(e, "fetchAkose"); return fallback; }
 };
 
@@ -447,7 +518,7 @@ Retorne APENAS este JSON:
 } `,
       true
     );
-    return JSON.parse(cleanJson(raw));
+    return parseJsonRobust(raw);
   } catch (e) {
     return {
       fullAnswer: handleError(e, "askSpecificQuestion"),
@@ -468,7 +539,7 @@ export const interpretDream = async (dream: string, lang: string) => {
       `Sonho: "${dream}".\nJSON: { "meaning": "...", "relatedOdu": "...", "advice": "...", "isPositive": true } `,
       true
     );
-    return JSON.parse(cleanJson(raw));
+    return parseJsonRobust(raw);
   } catch (e) { return { meaning: handleError(e, "interpretDream"), relatedOdu: "N/A", advice: "Erro", isPositive: false }; }
 };
 
@@ -540,7 +611,7 @@ JSON: {
 }`,
       true
     );
-    return { ...fallback, ...JSON.parse(cleanJson(raw)) };
+    return { ...fallback, ...parseJsonRobust(raw) };
   } catch (e) {
     return { ...fallback, advice: `Interferência: ${handleError(e, "SangoJustice")}` };
   }
@@ -586,7 +657,7 @@ export const analyzeOpeleImage = async (imageBase64: string) => {
 
     const data = await res.json();
     const raw = data?.choices?.[0]?.message?.content ?? "{}";
-    const parsed = JSON.parse(cleanJson(raw));
+    const parsed = parseJsonRobust(raw);
     
     // Validar se retornou o formato certo, senão usar default
     if (parsed.rightLeg && parsed.leftLeg && parsed.rightLeg.length === 4) {
@@ -644,7 +715,7 @@ export const analyzeFace = async (imageBase64: string, lang: string = 'pt-BR') =
 
     const data = await res.json();
     const raw = data?.choices?.[0]?.message?.content ?? "{}";
-    const parsed = JSON.parse(cleanJson(raw));
+    const parsed = parseJsonRobust(raw);
     
     if (parsed.emotionalState && parsed.oriDiagnosis && parsed.recommendation) {
       return parsed;
@@ -693,7 +764,7 @@ JSON: {
   "oduReference": "Odù relacionado"
 }`,
     );
-    const parsed = JSON.parse(cleanJson(raw));
+    const parsed = parseJsonRobust(raw);
     return { ...defaultResult, ...parsed };
   } catch (e) { return defaultResult; }
 };
@@ -730,7 +801,7 @@ JSON: { "yorubaName": "nome em Yorùbá (ex: Ewe Efinrin)", "scientificName": "n
 JSON: { "yorubaName": "nome em Yorùbá", "scientificName": "nome científico", "commonName": "nome popular PT", "spiritualUse": "uso em Ifá (mínimo 30 palavras)", "oduReference": "Odù" }`;
 
     const raw = await callGroq(systemPrompt, userPrompt, true);
-    const parsed = JSON.parse(cleanJson(raw));
+    const parsed = parseJsonRobust(raw);
 
     // Fetch real image from Wikimedia
     const imageUrl = await fetchWikimediaImage(parsed.scientificName || query);
@@ -814,6 +885,6 @@ export const fetchAjogunFullEbo = async (
       userPrompt,
       true
     );
-    return { ...fallback, ...JSON.parse(cleanJson(raw)) };
+    return { ...fallback, ...parseJsonRobust(raw) };
   } catch (e) { return fallback; }
 };
