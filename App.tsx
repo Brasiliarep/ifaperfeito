@@ -496,6 +496,10 @@ function App() {
     };
 
     const handleInterpret = async (oduToInterpret = currentOdu) => {
+        if (!user) {
+            setShowLoginModal(true);
+            return;
+        }
         setLoading({ isLoading: true, message: t.interpreting });
         try {
             const result = await fetchInterpretation(oduToInterpret, language, iboResult ?? undefined, userProfile?.plan === 'student_monthly');
